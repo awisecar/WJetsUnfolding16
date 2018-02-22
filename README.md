@@ -12,7 +12,7 @@ Set up a CMSSW environment:
 
 Clone the project to your working directory:
 
-    git clone https://github.com/ahortian/WJets13TeVUnfolding.git
+    git clone https://github.com/awisecar/WJetsUnfolding16.git
 
 Build the code:
 
