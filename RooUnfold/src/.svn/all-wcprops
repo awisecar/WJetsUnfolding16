@@ -1,0 +1,143 @@
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/public/unfolding/!svn/ver/348/RooUnfold/trunk/src
+END
+RooUnfoldBayes.h
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/public/unfolding/!svn/ver/316/RooUnfold/trunk/src/RooUnfoldBayes.h
+END
+RooUnfoldInvert.h
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/public/unfolding/!svn/ver/304/RooUnfold/trunk/src/RooUnfoldInvert.h
+END
+RooUnfoldBinByBin.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/public/unfolding/!svn/ver/296/RooUnfold/trunk/src/RooUnfoldBinByBin.cxx
+END
+RooUnfoldSvd.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/public/unfolding/!svn/ver/346/RooUnfold/trunk/src/RooUnfoldSvd.cxx
+END
+RooUnfoldResponse.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/public/unfolding/!svn/ver/348/RooUnfold/trunk/src/RooUnfoldResponse.cxx
+END
+TSVDUnfold_local.h
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/public/unfolding/!svn/ver/344/RooUnfold/trunk/src/TSVDUnfold_local.h
+END
+RooUnfoldTUnfold.h
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/public/unfolding/!svn/ver/320/RooUnfold/trunk/src/RooUnfoldTUnfold.h
+END
+RooUnfold_LinkDef.h
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/public/unfolding/!svn/ver/344/RooUnfold/trunk/src/RooUnfold_LinkDef.h
+END
+TSVDUnfold.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/public/unfolding/!svn/ver/346/RooUnfold/trunk/src/TSVDUnfold.cxx
+END
+RooUnfoldErrors.h
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/public/unfolding/!svn/ver/273/RooUnfold/trunk/src/RooUnfoldErrors.h
+END
+RooUnfoldBayes.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/public/unfolding/!svn/ver/335/RooUnfold/trunk/src/RooUnfoldBayes.cxx
+END
+RooUnfold.h
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/public/unfolding/!svn/ver/338/RooUnfold/trunk/src/RooUnfold.h
+END
+RooUnfoldDagostini.h
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/public/unfolding/!svn/ver/274/RooUnfold/trunk/src/RooUnfoldDagostini.h
+END
+RooUnfoldParms.h
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/public/unfolding/!svn/ver/261/RooUnfold/trunk/src/RooUnfoldParms.h
+END
+RooUnfoldInvert.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/public/unfolding/!svn/ver/304/RooUnfold/trunk/src/RooUnfoldInvert.cxx
+END
+RooUnfoldTUnfold.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/public/unfolding/!svn/ver/348/RooUnfold/trunk/src/RooUnfoldTUnfold.cxx
+END
+RooUnfoldErrors.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/public/unfolding/!svn/ver/336/RooUnfold/trunk/src/RooUnfoldErrors.cxx
+END
+RooUnfold.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/public/unfolding/!svn/ver/344/RooUnfold/trunk/src/RooUnfold.cxx
+END
+RooUnfoldDagostini.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/public/unfolding/!svn/ver/298/RooUnfold/trunk/src/RooUnfoldDagostini.cxx
+END
+RooUnfoldBinByBin.h
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/public/unfolding/!svn/ver/276/RooUnfold/trunk/src/RooUnfoldBinByBin.h
+END
+RooUnfoldSvd.h
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/public/unfolding/!svn/ver/344/RooUnfold/trunk/src/RooUnfoldSvd.h
+END
+RooUnfoldParms.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/public/unfolding/!svn/ver/248/RooUnfold/trunk/src/RooUnfoldParms.cxx
+END
+RooUnfoldResponse.h
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/public/unfolding/!svn/ver/342/RooUnfold/trunk/src/RooUnfoldResponse.h
+END
