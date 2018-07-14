@@ -926,14 +926,15 @@ TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalize
     if (hGen2) latexLabel->SetTextSize(0.035);
     if (hGen3) latexLabel->SetTextSize(0.05);
     
-    latexLabel->SetTextSize(0.05);
+    //latexLabel->SetTextSize(0.05);
+    latexLabel->SetTextSize(0.04);
     latexLabel->SetLineWidth(2);
     latexLabel->SetTextFont(61);
     if (canvasName.Contains("dPhiLepJet1")){
-    latexLabel->DrawLatex(0.18,0.23,"CMS Prelim.");
+    latexLabel->DrawLatex(0.18,0.23,"CMS Work in Progress");
     }
     else{
-    latexLabel->DrawLatex(0.18,0.25,"CMS Prelim.");
+    latexLabel->DrawLatex(0.18,0.25,"CMS Work in Progress");
     }
 
     //latexLabel->SetTextSize(0.036);

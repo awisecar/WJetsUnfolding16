@@ -94,8 +94,7 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 //    }
 
     //double integratedLumi = 2239.351439352; 
-    double integratedLumi = 35861.00;
-    //double integratedLumi = 35859.044; //andrew -- 2016 lumi for new MET filters
+    double integratedLumi(35916.637); // 80X 2016 data bonzai 23Sep2016ReReco golden json - andrew - 6.3.2018
     
     cout << " DYSHERPA14FILENAME " << DYSHERPA14FILENAME << endl;
     cout << " DYMGPYTHIA8FILENAME " << DYMGPYTHIA8FILENAME << endl;

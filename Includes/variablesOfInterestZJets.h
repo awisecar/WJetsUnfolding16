@@ -238,6 +238,10 @@ const variableStruct VAROFINTERESTZJETS[] = {
     {"LepPtPlusHTover2_4_Zinc4jet_R43",      1,      1,          1,              4,             1,            1 ,               1    },
     {"LepPtPlusHTover3_4_Zinc3jet_R43",      1,      1,          1,              4,             1,            1 ,               1    },
     {"LepPtPlusHTover3_4_Zinc4jet_R43",      1,      1,          1,              4,             1,            1 ,               1    },
+    {"FirstJetPhi_Zinc1jet",      1,      1,          1,              4,             1,            1 ,               1    },
+    {"MT_Zinc0jet",      1,      1,          1,              4,             1,            1 ,               1    },
+    {"MET_Zinc0jet",      1,      1,          1,              4,             1,            1 ,               1    },
+    {"lepPt_Zinc0jet",      1,      1,          1,              4,             1,            1 ,               1    },
 
 }; 
 
