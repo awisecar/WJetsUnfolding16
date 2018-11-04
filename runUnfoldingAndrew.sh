@@ -34,6 +34,22 @@
 #./runUnfoldingZJets lepSel=SMu variable=LepPtPlusHTover3_Zinc3jet_R43
 #./runUnfoldingZJets lepSel=SMu variable=LepPtPlusHTover3_Zinc4jet_R43
 
+./runUnfoldingZJets lepSel=SMu variable=ZPt_Zinc1jet
+./runUnfoldingZJets lepSel=SMu variable=ZPt_Zinc2jet
+./runUnfoldingZJets lepSel=SMu variable=ZPt_Zinc3jet
+./runUnfoldingZJets lepSel=SMu variable=ZPt_Zinc4jet
+./runUnfoldingZJets lepSel=SMu variable=ZPtPlusLeadingJetPt_Zinc1jet
+./runUnfoldingZJets lepSel=SMu variable=ZPtPlusLeadingJetPt_Zinc2jet
+./runUnfoldingZJets lepSel=SMu variable=ZPtPlusLeadingJetPt_Zinc3jet
+./runUnfoldingZJets lepSel=SMu variable=ZPtPlusLeadingJetPt_Zinc4jet
+./runUnfoldingZJets lepSel=SMu variable=ZPtPlusHTover2_Zinc2jet
+./runUnfoldingZJets lepSel=SMu variable=ZPtPlusHTover2_Zinc3jet
+./runUnfoldingZJets lepSel=SMu variable=ZPtPlusHTover2_Zinc4jet
+
+#./runUnfoldingZJets lepSel=SMu variable=JetsHT_Zinc1jet
+#./runUnfoldingZJets lepSel=SMu variable=JetsHT_Zinc2jet
+#./runUnfoldingZJets lepSel=SMu variable=FirstJetAbsRapidity_Zinc1jet
+
 # Alternative binnings
 # ./runUnfoldingZJets lepSel=SMu variable=LepPtPlusHT_1_Zinc1jet_R21
 # ./runUnfoldingZJets lepSel=SMu variable=LepPtPlusHT_1_Zinc2jet_R21

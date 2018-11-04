@@ -94,7 +94,7 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 //    }
 
     //double integratedLumi = 2239.351439352; 
-    double integratedLumi(35916.637); // 80X 2016 data bonzai 23Sep2016ReReco golden json - andrew - 6.3.2018
+    double integratedLumi(35916.625); // 80X 2016 data bonzai 23Sep2016ReReco golden json - andrew - 4.11.2018
     
     cout << " DYSHERPA14FILENAME " << DYSHERPA14FILENAME << endl;
     cout << " DYMGPYTHIA8FILENAME " << DYMGPYTHIA8FILENAME << endl;
@@ -240,6 +240,9 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 //        //--- response DYJets objects ---
 //        RooUnfoldResponse *Fine_respDYJets[18] = {NULL};
 //        //===================================================
+
+	std::cout << __FILE__ << ":"  << __LINE__ << ". " << std::endl;	
+
         TH1D *hGen1 = NULL;
         TH1D *hGen2 = NULL;
         if (DYMGPYTHIA8FILENAME.Length() > 0 ){
@@ -368,23 +371,33 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 //          //-----------------------------------------------------------------------------------------
 //          //---End: for calculating resp syst -------------------------------------------------------
       }
-
+      std::cout << __FILE__ << ":"  << __LINE__ << ". " << std::endl;
       //andrew -- write out gen distributions before lumi scaling to get num of entries
       outputRootFile->cd();
       hGenDYJets[0]->Write("hMadGenDYJetsCrossSection_NoScale");
       hGen1->Write("hGen1DYJetsCrossSection_NoScale");
 
+      std::cout << __FILE__ << ":"  << __LINE__ << ". " << std::endl;
+
       TH1D *hMadGenCrossSection = makeCrossSectionHist(hGenDYJets[0], integratedLumi);
       //andrew -- need to double check that this is pulling from the wjets source MC that's listed in the Samples structure in fileNamesZJets.h
       hMadGenCrossSection->SetZTitle("MG_aMC FxFx + PY8 (#leq 2j NLO + PS)");
+
+      std::cout << __FILE__ << ":"  << __LINE__ << ". " << std::endl;
+
     TH1D *hGen1CrossSection = makeCrossSectionHist(hGen1, integratedLumi);
       //andrew -- this should be the wjets signal mc mlm
       hGen1CrossSection->SetZTitle(generatorNames[gen1][1]);
        TH1D *hGen2CrossSection;
-        if (variable == "FirstJetPt_Zinc1jet" || variable == "JetsHT_Zinc1jet" || variable == "FirstJetAbsRapidity_Zinc1jet" || variable == "dRptmin100LepCloseJetCo300dR04_Zinc1jet" || variable == "dPhiLepJet1_Zinc1jet"){
-            hGen2CrossSection = makeCrossSectionHist(hGen2, 0);
-            hGen2CrossSection->SetZTitle(generatorNames[gen2][1]);
-        }  //add nnlo here
+
+        std::cout << __FILE__ << ":"  << __LINE__ << ". " << std::endl;
+
+        //andrew - 24.08.2018 - turning these next few lines off because I don't think the file it's looking for exists right now
+        //if (variable == "FirstJetPt_Zinc1jet" || variable == "JetsHT_Zinc1jet" || variable == "FirstJetAbsRapidity_Zinc1jet" || variable == "dRptmin100LepCloseJetCo300dR04_Zinc1jet" || variable == "dPhiLepJet1_Zinc1jet"){
+        //    hGen2CrossSection = makeCrossSectionHist(hGen2, 0);
+        //    hGen2CrossSection->SetZTitle(generatorNames[gen2][1]);
+        //}  //add nnlo here
+
 //        TH1D *genNNLO;
 //        vector<double> myVecNNLO;
 //        myVecNNLO = getNNLO1jxsec(variable);
@@ -431,6 +444,9 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
       // 13 - Lumi up, 14 - Lumi down
       // 15 - SF up, 16 - SF down
       // 17 - SherpaUnf
+
+      std::cout << __FILE__ << ":"  << __LINE__ << ". " << std::endl;
+
       TString name[] = {"Central", "JESUp", "JESDown", "PUUp", "PUDown", "JERUp", "JERDown", 
 			"XSECUp", "XSECDown", "LESUp", "LESDown", "LERUp", "LERDown",
 			"LumiUp", "LumiDown", "SFUp", "SFDown", "SherpaUnf"};
@@ -460,23 +476,27 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
       //int nSysts = DYSHERPA14FILENAME.Length()? 17 : 17;
       //--- Unfold the Data histograms for each systematic ---
       for (unsigned short iSyst = 0; iSyst < nSysts; ++iSyst) {
+          std::cout << __FILE__ << ":"  << __LINE__ << ". " << std::endl;
+          std::cout << "iSyst = " << iSyst << std::endl;
 
-	if(iSyst != 0 && whichSyst >= 0 && iSyst != whichSyst) continue;
-	//--- only JES up and down (iSyst = 1 and 2) is applied on data ---
-	unsigned short iData = (iSyst == 1 || iSyst == 2) ? iSyst : 0;
-	unsigned short iBg = 0;
-	if (iSyst == 0 || iSyst == 1 || iSyst == 2 || iSyst == 5 || iSyst == 6 || iSyst == 11 || iSyst == 12 || iSyst == 17) iBg = 0; // Central, JES, JER, LER, Sherpa
-	else if (iSyst == 3 || iSyst == 4) iBg = iSyst - 2; // PU
-	else if (iSyst == 7 || iSyst == 8 || iSyst == 9 || iSyst == 10) iBg = iSyst - 4; // XSec, LES
-	else if (iSyst == 13 || iSyst == 14 || iSyst == 15 || iSyst == 16) iBg = iSyst - 6;  // Lumi, SF
+  	  if(iSyst != 0 && whichSyst >= 0 && iSyst != whichSyst) continue;
+	  //--- only JES up and down (iSyst = 1 and 2) is applied on data ---
+	  unsigned short iData = (iSyst == 1 || iSyst == 2) ? iSyst : 0;
+	  unsigned short iBg = 0;
+	  if (iSyst == 0 || iSyst == 1 || iSyst == 2 || iSyst == 5 || iSyst == 6 || iSyst == 11 || iSyst == 12 || iSyst == 17) iBg = 0; // Central, JES, JER, LER, Sherpa
+	  else if (iSyst == 3 || iSyst == 4) iBg = iSyst - 2; // PU
+	  else if (iSyst == 7 || iSyst == 8 || iSyst == 9 || iSyst == 10) iBg = iSyst - 4; // XSec, LES
+	  else if (iSyst == 13 || iSyst == 14 || iSyst == 15 || iSyst == 16) iBg = iSyst - 6;  // Lumi, SF
 
-	TH1D *hRecDataMinusFakes = (TH1D*) hRecData[iData]->Clone();
-	if(hRecDataMinusFakes->GetBinContent(1) > 0){
-	  std::cout <<  __FILE__ << __LINE__ << ": "
+          std::cout << __FILE__ << ":"  << __LINE__ << ". " << std::endl;
+
+	  TH1D *hRecDataMinusFakes = (TH1D*) hRecData[iData]->Clone();
+	  if(hRecDataMinusFakes->GetBinContent(1) > 0){
+	      std::cout <<  __FILE__ << __LINE__ << ": "
 		    << "hRec: " << hRecDataMinusFakes->GetName()
 		    <<  " " << hRecDataMinusFakes->GetBinError(1)
 	    / sqrt(hRecDataMinusFakes->GetBinContent(1)) << "\n";
-	}
+	  }
 //	std::cerr << "DEBUG: hRecData[" << iData << "]->GetEntries() = "
 //		  << hRecDataMinusFakes->GetEntries()
 //		  << ", nbins: " << hRecDataMinusFakes->GetNbinsX()
@@ -531,7 +551,7 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 	
 	if (iSyst == 17) cout << "SHERPAUNFOLDING" << endl;
 	std::cout << "Starting unfolding of " << variable << " "
-		  << name[iSyst] << " for  "<< lepSel << " channel." << "\n";
+		  << name[iSyst] << " for  "<< lepSel << " channel: " << __FILE__ << ", "  << __LINE__ << std::endl;
 	if(hRecDataMinusFakes->GetEntries() == 0){
 	  std::cerr << "Warning: histogram " << hRecDataMinusFakes->GetName()
 		    << " has no entries. Its unfolding will be skipped.\n";
@@ -557,6 +577,8 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
         hRecDataMinusFakes->SetNameTitle(detecName, detecTitle);
         hRecDataMinusFakes->Write();
         }
+        std::cout << "Out of iSyst loop" << std::endl;
+        std::cout << __FILE__ << ":"  << __LINE__ << ". " << std::endl;
     }
       //-----------------------------------------------------------------------------------------
         
@@ -586,6 +608,9 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
       }
         
       //--- Now create the covariance matrices ---
+      std::cout << "Creating covariance matrices" << std::endl;
+      std::cout << __FILE__ << ":"  << __LINE__ << ". " << std::endl;
+
       int nCovs = nSysts > 17 ? 11 : 10;
         
       TH2D *hCov[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,};
@@ -644,13 +669,15 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
       //TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, variable, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection, hGen1CrossSection, hGen2CrossSection);
 
       //TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, variable, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection, hGen1CrossSection);  
+      //andrew -- need to comment out the next few lines as well, because no hGen2CrossSection yet
         TCanvas *crossSectionPlot;
-        if (variable == "FirstJetPt_Zinc1jet" || variable == "JetsHT_Zinc1jet" || variable == "FirstJetAbsRapidity_Zinc1jet" || variable == "dRptmin100LepCloseJetCo300dR04_Zinc1jet" || variable == "dPhiLepJet1_Zinc1jet"){
-            crossSectionPlot = makeCrossSectionPlot(lepSel, variable, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection, hGen1CrossSection, hGen2CrossSection);
-        }
-        else {
-            crossSectionPlot = makeCrossSectionPlot(lepSel, variable, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection, hGen1CrossSection);
-        }  //add nnlo here
+       // if (variable == "FirstJetPt_Zinc1jet" || variable == "JetsHT_Zinc1jet" || variable == "FirstJetAbsRapidity_Zinc1jet" || variable == "dRptmin100LepCloseJetCo300dR04_Zinc1jet" || variable == "dPhiLepJet1_Zinc1jet"){
+       //     crossSectionPlot = makeCrossSectionPlot(lepSel, variable, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection, hGen1CrossSection, hGen2CrossSection);
+       // }
+       // else {
+       //     crossSectionPlot = makeCrossSectionPlot(lepSel, variable, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection, hGen1CrossSection);
+       // }  //add nnlo here
+       crossSectionPlot = makeCrossSectionPlot(lepSel, variable, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection, hGen1CrossSection);
 
       //TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, variable, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection); 
       crossSectionPlot->Draw();
