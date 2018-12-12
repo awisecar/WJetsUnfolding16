@@ -80,6 +80,7 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
     TFile *fBg[NBGDYJETS][7] = {{NULL}};
 
     //--- Open all files ---------------------------------------------------------------------- 
+    std::cout << "\n-----> Opening all files!" << std::endl;
     getAllFiles(histoDir, lepSel, "13TeV", jetPtMin, jetEtaMax, fData, fDYJets, fBg, NBGDYJETS);
     //----------------------------------------------------------------------------------------- 
 
@@ -214,6 +215,7 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
       
       //--- Get all histograms ---
       std::cerr << __FILE__ << ":"  << __LINE__ << ". " << variable << "\n";
+      std::cout << "\n---> Grabbing all histograms with getAllHistos!" << std::endl;
       getAllHistos(variable, hRecData, fData, 
 		   hRecDYJets, hGenDYJets, hResDYJets, fDYJets,
 		   hRecBg, hRecSumBg, fBg, NBGDYJETS, respDYJets, hFakDYJets, hPurity);
@@ -691,17 +693,18 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
       plotRespMat(hResDYJets[0], variable, unfoldDir);
         
       if(whichSyst < 0){
+          std::cout << "\nCreating syst variation plots" << std::endl;
 	  createSystPlots(outputFileName, variable, lepSel, hUnfData, logy);
-      //--- print out break down of errors ---
+          std::cout << "\nPrint out break down of errors" << std::endl;
 	  for (int i = 2; i <= nCovs; ++i) {
-	  cout << hUnfData[0]->GetBinContent(i);
-	  for (int j = 0; j <= 11; ++j) {
-	    if(hCov[j]){
-	      cout << " +/- " << sqrt(hCov[j]->GetBinContent(i,i))*100./hUnfData[0]->GetBinContent(i) << "%";
-	    }
-	}
-	  cout << endl;
-	}
+	      cout << hUnfData[0]->GetBinContent(i);
+	      for (int j = 0; j <= 11; ++j) {
+	          if(hCov[j]) {
+	            cout << " +/- " << sqrt(hCov[j]->GetBinContent(i,i))*100./hUnfData[0]->GetBinContent(i) << "%";
+	          }
+      	      }
+	      cout << endl;
+ 	  }
 
 	createTable(outputFileName, lepSel, variable, doNormalized, hUnfData[0], hCov);
       }

@@ -65,8 +65,8 @@ TFile* getFile(TString histoDir, TString lepSel, TString energy, TString Name,
 
     //--- fileName is complete: just add the extension and open it ---
     fileName += ".root";
+    std::cout << "Opening file with name: " << fileName << "." << std::endl; //<< "   --->   Opened ? " << File->IsOpen() << std::endl;
     TFile *File = new TFile(fileName, "READ");
-    std::cout << "Opening " << fileName << "." << std::endl; //<< "   --->   Opened ? " << File->IsOpen() << std::endl;
     if (!File->IsOpen()) {
       std::cerr << "Please check that you produced the following file. I was not able to open it." << std::endl;
       std::cerr << "\t\033[031m " << fileName << "\033[0m " << std::endl;
@@ -113,12 +113,12 @@ void getFiles(TString histoDir, TFile *Files[], TString lepSel, TString energy, 
 //        Syst.push_back("5_Up");      // 5 up: LES up
 //        Syst.push_back("5_Down");    // 5 down: LES down
 //    };
-//    //andrew -- just working with JES uncertainties right now (these are only applied on data) -- 7.12.2017
-//    if (Name.Index("Data") >= 0 || Name.Index("data") >= 0 || Name.Index("DATA") >= 0) { // for data we have:
-//        Syst.push_back("0");                 //   0: central
-//        Syst.push_back("2_Up");              //   2 up: JES up
-//        Syst.push_back("2_Down");            //   2 down: JES down
-//    }
+    //andrew -- just working with JES uncertainties right now (these are only applied on data) -- 7.12.2017
+    if (Name.Index("Data") >= 0 || Name.Index("data") >= 0 || Name.Index("DATA") >= 0) { // for data we have:
+        Syst.push_back("0");                 //   0: central
+        Syst.push_back("2_Up");              //   2 up: JES up
+        Syst.push_back("2_Down");            //   2 down: JES down
+    }
 //    else if (Name.Index("UNFOLDING") >= 0 && /*Name.Index("DYJets") >= 0 &&*/ Name.Index("Tau") < 0) {
 //        // for DYJets in case of Z+Jets or for WJets in case of W+Jets analysis we have:
 //        Syst.push_back("0");         // 0: central
@@ -148,11 +148,11 @@ void getFiles(TString histoDir, TFile *Files[], TString lepSel, TString energy, 
 
     
     // No systematics
-    if (Name.Index("Data") >= 0) { // for data we have:
-        Syst.push_back("0");                 //   0: central
-        Syst.push_back("0");              //   2 up: JES up
-        Syst.push_back("0");            //   2 down: JES down
-    }
+ //   if (Name.Index("Data") >= 0) { // for data we have:
+ //       Syst.push_back("0");                 //   0: central
+ //       Syst.push_back("0");              //   2 up: JES up
+ //       Syst.push_back("0");            //   2 down: JES down
+ //   }
     else if (Name.Index("UNFOLDING") >= 0 && /*Name.Index("DYJets") >= 0 &&*/ Name.Index("Tau") < 0) {
         // for DYJets in case of Z+Jets or for WJets in case of W+Jets analysis we have:
         Syst.push_back("0");         // 0: central
@@ -180,7 +180,9 @@ void getFiles(TString histoDir, TFile *Files[], TString lepSel, TString energy, 
     
     //--- determnie how many files we have and open them all ---
     int nSyst(Syst.size());
+    std::cout << "Size of nSyst: " << nSyst << std::endl;
     for (int i(0); i < nSyst; i++) {
+        std::cout << "Syst[i]: " << Syst[i] << std::endl;
         Files[i] = getFile(histoDir, lepSel, energy, Name, jetPtMin, jetEtaMax, "", Syst[i]);
     }
     //----------------------------------------------------------
@@ -189,14 +191,17 @@ void getFiles(TString histoDir, TFile *Files[], TString lepSel, TString energy, 
 void getAllFiles(TString histoDir, TString lepSel, TString energy, int jetPtMin, int jetEtaMax, TFile *fData[3], TFile *fDYJets[9], TFile *fBg[][7], int nBg)
 {
     //--- Open data files ---------------------------------------------------------------------- 
+    std::cout << "\nOpening data files" << std::endl;
     getFiles(histoDir, fData, lepSel, energy, Samples[DATA].name, jetPtMin, jetEtaMax); 
     //------------------------------------------------------------------------------------------ 
 
     //--- Open DYJets files --------------------------------------------------------------------
+    std::cout << "\nOpening signal files" << std::endl;
     getFiles(histoDir, fDYJets, lepSel, energy, Samples[DYJETS].name, jetPtMin, jetEtaMax); 
     //------------------------------------------------------------------------------------------ 
 
     //--- Open Bg files ------------------------------------------------------------------------
+    std::cout << "\nOpening BG files" << std::endl;
     for (unsigned short iBg = 0; iBg < nBg; ++iBg) {
 	assert(iBg+1 < (int)NFILESDYJETS);
 	int j = FilesDYJets[iBg+1];
@@ -211,18 +216,23 @@ void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hR
 {
 
     //--- get rec Data histograms ---
+    std::cout << "\nGrabbing rec data histos!" << std::endl;
     getHistos(hRecData, fData, variable);
 
     //--- get rec DYJets histograms ---
+    std::cout << "\nGrabbing rec signal histos!" << std::endl;
     getHistos(hRecDYJets, fDYJets, variable);
 
     //--- get gen DYJets histograms ---
+    std::cout << "\nGrabbing gen signal histos!" << std::endl;
     getHistos(hGenDYJets, fDYJets, "gen" + variable);
 
     //--- get res DYJets histograms ---
+    std::cout << "\nGrabbing hresponse signal histos!" << std::endl;
     getHistos(hResDYJets, fDYJets, "hresponse" + variable);
 
     //--- get rec Bg histograms ---
+    std::cout << "\nGrabbing rec BG histos!" << std::endl;
     for (unsigned short iBg = 0; iBg < nBg; ++iBg) {
       std::cout << __FILE__ << ":" << __LINE__ << ". variable = " << variable <<"\n"
 		<< " file = " << fBg[iBg][0]->GetName() << std::endl;
@@ -249,12 +259,15 @@ void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hR
     }
     
     //--- get response DYJets objects ---
+    std::cout << "\nGrabbing response objects!" << std::endl;
     getResps(respDYJets, hRecDYJets, hGenDYJets, hResDYJets);
 
     //--- get fakes DYJets ---
+    std::cout << "\nGrabbing fakes objects!" << std::endl;
     getFakes(hFakDYJets, hRecData, hRecSumBg, hRecDYJets, hResDYJets);
 
     //--- get purities DYJets ---
+    std::cout << "\nGrabbing purities objects!" << std::endl;
     getPurities(hPurityDYJets, hRecData, hRecSumBg, hRecDYJets, hResDYJets);
 }
 

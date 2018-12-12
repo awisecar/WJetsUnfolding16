@@ -84,8 +84,8 @@ const TString DYMGPYTHIA8LEGEND("MG_aMC + PY8 (#leq 4j LO + PS)");
 //---------------------------------------------------------------
 
 //--- Use this Flag for the 3rd Theory -----------------------
-//const TString NNLO1JFILENAME("");
-const TString NNLO1JFILENAME("NNLO1J");
+const TString NNLO1JFILENAME("");
+//const TString NNLO1JFILENAME("NNLO1J");
 const TString NNLO1JLEGEND("N_{jetti} NNLO");
 //---------------------------------------------------------------
 
