@@ -114,11 +114,11 @@ void getFiles(TString histoDir, TFile *Files[], TString lepSel, TString energy, 
 //        Syst.push_back("5_Down");    // 5 down: LES down
 //    };
     //andrew -- just working with JES uncertainties right now (these are only applied on data) -- 7.12.2017
-    if (Name.Index("Data") >= 0 || Name.Index("data") >= 0 || Name.Index("DATA") >= 0) { // for data we have:
-        Syst.push_back("0");                 //   0: central
-        Syst.push_back("2_Up");              //   2 up: JES up
-        Syst.push_back("2_Down");            //   2 down: JES down
-    }
+//    if (Name.Index("Data") >= 0 || Name.Index("data") >= 0 || Name.Index("DATA") >= 0) { // for data we have:
+//        Syst.push_back("0");                 //   0: central
+//        Syst.push_back("2_Up");              //   2 up: JES up
+//        Syst.push_back("2_Down");            //   2 down: JES down
+//    }
 //    else if (Name.Index("UNFOLDING") >= 0 && /*Name.Index("DYJets") >= 0 &&*/ Name.Index("Tau") < 0) {
 //        // for DYJets in case of Z+Jets or for WJets in case of W+Jets analysis we have:
 //        Syst.push_back("0");         // 0: central
@@ -148,11 +148,11 @@ void getFiles(TString histoDir, TFile *Files[], TString lepSel, TString energy, 
 
     
     // No systematics
- //   if (Name.Index("Data") >= 0) { // for data we have:
- //       Syst.push_back("0");                 //   0: central
- //       Syst.push_back("0");              //   2 up: JES up
- //       Syst.push_back("0");            //   2 down: JES down
- //   }
+    if (Name.Index("Data") >= 0) { // for data we have:
+        Syst.push_back("0");                 //   0: central
+        Syst.push_back("0");              //   2 up: JES up
+        Syst.push_back("0");            //   2 down: JES down
+    }
     else if (Name.Index("UNFOLDING") >= 0 && /*Name.Index("DYJets") >= 0 &&*/ Name.Index("Tau") < 0) {
         // for DYJets in case of Z+Jets or for WJets in case of W+Jets analysis we have:
         Syst.push_back("0");         // 0: central
@@ -160,8 +160,6 @@ void getFiles(TString histoDir, TFile *Files[], TString lepSel, TString energy, 
         Syst.push_back("0");    // 1 down: PU down
         Syst.push_back("0");      // 4 up: JER up
         Syst.push_back("0");      // 4 down: JER down
- //       Syst.push_back("4_Up");      // 4 up: JER up
- //       Syst.push_back("4_Down");    // 4 down: JER down
         Syst.push_back("0");      // 5 up: LES up
         Syst.push_back("0");    // 5 down: LES down
         Syst.push_back("0");      // 6 up: LER up
@@ -191,12 +189,12 @@ void getFiles(TString histoDir, TFile *Files[], TString lepSel, TString energy, 
 void getAllFiles(TString histoDir, TString lepSel, TString energy, int jetPtMin, int jetEtaMax, TFile *fData[3], TFile *fDYJets[9], TFile *fBg[][7], int nBg)
 {
     //--- Open data files ---------------------------------------------------------------------- 
-    std::cout << "\nOpening data files" << std::endl;
+    std::cout << "\nOpening data files: " << Samples[DATA].name << std::endl;
     getFiles(histoDir, fData, lepSel, energy, Samples[DATA].name, jetPtMin, jetEtaMax); 
     //------------------------------------------------------------------------------------------ 
 
     //--- Open DYJets files --------------------------------------------------------------------
-    std::cout << "\nOpening signal files" << std::endl;
+    std::cout << "\nOpening signal files: " << Samples[DYJETS].name << std::endl;
     getFiles(histoDir, fDYJets, lepSel, energy, Samples[DYJETS].name, jetPtMin, jetEtaMax); 
     //------------------------------------------------------------------------------------------ 
 
@@ -206,7 +204,7 @@ void getAllFiles(TString histoDir, TString lepSel, TString energy, int jetPtMin,
 	assert(iBg+1 < (int)NFILESDYJETS);
 	int j = FilesDYJets[iBg+1];
 	assert(j < NSamples);
-	std::cout << __FILE__ << ":" << __LINE__ << ".  Includes background from " << Samples[j].name << "\n";
+	std::cout << "-----> "  << __FILE__ << ":" << __LINE__ << ".  Includes background from " << Samples[j].name << "\n";
         getFiles(histoDir, fBg[iBg], lepSel, energy, Samples[j].name, jetPtMin, jetEtaMax);
     }
     //------------------------------------------------------------------------------------------ 
@@ -684,39 +682,49 @@ void getResps(RooUnfoldResponse *responses[], TFile *Files[], TString variable)
 
 TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJets)
 {
+    printf("\n----->\n");
     TH1D *hFakDYJets = (TH1D*) hRecDYJets->Clone();
 
     //int sm= hRecDYJets->GetSumw2N();
     //int s = hResDYJets->GetSumw2N();
-    int nm = hResDYJets->GetNbinsX() + 2;
-    int nt = hResDYJets->GetNbinsY() + 2;
+    int nm = hResDYJets->GetNbinsX() + 2; //number of RECO bins in response matrix (plus over- and underflow)
+    int nt = hResDYJets->GetNbinsY() + 2; //number of GEN bins in response matrix (plus over- and underflow)
+    printf("hResDYJets->GetNbinsX() + 2 = %d, hResDYJets->GetNbinsY() + 2 = %d\n", nm, nt);
 
-    double dyIntegral = hRecDYJets->Integral(0, hRecDYJets->GetNbinsX()+1);
     double dataIntegral = hRecData->Integral(0, hRecData->GetNbinsX()+1);
+    double dyIntegral = hRecDYJets->Integral(0, hRecDYJets->GetNbinsX()+1);
     double bgIntegral = hRecSumBg->Integral(0, hRecSumBg->GetNbinsX()+1);
-    for (int i= 0; i<nm; i++) {
+
+    double factor = dyIntegral;
+    if (factor != 0) factor = (dataIntegral - bgIntegral) / factor;
+
+    printf("hRecData Integral: %F, hRecDYJets Integral: %F, hRecSumBg Integral: %F\n", dataIntegral, dyIntegral, bgIntegral);
+    printf("hRecData - (hRecDYJets+hRecSumBg): %F\n", (dataIntegral - (dyIntegral+bgIntegral)));
+    printf("Scaling fake counts (estimated with signal MC) by following factor for data histo: %F\n", factor);
+    std::cout << std::endl;
+
+    for (int i= 0; i<nm; i++) { //count over RECO bins
         double nmes= 0.0, wmes= 0.0;
-        for (int j= 0; j<nt; j++) {
+        for (int j= 0; j<nt; j++) { //count over GEN bins
             nmes += hResDYJets->GetBinContent(i, j);
             wmes += pow(hResDYJets->GetBinError(i, j), 2);
             //if (s) wmes += pow(hResDYJets->GetBinError(i, j), 2);
         }
         double fake = hRecDYJets->GetBinContent(i) - nmes;
-        double factor = dyIntegral;
-        if (factor != 0) factor = (dataIntegral - bgIntegral) / factor;
-        //if (!s) wmes= nmes;
-        hFakDYJets->SetBinContent (i, factor*fake);
-	double err2 = pow(hRecDYJets->GetBinError(i),2) - wmes;
+        printf("Integral of reco column %d in hResDYJets: %F, Corresponding bin count in hRecDYJets: %F, Estimated fakes: %F\n", i, nmes, (hRecDYJets->GetBinContent(i)), fake);
+        hFakDYJets->SetBinContent(i, factor*fake);
+
+        //Error calculation comes from simple error propagation
+	//double err2 = pow(hRecDYJets->GetBinError(i),2) - wmes; //should be a plus here for regular error propagation
+        double err2 = pow(hRecDYJets->GetBinError(i),2) + wmes;
 	if(err2 < 0) {
-	  std::cerr << __FILE__ << ":"  << __LINE__ << "Uncertainty on n_tot is smaller than the one on n_signal!"
-		      << "\n";
 	  err2 = 0;
 	}
-	//We neglect the uncertainty on the scale factor.
-        hFakDYJets->SetBinError(i, sqrt (err2));
+        hFakDYJets->SetBinError(i, sqrt (err2)); //neglecting uncertainty introduced by the scale factor
         //hFakDYJets->SetBinError   (i, sqrt (wmes + (sm ? pow(hRecDYJets->GetBinError(i),2) : hRecDYJets->GetBinContent(i))));
     }
-    hFakDYJets->SetEntries (hFakDYJets->GetEffectiveEntries());  // 0 entries if 0 fakes
+    //NOTE: not sure what this does exactly -- andrew -- 21 jan 2019
+    hFakDYJets->SetEntries(hFakDYJets->GetEffectiveEntries());  // 0 entries if 0 fakes
 
     return hFakDYJets;
 
@@ -724,7 +732,7 @@ TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJe
 
 void getFakes(TH1D *hFakDYJets[18], TH1D *hRecData[3], TH1D *hRecSumBg[11], TH1D *hRecDYJets[13], TH2D *hResDYJets[13])
 {
-
+    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
     hFakDYJets[0] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[0], hResDYJets[0]);
     hFakDYJets[1] = getFakes(hRecDYJets[0], hRecData[1], hRecSumBg[0], hResDYJets[0]);
     hFakDYJets[2] = getFakes(hRecDYJets[0], hRecData[2], hRecSumBg[0], hResDYJets[0]);
