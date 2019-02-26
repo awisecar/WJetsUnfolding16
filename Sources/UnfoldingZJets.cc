@@ -25,6 +25,8 @@
 #include "functions.h"
 #include "TRandom3.h"
 #include <sys/time.h>
+#include "TVectorD.h"
+#include "TMatrixD.h"
 #include "TDecompSVD.h"
 #include <regex>
 #include "TVectorT.h"
@@ -530,7 +532,7 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 //    }
 
     //Applies purity corrections (aka fake corrections):
-    std::cout << "Applying purity corrections using RemoveFakes function!" << std::endl;
+    std::cout << "Removing fakes!" << std::endl;
     RemoveFakes(hRecDataMinusFakes, hFakDYJets[iSyst], hPurity[iSyst]);
 
     //FIXME: use independent samples for subtraction
@@ -546,17 +548,18 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
     } else{
       hRecDataMinusFakesEven = hRecDataMinusFakesOdd = 0;
     }
-    if(hRecDataMinusFakes->GetBinContent(1) > 0){
-      std::cout <<  __FILE__ << __LINE__ << ": "
-            << "hRecMinusBgMinusFake: " << hRecDataMinusFakes->GetName()
-            << " " << hRecDataMinusFakes->GetBinError(1)
-        / sqrt(hRecDataMinusFakes->GetBinContent(1))
-            << "\t" << hRecDataMinusFakes->GetBinContent(1) /  hRecData[iData]->GetBinContent(1)
-                << "\t" << hRecDataMinusFakes->GetBinError(3)
-        / sqrt(hRecDataMinusFakes->GetBinContent(3))
-            << "\t" << hRecDataMinusFakes->GetBinContent(3) /  hRecData[iData]->GetBinContent(3)
-            << "\n";
-    }
+
+//    if(hRecDataMinusFakes->GetBinContent(1) > 0){
+//      std::cout <<  __FILE__ << __LINE__ << ": "
+//            << "hRecMinusBgMinusFake: " << hRecDataMinusFakes->GetName()
+//            << " " << hRecDataMinusFakes->GetBinError(1)
+//        / sqrt(hRecDataMinusFakes->GetBinContent(1))
+//            << "\t" << hRecDataMinusFakes->GetBinContent(1) /  hRecData[iData]->GetBinContent(1)
+//                << "\t" << hRecDataMinusFakes->GetBinError(3)
+//        / sqrt(hRecDataMinusFakes->GetBinContent(3))
+//            << "\t" << hRecDataMinusFakes->GetBinContent(3) /  hRecData[iData]->GetBinContent(3)
+//            << "\n";
+//    }
 
     
     if (iSyst == 17) cout << "SHERPAUNFOLDING" << endl;
@@ -1743,8 +1746,8 @@ bool logy, TH1D *hRecDataMinusFakesOdd, TH1D *hRecDataMinusFakesEven){
 
     std::cout << "-----------------------" << std::endl;
     TString variable = TString(hRecDataMinusFakes->GetName());
-    system("mkdir -p UnfoldingCheck_TUnfold/");
-    TFile *f = new TFile("UnfoldingCheck_TUnfold/" + lepSel + "_" + variable + "_" + name + ".root", "RECREATE");
+    system("mkdir -p UnfoldingCheck/");
+    TFile *f = new TFile("UnfoldingCheck/" + lepSel + "_" + variable + "_" + name + ".root", "RECREATE");
     f->cd();
 
     // Fakes removed, BG subtracted from reco data distribution
@@ -1762,13 +1765,13 @@ bool logy, TH1D *hRecDataMinusFakesOdd, TH1D *hRecDataMinusFakesEven){
     double recoEventCounter = 0;
     for(int i=1;i<=recoData->GetNbinsX();i++){
         recoEventCounter += recoData->GetBinContent(i);
-        printf("bin %i, (%F, %F): %F\n", i, recoData->GetBinLowEdge(i), recoData->GetXaxis()->GetBinUpEdge(i), recoData->GetBinContent(i));
+        //printf("bin %i, (%F, %F): %F\n", i, recoData->GetBinLowEdge(i), recoData->GetXaxis()->GetBinUpEdge(i), recoData->GetBinContent(i));
     }
     printf("Total number of events in input reco dist.: %F\n", recoEventCounter);
     printf("genDY->GetNbinsX=%d\n", genDY->GetNbinsX());
-    for(int i=1;i<=genDY->GetNbinsX();i++){
-        printf("bin %i, (%F, %F): %F\n", i, genDY->GetBinLowEdge(i), genDY->GetXaxis()->GetBinUpEdge(i), genDY->GetBinContent(i));
-    }
+   // for(int i=1;i<=genDY->GetNbinsX();i++){
+   //     printf("bin %i, (%F, %F): %F\n", i, genDY->GetBinLowEdge(i), genDY->GetXaxis()->GetBinUpEdge(i), genDY->GetBinContent(i));
+   // }
     printf("responseMatrix->GetNbinsX=%d, responseMatrix->GetNbinsY=%d\n", nBinsRespX, nBinsRespY);
 
     // add non-reconstructed fiducial events in underflow reco bins
@@ -1782,7 +1785,7 @@ bool logy, TH1D *hRecDataMinusFakesOdd, TH1D *hRecDataMinusFakesEven){
         for(int j=1; j <= nBinsRespX; j++) { // RECO
             recBin += responseMatrix->GetBinContent(j,i);
         }
-        printf("Gen bin content = %F, Reco bin content (integrated over gen row) = %F, Efficiency = %F\n",genBin,recBin,recBin/genBin);
+        //printf("Gen bin content = %F, Reco bin content (integrated over gen row) = %F, Efficiency = %F\n",genBin,recBin,recBin/genBin);
         dataEfficiency.push_back(recBin/genBin);
         //if(genBin-recBin <= 0) printf("Bin %d totally efficient (%f/%f/%f)\n",i,genBin,recBin,genBin-recBin);
         //if(i==1) printf("Bin %d totally efficient (%f/%f/%f)\n",i,genBin,recBin,genBin-recBin);
@@ -1800,14 +1803,14 @@ bool logy, TH1D *hRecDataMinusFakesOdd, TH1D *hRecDataMinusFakesEven){
         responseMatrix->SetBinContent(responseMatrix->GetNbinsX()+1, i, 0.0);
     }
 
-    //print overflow and underflow bins
-    std::cout << "Printing response matrix bin content: " << std::endl;
-    printf("responseMatrix->GetNbinsX=%d, responseMatrix->GetNbinsY=%d\n", nBinsRespX, nBinsRespY);
-    for(int i=0; i < nBinsRespX+2; i++){
-        for(int j=0; j < nBinsRespY+2; j++){
-            printf("Value in Bin(%i,%i): %f\n", i, j, responseMatrix->GetBinContent(i,j));
-        }
-    }
+  //  //print overflow and underflow bins
+  //  std::cout << "Printing response matrix bin content: " << std::endl;
+  //  printf("responseMatrix->GetNbinsX=%d, responseMatrix->GetNbinsY=%d\n", nBinsRespX, nBinsRespY);
+  //  for(int i=0; i < nBinsRespX+2; i++){
+  //      for(int j=0; j < nBinsRespY+2; j++){
+  //          printf("Value in Bin(%i,%i): %f\n", i, j, responseMatrix->GetBinContent(i,j));
+  //      }
+  //  }
 
     //This should already be done in RemoveFakes(hRecDataMinusFakes, hFakDYJets[iSyst], hPurity[iSyst]);. I will leave the code here for reference.
     /*
@@ -1864,7 +1867,7 @@ bool logy, TH1D *hRecDataMinusFakesOdd, TH1D *hRecDataMinusFakesEven){
     TGraph *lCurve=0;
     const char *SCAN_DISTRIBUTION="signal";
     const char *SCAN_AXISSTEERING=0;
-    Int_t nScan=50;
+    Int_t nScan=100;
     TSpline *logTauX,*logTauY;
     TSpline *rhoLogTau=0;
     
@@ -1912,7 +1915,7 @@ bool logy, TH1D *hRecDataMinusFakesOdd, TH1D *hRecDataMinusFakesEven){
     hUnfData->SetTitle(hRecDataMinusFakes->GetTitle());
     hUnfData->GetXaxis()->SetTitle(hRecDataMinusFakes->GetXaxis()->GetTitle());
     hUnfData->GetYaxis()->SetTitle(hRecDataMinusFakes->GetYaxis()->GetTitle());
-    printf("---> Unfolded Data:\n");
+    printf("\n---> Unfolded Data:\n");
     double unfEventCounter = 0;
     for(int i=1;i<=hUnfData->GetNbinsX();i++){
         unfEventCounter += hUnfData->GetBinContent(i);
@@ -1941,16 +1944,16 @@ bool logy, TH1D *hRecDataMinusFakesOdd, TH1D *hRecDataMinusFakesEven){
     printf("number of degrees of freedom = %d\n",unfold.GetNdf());
     TH1D *foldedData = (TH1D*)unfold.GetFoldedOutput("foldedData");
 
-    printf("---> Input data:\n");
-    for(int i=1;i<=recoData->GetNbinsX();i++){
-        printf("bin %i: %F\n",i,recoData->GetBinContent(i));
-    }
-    printf("---> Folded result:\n");
+    //printf("---> Input data:\n");
+    //for(int i=1;i<=recoData->GetNbinsX();i++){
+    //    printf("bin %i: %F\n",i,recoData->GetBinContent(i));
+    //}
     if(foldedData){
         foldedData->Write();
-        for(int i=1;i<=foldedData->GetNbinsX();i++){
-            printf("bin %i: %F\n",i,foldedData->GetBinContent(i));
-        }
+        //printf("---> Folded result:\n");
+        //for(int i=1;i<=foldedData->GetNbinsX();i++){
+        //    printf("bin %i: %F\n",i,foldedData->GetBinContent(i));
+        //}
         printf("---> Ratio, Input/Folded:\n"); 
         TH1D *foldedClosureRatio = (TH1D*) recoData->Clone();
         foldedClosureRatio->SetName("foldedClosureRatio");
@@ -1970,7 +1973,7 @@ bool logy, TH1D *hRecDataMinusFakesOdd, TH1D *hRecDataMinusFakesEven){
     
     //--- divide by luminosity ---
     double lumiUnc = cfg.getD("lumiUnc", 0.027);
-    printf("Scaling data %s by luminosity %F... \n",hUnfData->GetName(), integratedLumi);
+    printf("Scaling data %s by int. lumi = %F... \n",hUnfData->GetName(), integratedLumi);
     hUnfData->Scale(1./integratedLumi);
     if(hUnfDataStatCov) hUnfDataStatCov->Scale(1./(integratedLumi*integratedLumi));
     if(hUnfMCStatCov) hUnfMCStatCov->Scale(1./(integratedLumi*integratedLumi));
@@ -2245,6 +2248,21 @@ void plotRespMat(TH2D *hResp, TString variable, TString unfoldDir, bool addSwitc
 
         //set bin content of this new histo using bin contents from original response matrix
         TH2D *hRespNominal = (TH2D*) hResp->Clone();
+
+
+
+        //get condition number for matrix before normalization
+        TMatrixD respMatrix(hRespNominal->GetNbinsX(), hRespNominal->GetNbinsY());
+        for(int i=1; i<=hRespNominal->GetNbinsX();i++){
+            for(int j=1; j<=hRespNominal->GetNbinsY();j++){
+                respMatrix[i-1][j-1] = hRespNominal->GetBinContent(i,j);
+            }
+        }
+        TDecompSVD svdResp(respMatrix);
+        svdResp.Decompose(); //do the single value decomposition
+        TVectorD svdRespVector = svdResp.GetSig(); //returns diagonal elements of diagonal matrix S
+        //printf("Condition # = %F / %F = %F\n", svdRespVector[0], svdRespVector[svdRespVector.GetNoElements()-1], svdRespVector[0]/svdRespVector[svdRespVector.GetNoElements()-1]);  
+
         normalizeTH2D(hRespNominal);
         int numBinsXRespNominal = hRespNominal->GetNbinsX();
         int numBinsYRespNominal = hRespNominal->GetNbinsY();
@@ -2304,6 +2322,24 @@ void plotRespMat(TH2D *hResp, TString variable, TString unfoldDir, bool addSwitc
     }
     else{ //the nominal case
         hNormResp = (TH2D*) hResp->Clone();
+    
+        //get condition number for matrix before normalization
+        TMatrixD respMatrix(hResp->GetNbinsX(), hResp->GetNbinsY());
+        for(int i=1; i<=hResp->GetNbinsX();i++){
+            for(int j=1; j<=hResp->GetNbinsY();j++){
+                respMatrix[i-1][j-1] = hResp->GetBinContent(i,j);
+            }
+        }
+        TDecompSVD svdResp(respMatrix);
+        svdResp.Decompose(); //do the single value decomposition
+        TVectorD svdRespVector = svdResp.GetSig(); //returns diagonal elements of diagonal matrix S
+        std::cout << "Elements of diagonal matrix S: ";
+        for(int i=0; i < svdRespVector.GetNoElements(); i++){
+            std::cout << svdRespVector[i] << " ";
+        }
+        std::cout << std::endl;
+        printf("Condition # = %F / %F = %F\n", svdRespVector[0], svdRespVector[svdRespVector.GetNoElements()-1], svdRespVector[0]/svdRespVector[svdRespVector.GetNoElements()-1]);  
+
         normalizeTH2D(hNormResp);
         
         TString YTitle = hNormResp->GetYaxis()->GetTitle();  

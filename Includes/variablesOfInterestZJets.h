@@ -148,26 +148,20 @@ const variableStruct VAROFINTERESTZJETS[] = {
     {"dRptmin100LepCloseDiJetCo300dR04_Zinc2jet",         1,      1,           3,              3,             3,            3 ,               3    }, // 1
 
 //andrew
-    {"LeadingJetPt_Zinc1jet_R21",         1,      1,          1,              4,             1,            1 ,               1    },// 1
-    {"LeadingJetPt_Zinc2jet_R21",         1,      1,          1,              4,             1,            1 ,               1    },// 1
-    {"LeadingJetPt_Zinc2jet_R32",         1,      1,          1,              4,             1,            1 ,               1    },// 1
-    {"LeadingJetPt_Zinc3jet_R32",         1,      1,          1,              4,             1,            1 ,               1    },// 1
-    {"LeadingJetPt_Zinc3jet_R43",         1,      1,          1,              4,             1,            1 ,               1    },// 1
-    {"LeadingJetPt_Zinc4jet_R43",         1,      1,          1,              4,             1,            1 ,               1    },// 1
-    {"HTover2_Zinc2jet_R32",         1,      1,          1,              4,             1,            1 ,               1    },// 1
-    {"HTover2_Zinc3jet_R32",         1,      1,          1,              4,             1,            1 ,               1    },// 1
-    {"HTover2_Zinc3jet_R43",         1,      1,          1,              4,             1,            1 ,               1    },// 1
-    {"HTover2_Zinc4jet_R43",         1,      1,          1,              4,             1,            1 ,               1    },// 1
-    {"LepPtPlusLeadingJetPt_Zinc1jet_R21",         1,      1,          1,              4,             1,            1 ,               1    },
-    {"LepPtPlusLeadingJetPt_Zinc2jet_R21",         1,      1,          1,              4,             1,            1 ,               1    },
-    {"LepPtPlusLeadingJetPt_Zinc2jet_R32",         1,      1,          1,              4,             1,            1 ,               1    },
-    {"LepPtPlusLeadingJetPt_Zinc3jet_R32",         1,      1,          1,              4,             1,            1 ,               1    },
-    {"LepPtPlusLeadingJetPt_Zinc3jet_R43",         1,      1,          1,              4,             1,            1 ,               1    },
-    {"LepPtPlusLeadingJetPt_Zinc4jet_R43",         1,      1,          1,              4,             1,            1 ,               1    },
-    {"LepPtPlusHTover2_Zinc2jet_R32",         1,      1,          1,              4,             1,            1 ,               1    },// 1
-    {"LepPtPlusHTover2_Zinc3jet_R32",         1,      1,          1,              4,             1,            1 ,               1    },// 1
-    {"LepPtPlusHTover2_Zinc3jet_R43",         1,      1,          1,              4,             1,            1 ,               1    },// 1
-    {"LepPtPlusHTover2_Zinc4jet_R43",         1,      1,          1,              4,             1,            1 ,               1    },// 1
+    {"LeadingJetPt_Zinc1jet",         1,      1,          1,              4,             1,            1 ,               1    },// 1
+    {"LeadingJetPt_Zinc2jet",         1,      1,          1,              4,             1,            1 ,               1    },// 1
+    {"LeadingJetPt_Zinc3jet",         1,      1,          1,              4,             1,            1 ,               1    },// 1
+    {"LeadingJetPt_Zinc4jet",         1,      1,          1,              4,             1,            1 ,               1    },// 1
+    {"HTover2_Zinc2jet",         1,      1,          1,              4,             1,            1 ,               1    },// 1
+    {"HTover2_Zinc3jet",         1,      1,          1,              4,             1,            1 ,               1    },// 1
+    {"HTover2_Zinc4jet",         1,      1,          1,              4,             1,            1 ,               1    },// 1
+    {"LepPtPlusLeadingJetPt_Zinc1jet",         1,      1,          1,              4,             1,            1 ,               1    },
+    {"LepPtPlusLeadingJetPt_Zinc2jet",         1,      1,          1,              4,             1,            1 ,               1    },
+    {"LepPtPlusLeadingJetPt_Zinc3jet",         1,      1,          1,              4,             1,            1 ,               1    },
+    {"LepPtPlusLeadingJetPt_Zinc4jet",         1,      1,          1,              4,             1,            1 ,               1    },
+    {"LepPtPlusHTover2_Zinc2jet",         1,      1,          1,              4,             1,            1 ,               1    },// 1
+    {"LepPtPlusHTover2_Zinc3jet",         1,      1,          1,              4,             1,            1 ,               1    },// 1
+    {"LepPtPlusHTover2_Zinc4jet",         1,      1,          1,              4,             1,            1 ,               1    },// 1
     {"ZPt_Zinc1jet",      1,      1,          1,              4,             1,            1 ,               1    },
     {"ZPt_Zinc2jet",      1,      1,          1,              4,             1,            1 ,               1    },
     {"ZPt_Zinc3jet",      1,      1,          1,              4,             1,            1 ,               1    },
@@ -186,58 +180,20 @@ const variableStruct VAROFINTERESTZJETS[] = {
     {"lepPt_Zinc0jet",      1,      1,          1,              4,             1,            1 ,               1    },
     ////
     /// following distributions have different binning for reco and gen (done for TUnfold)
-    {"LeadingJetPt_1_Zinc1jet_R21",         1,      1,          1,              4,             1,            1 ,               1    },// 1
-    {"LeadingJetPt_1_Zinc2jet_R21",         1,      1,          1,              4,             1,            1 ,               1    },// 1
-    {"LeadingJetPt_1_Zinc2jet_R32",         1,      1,          1,              4,             1,            1 ,               1    },// 1
-    {"LeadingJetPt_1_Zinc3jet_R32",         1,      1,          1,              4,             1,            1 ,               1    },// 1
-    {"LeadingJetPt_1_Zinc3jet_R43",         1,      1,          1,              4,             1,            1 ,               1    },// 1
-    {"LeadingJetPt_1_Zinc4jet_R43",         1,      1,          1,              4,             1,            1 ,               1    },// 1
-    {"HTover2_1_Zinc2jet_R32",         1,      1,          1,              4,             1,            1 ,               1    },// 1
-    {"HTover2_1_Zinc3jet_R32",         1,      1,          1,              4,             1,            1 ,               1    },// 1
-    {"HTover2_1_Zinc3jet_R43",         1,      1,          1,              4,             1,            1 ,               1    },// 1
-    {"HTover2_1_Zinc4jet_R43",         1,      1,          1,              4,             1,            1 ,               1    },// 1
-    {"LepPtPlusLeadingJetPt_1_Zinc1jet_R21",         1,      1,          1,              4,             1,            1 ,               1    },
-    {"LepPtPlusLeadingJetPt_1_Zinc2jet_R21",         1,      1,          1,              4,             1,            1 ,               1    },
-    {"LepPtPlusLeadingJetPt_1_Zinc2jet_R32",         1,      1,          1,              4,             1,            1 ,               1    },
-    {"LepPtPlusLeadingJetPt_1_Zinc3jet_R32",         1,      1,          1,              4,             1,            1 ,               1    },
-    {"LepPtPlusLeadingJetPt_1_Zinc3jet_R43",         1,      1,          1,              4,             1,            1 ,               1    },
-    {"LepPtPlusLeadingJetPt_1_Zinc4jet_R43",         1,      1,          1,              4,             1,            1 ,               1    },
-    {"LepPtPlusHTover2_1_Zinc2jet_R32",      1,      1,          1,              4,             1,            1 ,               1    },
-    {"LepPtPlusHTover2_1_Zinc3jet_R32",      1,      1,          1,              4,             1,            1 ,               1    },
-    {"LepPtPlusHTover2_1_Zinc3jet_R43",      1,      1,          1,              4,             1,            1 ,               1    },
-    {"LepPtPlusHTover2_1_Zinc4jet_R43",      1,      1,          1,              4,             1,            1 ,               1    },
-    {"ZPt_1_Zinc1jet",      1,      1,          1,              4,             1,            1 ,               1    },
-    {"ZPt_1_Zinc2jet",      1,      1,          1,              4,             1,            1 ,               1    },
-    {"ZPt_1_Zinc3jet",      1,      1,          1,              4,             1,            1 ,               1    },
-    {"ZPt_1_Zinc4jet",      1,      1,          1,              4,             1,            1 ,               1    },
-    {"ZPtPlusLeadingJetPt_1_Zinc1jet",      1,      1,          1,              4,             1,            1 ,               1    },
-    {"ZPtPlusLeadingJetPt_1_Zinc2jet",      1,      1,          1,              4,             1,            1 ,               1    },
-    {"ZPtPlusLeadingJetPt_1_Zinc3jet",      1,      1,          1,              4,             1,            1 ,               1    },
-    {"ZPtPlusLeadingJetPt_1_Zinc4jet",      1,      1,          1,              4,             1,            1 ,               1    },
-    {"ZPtPlusHTover2_1_Zinc2jet",      1,      1,          1,              4,             1,            1 ,               1    },
-    {"ZPtPlusHTover2_1_Zinc3jet",      1,      1,          1,              4,             1,            1 ,               1    },
-    {"ZPtPlusHTover2_1_Zinc4jet",      1,      1,          1,              4,             1,            1 ,               1    },
-    /// following distributions have different binning for reco and gen (done for TUnfold)
-    {"LeadingJetPt_2_Zinc1jet_R21",         1,      1,          1,              4,             1,            1 ,               1    },// 1
-    {"LeadingJetPt_2_Zinc2jet_R21",         1,      1,          1,              4,             1,            1 ,               1    },// 1
-    {"LeadingJetPt_2_Zinc2jet_R32",         1,      1,          1,              4,             1,            1 ,               1    },// 1
-    {"LeadingJetPt_2_Zinc3jet_R32",         1,      1,          1,              4,             1,            1 ,               1    },// 1
-    {"LeadingJetPt_2_Zinc3jet_R43",         1,      1,          1,              4,             1,            1 ,               1    },// 1
-    {"LeadingJetPt_2_Zinc4jet_R43",         1,      1,          1,              4,             1,            1 ,               1    },// 1
-    {"HTover2_2_Zinc2jet_R32",         1,      1,          1,              4,             1,            1 ,               1    },// 1
-    {"HTover2_2_Zinc3jet_R32",         1,      1,          1,              4,             1,            1 ,               1    },// 1
-    {"HTover2_2_Zinc3jet_R43",         1,      1,          1,              4,             1,            1 ,               1    },// 1
-    {"HTover2_2_Zinc4jet_R43",         1,      1,          1,              4,             1,            1 ,               1    },// 1
-    {"LepPtPlusLeadingJetPt_2_Zinc1jet_R21",         1,      1,          1,              4,             1,            1 ,               1    },
-    {"LepPtPlusLeadingJetPt_2_Zinc2jet_R21",         1,      1,          1,              4,             1,            1 ,               1    },
-    {"LepPtPlusLeadingJetPt_2_Zinc2jet_R32",         1,      1,          1,              4,             1,            1 ,               1    },
-    {"LepPtPlusLeadingJetPt_2_Zinc3jet_R32",         1,      1,          1,              4,             1,            1 ,               1    },
-    {"LepPtPlusLeadingJetPt_2_Zinc3jet_R43",         1,      1,          1,              4,             1,            1 ,               1    },
-    {"LepPtPlusLeadingJetPt_2_Zinc4jet_R43",         1,      1,          1,              4,             1,            1 ,               1    },
-    {"LepPtPlusHTover2_2_Zinc2jet_R32",      1,      1,          1,              4,             1,            1 ,               1    },
-    {"LepPtPlusHTover2_2_Zinc3jet_R32",      1,      1,          1,              4,             1,            1 ,               1    },
-    {"LepPtPlusHTover2_2_Zinc3jet_R43",      1,      1,          1,              4,             1,            1 ,               1    },
-    {"LepPtPlusHTover2_2_Zinc4jet_R43",      1,      1,          1,              4,             1,            1 ,               1    },
+    {"LeadingJetPt_2_Zinc1jet",         1,      1,          1,              4,             1,            1 ,               1    },// 1
+    {"LeadingJetPt_2_Zinc2jet",         1,      1,          1,              4,             1,            1 ,               1    },// 1
+    {"LeadingJetPt_2_Zinc3jet",         1,      1,          1,              4,             1,            1 ,               1    },// 1
+    {"LeadingJetPt_2_Zinc4jet",         1,      1,          1,              4,             1,            1 ,               1    },// 1
+    {"HTover2_2_Zinc2jet",         1,      1,          1,              4,             1,            1 ,               1    },// 1
+    {"HTover2_2_Zinc3jet",         1,      1,          1,              4,             1,            1 ,               1    },// 1
+    {"HTover2_2_Zinc4jet",         1,      1,          1,              4,             1,            1 ,               1    },// 1
+    {"LepPtPlusLeadingJetPt_2_Zinc1jet",         1,      1,          1,              4,             1,            1 ,               1    },
+    {"LepPtPlusLeadingJetPt_2_Zinc2jet",         1,      1,          1,              4,             1,            1 ,               1    },
+    {"LepPtPlusLeadingJetPt_2_Zinc3jet",         1,      1,          1,              4,             1,            1 ,               1    },
+    {"LepPtPlusLeadingJetPt_2_Zinc4jet",         1,      1,          1,              4,             1,            1 ,               1    },
+    {"LepPtPlusHTover2_2_Zinc2jet",      1,      1,          1,              4,             1,            1 ,               1    },
+    {"LepPtPlusHTover2_2_Zinc3jet",      1,      1,          1,              4,             1,            1 ,               1    },
+    {"LepPtPlusHTover2_2_Zinc4jet",      1,      1,          1,              4,             1,            1 ,               1    },
     {"ZPt_2_Zinc1jet",      1,      1,          1,              4,             1,            1 ,               1    },
     {"ZPt_2_Zinc2jet",      1,      1,          1,              4,             1,            1 ,               1    },
     {"ZPt_2_Zinc3jet",      1,      1,          1,              4,             1,            1 ,               1    },

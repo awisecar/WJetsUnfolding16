@@ -682,14 +682,14 @@ void getResps(RooUnfoldResponse *responses[], TFile *Files[], TString variable)
 
 TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJets)
 {
-    printf("\n----->\n");
+ //   printf("\n-----> Getting statistics concerning fakes:\n");
     TH1D *hFakDYJets = (TH1D*) hRecDYJets->Clone();
 
     //int sm= hRecDYJets->GetSumw2N();
     //int s = hResDYJets->GetSumw2N();
     int nm = hResDYJets->GetNbinsX() + 2; //number of RECO bins in response matrix (plus over- and underflow)
     int nt = hResDYJets->GetNbinsY() + 2; //number of GEN bins in response matrix (plus over- and underflow)
-    printf("hResDYJets->GetNbinsX() + 2 = %d, hResDYJets->GetNbinsY() + 2 = %d\n", nm, nt);
+ //   printf("hResDYJets->GetNbinsX() + 2 = %d, hResDYJets->GetNbinsY() + 2 = %d\n", nm, nt);
 
     double dataIntegral = hRecData->Integral(0, hRecData->GetNbinsX()+1);
     double dyIntegral = hRecDYJets->Integral(0, hRecDYJets->GetNbinsX()+1);
@@ -698,9 +698,9 @@ TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJe
     double factor = dyIntegral;
     if (factor != 0) factor = (dataIntegral - bgIntegral) / factor;
 
-    printf("hRecData Integral: %F, hRecDYJets Integral: %F, hRecSumBg Integral: %F\n", dataIntegral, dyIntegral, bgIntegral);
-    printf("hRecData - (hRecDYJets+hRecSumBg): %F\n", (dataIntegral - (dyIntegral+bgIntegral)));
-    printf("Scaling fake counts (estimated with signal MC) by following factor for data histo: %F\n", factor);
+//    printf("hRecData Integral: %F, hRecDYJets Integral: %F, hRecSumBg Integral: %F\n", dataIntegral, dyIntegral, bgIntegral);
+//    printf("hRecData - (hRecDYJets+hRecSumBg): %F\n", (dataIntegral - (dyIntegral+bgIntegral)));
+//    printf("Scaling fake counts (estimated with signal MC) by following factor for data histo: %F\n", factor);
     std::cout << std::endl;
 
     for (int i= 0; i<nm; i++) { //count over RECO bins
@@ -711,7 +711,7 @@ TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJe
             //if (s) wmes += pow(hResDYJets->GetBinError(i, j), 2);
         }
         double fake = hRecDYJets->GetBinContent(i) - nmes;
-        printf("Integral of reco column %d in hResDYJets: %F, Corresponding bin count in hRecDYJets: %F, Estimated fakes: %F\n", i, nmes, (hRecDYJets->GetBinContent(i)), fake);
+ //       printf("Integral of reco column %d in hResDYJets: %F, Corresponding bin count in hRecDYJets: %F, Estimated fakes: %F\n", i, nmes, (hRecDYJets->GetBinContent(i)), fake);
         hFakDYJets->SetBinContent(i, factor*fake);
 
         //Error calculation comes from simple error propagation
