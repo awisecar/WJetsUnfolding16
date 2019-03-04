@@ -87,34 +87,8 @@ void getFiles(TString histoDir, TFile *Files[], TString lepSel, TString energy, 
 
     vector<TString> Syst;
     
-//    if (Name.Index("Data") >= 0 || Name.Index("data") >= 0 || Name.Index("DATA") >= 0) { // for data we have:
-//        Syst.push_back("0");                 //   0: central
-//        Syst.push_back("2_Up");              //   2 up: JES up
-//        Syst.push_back("2_Down");            //   2 down: JES down
-//    }
-//    else if (Name.Index("UNFOLDING") >= 0 && Name.Index("DYJets") >= 0 && Name.Index("Tau") < 0) {
-//        // for DYJets in case of Z+Jets or for WJets in case of W+Jets analysis we have:
-//        Syst.push_back("0");         // 0: central
-//        Syst.push_back("1_Up");      // 1 up: PU up
-//        Syst.push_back("1_Down");    // 1 down: PU down
-//        Syst.push_back("4_Up");      // 4 up: JER up
-//        Syst.push_back("4_Down");    // 4 down: JER down
-//        Syst.push_back("5_Up");      // 5 up: LES up
-//        Syst.push_back("5_Down");    // 5 down: LES down
-//        Syst.push_back("6_Up");      // 6 up: LER up
-//        Syst.push_back("6_Down");    // 6 down: LER down
-//    }
-//    else { // for background we have
-//        Syst.push_back("0");         // 0: central
-//        Syst.push_back("1_Up");      // 1 up: PU up
-//        Syst.push_back("1_Down");    // 1 down: PU down
-//        Syst.push_back("3_Up");      // 3 up: XSec up
-//        Syst.push_back("3_Down");    // 3 down: Xsec down
-//        Syst.push_back("5_Up");      // 5 up: LES up
-//        Syst.push_back("5_Down");    // 5 down: LES down
-//    };
-    //andrew -- just working with JES uncertainties right now (these are only applied on data) -- 7.12.2017
-//    if (Name.Index("Data") >= 0 || Name.Index("data") >= 0 || Name.Index("DATA") >= 0) { // for data we have:
+//    //Full systematics
+//    if (Name.Index("Data") >= 0 ) { // for data we have:
 //        Syst.push_back("0");                 //   0: central
 //        Syst.push_back("2_Up");              //   2 up: JES up
 //        Syst.push_back("2_Down");            //   2 down: JES down
@@ -126,12 +100,10 @@ void getFiles(TString histoDir, TFile *Files[], TString lepSel, TString energy, 
 //        Syst.push_back("1_Down");    // 1 down: PU down
 //        Syst.push_back("4_Up");      // 4 up: JER up
 //        Syst.push_back("4_Down");    // 4 down: JER down
-//        //Syst.push_back("0");      // 5 up: LES up
-//        //Syst.push_back("0");    // 5 down: LES down
-//        Syst.push_back("5_Up");      // 5 up: BtagSF up
-//        Syst.push_back("5_Down");    // 5 down: BtagSF down
-//        Syst.push_back("0");      // 6 up: LER up
-//        Syst.push_back("0");    // 6 down: LER down
+//        Syst.push_back("5_Up");      // 5 up: LepSF up
+//        Syst.push_back("5_Down");    // 5 down: LepSF down
+//        Syst.push_back("6_Up");      // 6 up: BtagSF up
+//        Syst.push_back("6_Down");    // 6 down: BtagSF down
 //    }
 //    else { // for background we have
 //        Syst.push_back("0");         // 0: central
@@ -139,14 +111,11 @@ void getFiles(TString histoDir, TFile *Files[], TString lepSel, TString energy, 
 //        Syst.push_back("1_Down");    // 1 down: PU down
 //        Syst.push_back("3_Up");      // 3 up: XSec up
 //        Syst.push_back("3_Down");    // 3 down: Xsec down
-//        //Syst.push_back("0");      // 5 up: LES up
-//        //Syst.push_back("0");    // 5 down: LES down
-//        Syst.push_back("5_Up");      // 5 up: BtagSF up
-//        Syst.push_back("5_Down");    // 5 down: BtagSF down
+//        Syst.push_back("6_Up");      // 6 up: BtagSF up
+//        Syst.push_back("6_Down");    // 6 down: BtagSF down
 //    };
 
 
-    
     // No systematics
     if (Name.Index("Data") >= 0) { // for data we have:
         Syst.push_back("0");                 //   0: central
@@ -160,10 +129,10 @@ void getFiles(TString histoDir, TFile *Files[], TString lepSel, TString energy, 
         Syst.push_back("0");    // 1 down: PU down
         Syst.push_back("0");      // 4 up: JER up
         Syst.push_back("0");      // 4 down: JER down
-        Syst.push_back("0");      // 5 up: LES up
-        Syst.push_back("0");    // 5 down: LES down
-        Syst.push_back("0");      // 6 up: LER up
-        Syst.push_back("0");    // 6 down: LER down
+        Syst.push_back("0");      // 5 up: LepSF up
+        Syst.push_back("0");    // 5 down: LepSF down
+        Syst.push_back("0");      // 6 up: BtagSF up
+        Syst.push_back("0");    // 6 down: BtagSF down
     }
     else { // for background we have
         Syst.push_back("0");         // 0: central
@@ -171,8 +140,8 @@ void getFiles(TString histoDir, TFile *Files[], TString lepSel, TString energy, 
         Syst.push_back("0");    // 1 down: PU down
         Syst.push_back("0");      // 3 up: XSec up
         Syst.push_back("0");    // 3 down: Xsec down
-        Syst.push_back("0");      // 5 up: LES up
-        Syst.push_back("0");    // 5 down: LES down
+        Syst.push_back("0");      // 6 up: BtagSF up
+        Syst.push_back("0");    // 6 down: BtagSF down
     };
 
     
@@ -180,7 +149,7 @@ void getFiles(TString histoDir, TFile *Files[], TString lepSel, TString energy, 
     int nSyst(Syst.size());
     std::cout << "Size of nSyst: " << nSyst << std::endl;
     for (int i(0); i < nSyst; i++) {
-        std::cout << "Syst[i]: " << Syst[i] << std::endl;
+        //std::cout << "Syst[i]: " << Syst[i] << std::endl;
         Files[i] = getFile(histoDir, lepSel, energy, Name, jetPtMin, jetEtaMax, "", Syst[i]);
     }
     //----------------------------------------------------------
@@ -214,59 +183,60 @@ void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hR
 {
 
     //--- get rec Data histograms ---
-    std::cout << "\nGrabbing rec data histos!" << std::endl;
+    std::cout << "\nGrabbing rec data histos hRecData!" << std::endl;
     getHistos(hRecData, fData, variable);
 
     //--- get rec DYJets histograms ---
-    std::cout << "\nGrabbing rec signal histos!" << std::endl;
+    std::cout << "Grabbing rec signal histos hRecDYJets!" << std::endl;
     getHistos(hRecDYJets, fDYJets, variable);
 
     //--- get gen DYJets histograms ---
-    std::cout << "\nGrabbing gen signal histos!" << std::endl;
+    std::cout << "Grabbing gen signal histos hGenDYJets!" << std::endl;
     getHistos(hGenDYJets, fDYJets, "gen" + variable);
 
     //--- get res DYJets histograms ---
-    std::cout << "\nGrabbing hresponse signal histos!" << std::endl;
+    std::cout << "Grabbing hresponse signal histos hResDYJets!" << std::endl;
     getHistos(hResDYJets, fDYJets, "hresponse" + variable);
 
     //--- get rec Bg histograms ---
-    std::cout << "\nGrabbing rec BG histos!" << std::endl;
+    std::cout << "Grabbing rec BG histos hRecBg and hRecSumBg!" << std::endl;
     for (unsigned short iBg = 0; iBg < nBg; ++iBg) {
-      std::cout << __FILE__ << ":" << __LINE__ << ". variable = " << variable <<"\n"
-		<< " file = " << fBg[iBg][0]->GetName() << std::endl;
-      getHistos(hRecBg[iBg], fBg[iBg], variable);
-      for (unsigned short iSyst = 0; iSyst < 11; ++iSyst) {
-	  if(hRecBg[iBg][iSyst] == 0){
-	      std::cerr << __FILE__ << ":" << __LINE__ << ". Missing histogram " << variable
-			<< ", systematic id " << iSyst << " for process with central value file " 
-			<< fBg[iBg][0]->GetName() << ". Exiting.\n";
-	      exit(1);
-	  }	  
-	  if (iBg == 0) hRecSumBg[iSyst] = (TH1D*) hRecBg[0][iSyst]->Clone();
-	  else{
-	      if(hRecSumBg[iSyst]->GetXaxis()->GetNbins()!=hRecBg[iBg][iSyst]->GetXaxis()->GetNbins()){
-		  std::cerr << __FILE__ << ":" <<  __LINE__ << ". "
-			    << "Histogram " << hRecSumBg[iSyst]->GetName()
-			    << "for systematic index " << iSyst
-			    << " and background index " << iBg
-			    << " has a different bining than the background #0.\n";
-	      }
-	      hRecSumBg[iSyst]->Add(hRecBg[iBg][iSyst]);
-	  }
-      }
+        std::cout << __FILE__ << ":" << __LINE__ << ". variable = " << variable <<"\n"
+          	<< " file = " << fBg[iBg][0]->GetName() << std::endl;
+        getHistos(hRecBg[iBg], fBg[iBg], variable);
+        for (unsigned short iSyst = 0; iSyst < 11; ++iSyst) {
+            if(hRecBg[iBg][iSyst] == 0){
+                std::cerr << __FILE__ << ":" << __LINE__ << ". Missing histogram " << variable
+          		<< ", systematic id " << iSyst << " for process with central value file " 
+          		<< fBg[iBg][0]->GetName() << ". Exiting.\n";
+                exit(1);
+            }	  
+            if (iBg == 0) hRecSumBg[iSyst] = (TH1D*) hRecBg[0][iSyst]->Clone();
+            else{
+                if(hRecSumBg[iSyst]->GetXaxis()->GetNbins()!=hRecBg[iBg][iSyst]->GetXaxis()->GetNbins()){
+          	  std::cerr << __FILE__ << ":" <<  __LINE__ << ". "
+          		    << "Histogram " << hRecSumBg[iSyst]->GetName()
+          		    << "for systematic index " << iSyst
+          		    << " and background index " << iBg
+          		    << " has a different bining than the background #0.\n";
+                }
+            hRecSumBg[iSyst]->Add(hRecBg[iBg][iSyst]);
+            }
+        }
     }
     
     //--- get response DYJets objects ---
-    std::cout << "\nGrabbing response objects!" << std::endl;
+    std::cout << "Grabbing response objects respDYJets!" << std::endl;
     getResps(respDYJets, hRecDYJets, hGenDYJets, hResDYJets);
 
     //--- get fakes DYJets ---
-    std::cout << "\nGrabbing fakes objects!" << std::endl;
+    std::cout << "Grabbing fakes objects hFakDYJets!" << std::endl;
     getFakes(hFakDYJets, hRecData, hRecSumBg, hRecDYJets, hResDYJets);
 
     //--- get purities DYJets ---
-    std::cout << "\nGrabbing purities objects!" << std::endl;
-    getPurities(hPurityDYJets, hRecData, hRecSumBg, hRecDYJets, hResDYJets);
+    std::cout << "Grabbing purities objects hPurityDYJets!" << std::endl;
+    std::cout << "SKIPPING THIS!!!" << std::endl;
+    //getPurities(hPurityDYJets, hRecData, hRecSumBg, hRecDYJets, hResDYJets);
 }
 
 //------------------------------------------------------------
@@ -387,8 +357,6 @@ TH1D* getHisto(TFile *File, const TString variable)
 
 void getHistos(TH1D *histograms[], TFile *Files[], TString variable)
 {
-
-    std::cerr << "getHistos(" << histograms<< ", {" << Files[0]->GetName() << ",...}, " << variable << ")" << std::endl;
 
     TString fileName = gSystem->BaseName(Files[0]->GetName());
     bool isData = (fileName.Index("Data") >= 0 || fileName.Index("data") >= 0 || fileName.Index("DATA") >= 0);
@@ -701,7 +669,7 @@ TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJe
 //    printf("hRecData Integral: %F, hRecDYJets Integral: %F, hRecSumBg Integral: %F\n", dataIntegral, dyIntegral, bgIntegral);
 //    printf("hRecData - (hRecDYJets+hRecSumBg): %F\n", (dataIntegral - (dyIntegral+bgIntegral)));
 //    printf("Scaling fake counts (estimated with signal MC) by following factor for data histo: %F\n", factor);
-    std::cout << std::endl;
+   // std::cout << std::endl;
 
     for (int i= 0; i<nm; i++) { //count over RECO bins
         double nmes= 0.0, wmes= 0.0;

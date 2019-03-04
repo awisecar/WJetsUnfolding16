@@ -32,6 +32,7 @@
 #include "TVectorT.h"
 #include "TMatrixT.h"
 
+//headers for TUnfold
 #include "TUnfold.h"
 #include "TUnfoldDensity.h"
 #include "TUnfoldBinning.h"
@@ -47,26 +48,22 @@ const static bool isdatabug = false;
 static int verbosity = 1;
 
 using namespace std;
-//void createInclusivePlots(bool doNormalized, TString outputFileName, TString lepSel, TH1D *hUnfData, TH2D *hCov[], TH1D *hMadGenCrossSection, TH1D *hSheGenCrossSection, TH1D *hPowGenCrossSection);
-void createInclusivePlots(bool doNormalized, TString outputFileName, TString lepSel, TH1D *hUnfData, TH2D *hCov[], TH1D *hMadGenCrossSection, TH1D *hSheGenCrossSection);
-//void createInclusivePlots(bool doNormalized, TString outputFileName, TString lepSel, TH1D *hUnfData, TH2D *hCov[], TH1D *hMadGenCrossSection);
 
+void createInclusivePlots(bool doNormalized, TString outputFileName, TString lepSel, TH1D *hUnfData, TH2D *hCov[], TH1D *hMadGenCrossSection, TH1D *hSheGenCrossSection);
 void plotRespMat(TH2D *hResp, TString variable, TString unfoldDir, bool addSwitch, TH1D *hGenDYJets);
 void normalizeTH2D(TH2D *h);
 
-//void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfoldDir, 
-//        int jetPtMin, int jetEtaMax, TString gen1, TString gen2, TString variable, bool doNormalized)
-void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfoldDir, 
-            int jetPtMin, int jetEtaMax, TString variable, bool doNormalized,
-            int whichSyst)
+void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfoldDir, int jetPtMin, int jetEtaMax, TString variable, bool doNormalized, int whichSyst)
 {
     gStyle->SetOptStat(0);
-    //--- create output directory if does not exist ---
+
+    //--- Create output directory if does not exist ---
     system("mkdir -p " + unfoldDir);
 
     int start = 0;
     int end = NVAROFINTERESTZJETS;
 
+    //--- Choosing distribution to unfold
     if (variable != "") {
         start = findVariable(variable);
         if (start >= 0) {
@@ -83,36 +80,26 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
         }
     }
 
-    // Here we declare the different arrays of TFiles. 
-    // fData is for the three data files: 
+    //--- Here we declare the different arrays of TFiles (nominal/central and systematic variations)
+    // fData is for the 3 data files: 
     // 0 - central, 1 - JES up, 2 - JES down
     TFile *fData[3] = {NULL}; 
-    // fDYJets is for the five DYJets files:
-    // 0 - central, 1 - PU up, 2 - PU down, 3 - JER up, 4 - JER down, 5 - LES up, 6 - LES down, 7 - LER up, 8 - LER down 
+    // fDYJets is for the 9 signal files:
+    // 0 - central, 1 - PU up, 2 - PU down, 3 - JER up, 4 - JER down, 5 - LepSF up, 6 - LepSF down, 7 - BtagSF up, 8 - BtagSF down 
     TFile *fDYJets[9] = {NULL};
-    // fBg is for the NBGDYJETS x 5 systematics files:
-    // 0 - central, 1 - PU up, 2 - PU down, 3 - XSEc up, 4 - XSEC down, 5 - LES up, 6 - LES down 
+    // fBg is for the NBGDYJETS x 7 systematics files:
+    // 0 - central, 1 - PU up, 2 - PU down, 3 - XSEC up, 4 - XSEC down, 5 - BtagSF up, 6 - BtagSF down
     TFile *fBg[NBGDYJETS][7] = {{NULL}};
 
-    //--- Open all files ---------------------------------------------------------------------- 
+    //--- Open all files!
+    std::cout << "\n-----> Opening all files from reco-level analysis code!" << std::endl;
     getAllFiles(histoDir, lepSel, "13TeV", jetPtMin, jetEtaMax, fData, fDYJets, fBg, NBGDYJETS);
-    //----------------------------------------------------------------------------------------- 
 
-//    //reads integrated luminosity
-//    double integratedLumi = -1;
-//    TH1* Lumi = 0;
-//    if(fData[0]) fData[0]->GetObject("Lumi", Lumi);
-//    if(Lumi) integratedLumi = Lumi->GetBinContent(1);
-//    else {
-//      cerr << "Error: Lumi histogram was not found.\n";
-//      return;
-//    }
-
-   // double integratedLumi = 2239.351439352; 
-   // double integratedLumi = 35861.00;
     double integratedLumi(35916.625); // 80X 2016 data bonzai 23Sep2016ReReco golden json - andrew - 4.11.2018
     std::cout << "\nintegratedLumi = " << integratedLumi << std::endl; 
     
+    //--- These are the names of the different WJets theory files (defined in fileNamesZJets.h)
+    //--- Grabbed in the following lines below
     cout << "\nDYSHERPA14FILENAME = " << DYSHERPA14FILENAME << endl;
     cout << "DYMGPYTHIA8FILENAME = " << DYMGPYTHIA8FILENAME << endl;
     cout << "NNLO1JFILENAME = " << NNLO1JFILENAME << endl;
@@ -121,14 +108,23 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
     TFile *fGen1 = NULL;
     TString gen1;
     TString gen1File;
-    
     TFile *fGen2 = NULL;
     TString gen2;
     TString gen2File;
-
     std::map<TString, vector<TString> > generatorNames;
 
     std::cout << std::endl;
+    //--- Use this Flag for Resp Syst (sherpa unfolding in 8TeV) ---
+    if (DYSHERPA14FILENAME.Length() > 0 ){
+        //--- Open additional generator files -----------------------------------------------------
+        TString genSherpaFile = histoDir + lepSel + "_13TeV_" + DYSHERPA14FILENAME + "_dR_TrigCorr_0_Syst_0_JetPtMin_30_JetEtaMax_24.root";
+        std::cout << "Opening file with name: " << genSherpaFile << std::endl;
+        fSheUnf = new TFile(histoDir + lepSel + "_13TeV_" + DYSHERPA14FILENAME + "_dR_TrigCorr_0_Syst_0_JetPtMin_30_JetEtaMax_24.root");
+        vector<TString> sherpa14;
+        sherpa14.push_back(DYSHERPA14FILENAME);
+        sherpa14.push_back(DYSHERPA14LEGEND);
+        generatorNames["sherpa14"] = sherpa14;
+    }      
     //--- Use this Flag for the 2nd Theory -----------------------
     if (DYMGPYTHIA8FILENAME.Length() > 0 ){
         vector<TString> mgpythia8;
@@ -146,7 +142,6 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
         std::cout << "Opening file with name: " << gen1File << std::endl;
         fGen1 = new TFile(gen1File);
     }
-    
     //--- Use this Flag for the 3rd Theory -----------------------
     if (NNLO1JFILENAME.Length() > 0 ){
         vector<TString> nnlo1j;
@@ -160,239 +155,77 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
         std::cout << "Opening file with name: " << gen2File << std::endl;
         fGen2 = new TFile(gen2File);
     }
-
-    //--- Use this Flag for Resp Syst (sherpa unfolding in 8TeV) ---
-    if (DYSHERPA14FILENAME.Length() > 0 ){
-    //--- Open additional generator files -----------------------------------------------------
-    TString genSherpaFile = histoDir + lepSel + "_13TeV_" + DYSHERPA14FILENAME + "_dR_TrigCorr_0_Syst_0_JetPtMin_30_JetEtaMax_24.root";
-    std::cout << "Opening file with name: " << genSherpaFile << std::endl;
-    fSheUnf = new TFile(histoDir + lepSel + "_13TeV_" + DYSHERPA14FILENAME + "_dR_TrigCorr_0_Syst_0_JetPtMin_30_JetEtaMax_24.root");
-
-    //std::map<TString, vector<TString> > generatorNames;
-      
-    vector<TString> sherpa14;
-    sherpa14.push_back(DYSHERPA14FILENAME);
-    sherpa14.push_back(DYSHERPA14LEGEND);
-    //vector<TString> sherpa2;
-    //sherpa2.push_back(DYSHERPA2FILENAME);
-    //sherpa2.push_back(DYSHERPA2LEGEND);
-    //vector<TString> amcatnlo;
-    //amcatnlo.push_back(DYAMCATNLOFILENAME);
-    //amcatnlo.push_back(DYAMCATNLOLEGEND);
-      
-    generatorNames["sherpa14"] = sherpa14;
-    //generatorNames["sherpa2"] = sherpa2;
-    //generatorNames["amcatnlo"] = amcatnlo; 
-
-    }      
     //----------------------------------------------------------------------------------------- 
 
     //----------------------------------------------------------------------------------------- 
+    //--- All necessary files have now been opened ---
     //--- Now run on the different variables ---
     for (int i = start; i < end; ++i) {
-      variable = VAROFINTERESTZJETS[i].name;
-      
-      TString outputFileName = unfoldDir + lepSel; 
-      outputFileName += "_unfolded_" + variable + "_" + algo;
-      outputFileName += "_JetPtMin_";
-      outputFileName += jetPtMin;
-      outputFileName += "_JetEtaMax_";
-      outputFileName += jetEtaMax;
-      //outputFileName += "_MGPYTHIA6_" + gen1 + "_" + gen2;
-      outputFileName += "_MGPYTHIA6_";
-      outputFileName += doNormalized ? "_normalized" : "";
-    
-      TFile *outputRootFile = new TFile(outputFileName + ".root", "RECREATE");
-    
-    
-      //--- rec Data histograms ---
-      TH1D *hRecData[3] = {NULL};
-      TH1D* hRecDataOdd = 0;
-      TH1D* hRecDataEven = 0;
-      
-      //--- rec DYJets histograms ---
-      TH1D *hRecDYJets[13] = {NULL};
-      //--- fake DYJets histograms ---
-      TH1D *hFakDYJets[18] = {NULL};
-      //--- purity "histograms" ---
-      TH1D *hPurity[18] = {NULL};
-      //--- gen DYJets histograms ---
-      TH1D *hGenDYJets[11] = {NULL};
-      //--- res DYJets histograms ---
-      TH2D *hResDYJets[13] = {NULL};
-      //--- rec Bg histograms ---
-      TH1D *hRecBg[NBGDYJETS][11] = {{NULL}};
-      //--- rec Sum Bg histograms ---
-      TH1D *hRecSumBg[11] = {NULL};
-      //--- response DYJets objects ---
-      RooUnfoldResponse *respDYJets[18] = {NULL};
+        variable = VAROFINTERESTZJETS[i].name;
 
-      //Get split histogram of data used for cross-validation
-      TString variable_odd = variable + "_Odd";
-      TString variable_even = variable + "_Even";
+        //--- Create output file  
+        TString outputFileName = unfoldDir + lepSel; 
+        outputFileName += "_unfolded_" + variable + "_" + algo;
+        outputFileName += "_JetPtMin_";
+        outputFileName += jetPtMin;
+        outputFileName += "_JetEtaMax_";
+        outputFileName += jetEtaMax;
+        outputFileName += "_MGPYTHIA6_";
+        outputFileName += doNormalized ? "_normalized" : "";   
+        TFile *outputRootFile = new TFile(outputFileName + ".root", "RECREATE");
+    
+        //--- Setting up vectors for histograms (for reco-level, fakes, purities, etc.)
+        //--- rec Data histograms ---
+        TH1D *hRecData[3] = {NULL};
+        TH1D* hRecDataOdd = 0;
+        TH1D* hRecDataEven = 0;
+        //--- rec DYJets histograms ---
+        TH1D *hRecDYJets[13] = {NULL};
+        //--- gen DYJets histograms ---
+        TH1D *hGenDYJets[11] = {NULL};
+        //--- res DYJets histograms ---
+        TH2D *hResDYJets[13] = {NULL};
+        //--- fake DYJets histograms ---
+        TH1D *hFakDYJets[18] = {NULL};
+        //--- purity "histograms" ---
+        TH1D *hPurity[18] = {NULL};
+        //--- rec Bg histograms ---
+        TH1D *hRecBg[NBGDYJETS][11] = {{NULL}};
+        //--- rec Sum Bg histograms ---
+        TH1D *hRecSumBg[11] = {NULL};
+        //--- response DYJets objects ---
+        RooUnfoldResponse *respDYJets[18] = {NULL};
 
-      if(fData[0]){
-    fData[0]->cd();
-    hRecDataOdd = (TH1D*) fData[0]->Get(variable_odd);
-    hRecDataEven = (TH1D*) fData[0]->Get(variable_even);
-      }
-      
-      //--- Get all histograms ---
-      std::cerr << __FILE__ << ":"  << __LINE__ << ". " << variable << "\n";
-      getAllHistos(variable, hRecData, fData, 
-           hRecDYJets, hGenDYJets, hResDYJets, fDYJets,
-           hRecBg, hRecSumBg, fBg, NBGDYJETS, respDYJets, hFakDYJets, hPurity);
+        //Get split histogram of data used for cross-validation
+        TString variable_odd = variable + "_Odd";
+        TString variable_even = variable + "_Even";
+        if(fData[0]){
+            fData[0]->cd();
+            hRecDataOdd = (TH1D*) fData[0]->Get(variable_odd);
+            hRecDataEven = (TH1D*) fData[0]->Get(variable_even);
+        }
         
-            
-//        //--- Apichart : This ccalculation does not work, but keep the code for futher development--
-//        //----------- for calculating resp syst --------
-//        //--- rec Data histograms ---
-//        TH1D *Fine_hRecData[3] = {NULL};
-//        //--- rec DYJets histograms ---
-//        TH1D *Fine_hRecDYJets[13] = {NULL};
-//        //--- fake DYJets histograms ---
-//        TH1D *Fine_hFakDYJets[18] = {NULL};
-//        //--- purity "histograms" ---
-//        TH1D *Fine_hPurity[18] = {NULL};
-//        //--- gen DYJets histograms ---
-//        TH1D *Fine_hGenDYJets[11] = {NULL};
-//        //--- res DYJets histograms ---
-//        TH2D *Fine_hResDYJets[13] = {NULL};
-//        //--- rec Bg histograms ---
-//        TH1D *Fine_hRecBg[NBGDYJETS][11] = {{NULL}};
-//        //--- rec Sum Bg histograms ---
-//        TH1D *Fine_hRecSumBg[11] = {NULL};
-//        //--- response DYJets objects ---
-//        RooUnfoldResponse *Fine_respDYJets[18] = {NULL};
-//        //===================================================
+        //--- Get all histograms needed for unfolding! ---
+        std::cerr << __FILE__ << ":"  << __LINE__ << ". " << variable << "\n";
+        //note: andrew -- ttbar scaling done inside getAllHistos (doublecheck?)
+        getAllHistos(variable, hRecData, fData, hRecDYJets, hGenDYJets, hResDYJets, fDYJets, hRecBg, hRecSumBg, fBg, NBGDYJETS, respDYJets, hFakDYJets, hPurity);
+        
+        //--- Get histos from theory files (if files opened above)
         TH1D *hGen1 = NULL;
         TH1D *hGen2 = NULL;
+        if (DYSHERPA14FILENAME.Length() > 0 ){
+            //--- Get Sherpa Unfolding response (Resp Syst)---
+            respDYJets[17] = getResp(fSheUnf, variable);
+        }
         if (DYMGPYTHIA8FILENAME.Length() > 0 ){
             hGen1 = getHisto(fGen1, "gen" + variable);
         }
         if (NNLO1JFILENAME.Length() > 0 ){
-        if (variable == "FirstJetPt_Zinc1jet" || variable == "JetsHT_Zinc1jet" || variable == "FirstJetAbsRapidity_Zinc1jet" || variable == "dRptmin100LepCloseJetCo300dR04_Zinc1jet" || variable == "dPhiLepJet1_Zinc1jet"){
-            //--- Additional (3rd) theory comparison ---
-            hGen2 = getHisto(fGen2, "gen" + variable);
+            if (variable == "FirstJetPt_Zinc1jet" || variable == "JetsHT_Zinc1jet" || variable == "FirstJetAbsRapidity_Zinc1jet" || variable == "dRptmin100LepCloseJetCo300dR04_Zinc1jet" || variable == "dPhiLepJet1_Zinc1jet"){
+                //--- Additional (3rd) theory comparison ---
+                hGen2 = getHisto(fGen2, "gen" + variable);
             }
-        }  //add nnlo here
-        if (DYSHERPA14FILENAME.Length() > 0 ){
-          //--- Get Sherpa Unfolding response (Resp Syst)---
-          respDYJets[17] = getResp(fSheUnf, variable);
-            
-          
-               
-//        //--- Apichart : This ccalculation does not work, but keep the code for futher development--
-//        //----------- for calculating resp syst --------  
-//          TString variableStd = variable;
-//          TString variableFine = variable;
-//          variableFine.Replace(variable.Index("_"), 1,"_2_");
-//          if (variable == "ZNGoodJets_Zexc") variableFine = variable;
-//          cout << " " << variableStd << " " << variableFine << endl;
-//          
-//          getAllHistos(variableFine, Fine_hRecData, fData,
-//                       Fine_hRecDYJets, Fine_hGenDYJets, Fine_hResDYJets, fDYJets,
-//                       Fine_hRecBg, Fine_hRecSumBg, fBg, NBGDYJETS, Fine_respDYJets, Fine_hFakDYJets, Fine_hPurity);
-//          
-//          TH1D *measSubBG = (TH1D*) Fine_hRecData[0]->Clone();
-//          measSubBG->Add(Fine_hRecSumBg[0], -1);
-//          
-//          //--- Bins definition : nominal binning ---
-//          const int nBinsStd(hRecData[0]->GetNbinsX());
-//          double BinsArray[nBinsStd+1];
-//          for (int i = 0; i <= nBinsStd; i++){
-//              if (i == 0) BinsArray[i] = hRecData[0]->GetXaxis()->GetBinLowEdge(i+1);
-//              else BinsArray[i] = hRecData[0]->GetXaxis()->GetBinUpEdge(i);
-//          }
-//          
-//          cout << " Number of bin used = " << measSubBG->GetNbinsX()  << "   "  << nBinsStd << endl;
-//
-//          
-//          TH2D *hResponse      = (TH2D*) Fine_hResDYJets[0]->Clone();
-//          TH1D *histoMCtruth   = (TH1D*) Fine_hGenDYJets[0]->Clone();
-//          TH1D *histoMCreco    = (TH1D*) Fine_hRecDYJets[0]->Clone();
-//          
-//          cout << " integral " << measSubBG->Integral() << " " << histoMCtruth->Integral() << " " << histoMCreco->Integral() << " " << hResponse->Integral() << endl;
-//          
-//          //--- calculate scaling factor
-//          const int nBinsFine(histoMCreco->GetNbinsX());
-//          double fwFirst[nBinsFine];
-//          cout << "----------- calculate scaling factor fw -------------" << endl;
-//          for (int i = 1; i <= nBinsFine; i++){
-//              fwFirst[i] = 1;
-//              if ((histoMCreco->GetBinContent(i) > 0) & (measSubBG->Integral() > 0)){
-//                  fwFirst[i] = (measSubBG->GetBinContent(i) / histoMCreco->GetBinContent(i)) * (histoMCreco->Integral() / measSubBG->Integral());
-//              }
-//              if (fwFirst[i] < 0)fwFirst[i] =1;
-//              cout << fwFirst[i] << endl;
-//          }
-//
-//          double TruthToProjectY[nBinsFine];
-//          for (int j = 1; j <= hResponse->GetYaxis()->GetNbins(); j++){
-//              TruthToProjectY[j] = 1;
-//              if(hResponse->ProjectionY()->GetBinContent(j) > 0){
-//                  TruthToProjectY[j]  = (histoMCtruth->GetBinContent(j) / hResponse->ProjectionY()->GetBinContent(j));
-//              }
-//              cout << " TruthToProjectY   " << TruthToProjectY[j] << endl;
-//          }
-//
-//          
-//          TH2D *hResponseTemp = (TH2D*) hResponse->Clone();
-//          TH1D *MCtruthTemp = (TH1D*) histoMCtruth->Clone();
-//          TH1D *MCrecoTemp = (TH1D*) histoMCreco->Clone();
-//          //--- hResponseTemp
-//          for (int j = 1; j <= nBinsFine; j++){
-//              for (int i = 1; i <= nBinsFine; i++){
-//                  hResponseTemp->SetBinContent(i, j, fwFirst[i] * hResponse->GetBinContent(i, j));
-//              }
-//          }
-//          //--- MCtruthTemp, MCrecoTemp
-//          for (int j = 1; j <= nBinsFine; j++){
-//              MCtruthTemp->SetBinContent(j, TruthToProjectY[j] * hResponseTemp->ProjectionY()->GetBinContent(j));
-//              MCrecoTemp->SetBinContent(j, fwFirst[j] * histoMCreco->GetBinContent(j));
-//          }
-//
-//
-//          //--- Produce the response and unfolded with nominal binning.
-//          //--- Note that measSubBG should be taken from filling the nominal binning.
-//          //--- Only response-relevant should be produced here.
-//          TH1D *MCtruthTempNominal    = (TH1D*) MCtruthTemp ->Rebin(nBinsStd,"MCtruthNorminal",   BinsArray);
-//          TH1D *MCrecoTempNominal     = (TH1D*) MCrecoTemp  ->Rebin(nBinsStd,"MCrecoNorminal",    BinsArray);
-//          //--- Rebin 2D response matrix
-//          TH2D *hResponseTempNominal = new TH2D("responseNorminal", hResponse->GetTitle(), nBinsStd, BinsArray, nBinsStd, BinsArray);
-//          for (int j = 1; j <= hResponseTemp->GetYaxis()->GetNbins(); j++){
-//              for (int i = 1; i <= hResponseTemp->GetXaxis()->GetNbins(); i++){
-//                  hResponseTempNominal->Fill(hResponseTemp->GetXaxis()->GetBinCenter(i), hResponseTemp->GetYaxis()->GetBinCenter(j), hResponseTemp->GetBinContent(i,j));
-//              }
-//          }
-//          
-//          //---- print out ----
-//          for (int j = 1; j <= hResponseTempNominal->GetYaxis()->GetNbins(); j++){
-//              for (int i = 1; i <= hResponseTempNominal->GetXaxis()->GetNbins(); i++){
-//                  
-//                  if (hResDYJets[0]->GetBinContent(i,j) > 0){
-//                      hResponseTempNominal->SetBinError(i,j, (hResponseTempNominal->GetBinContent(i,j)*hResDYJets[0]->GetBinError(i,j))/hResDYJets[0]->GetBinContent(i,j));
-//                  }
-//                  else{
-//                      hResponseTempNominal->SetBinError(i,j, 0.);
-//                  }
-//                  
-//                  
-//                  cout << "i " << i << " j " << j << " " << hResponseTempNominal->GetBinContent(i,j) << " " <<  hResDYJets[0]->GetBinContent(i,j) << "   " << hResponseTempNominal->GetBinError(i,j) << " " <<  hResDYJets[0]->GetBinError(i,j) << endl;
-//              }
-//          }
-//          
-//          MCrecoTempNominal->Reset();
-//
-//          RooUnfoldResponse *responseReweightedNominal = new RooUnfoldResponse (MCrecoTempNominal, MCtruthTempNominal, hResponseTempNominal);
-//          responseReweightedNominal->UseOverflow();
-//
-//          //TH2D * tepmResp = getResp(fSheUnf, variable);
-//          //respDYJets[17] = getResp(fSheUnf, variable);
-//          respDYJets[17] = (RooUnfoldResponse*) responseReweightedNominal->Clone();
-//          //-----------------------------------------------------------------------------------------
-//          //---End: for calculating resp syst -------------------------------------------------------
-      }
+        }
 
       outputRootFile->cd();
       //write out w+jets gen distributions before lumi and bin width scaling
@@ -402,53 +235,17 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
       //this is the signal NLO FxFx W+jets MC (used for building migration/response matrix for unfolding)
       TH1D *hMadGenCrossSection = makeCrossSectionHist(hGenDYJets[0], integratedLumi);
       hMadGenCrossSection->SetZTitle("MG_aMC FxFx + PY8 (#leq 2j NLO + PS)");
-
       //this is the signal LO MLM W+jets MC
       TH1D *hGen1CrossSection = makeCrossSectionHist(hGen1, integratedLumi);
       hGen1CrossSection->SetZTitle(generatorNames[gen1][1]);
-
       //this is the tag for another theory prediciton (NNLO prediction in 2015 W+jets)
       TH1D *hGen2CrossSection;
       if (variable == "FirstJetPt_Zinc1jet" || variable == "JetsHT_Zinc1jet" || variable == "FirstJetAbsRapidity_Zinc1jet" || variable == "dRptmin100LepCloseJetCo300dR04_Zinc1jet" || variable == "dPhiLepJet1_Zinc1jet"){
             hGen2CrossSection = makeCrossSectionHist(hGen2, 0);
             hGen2CrossSection->SetZTitle(generatorNames[gen2][1]);
-      }  //add nnlo here
-//        TH1D *genNNLO;
-//        vector<double> myVecNNLO;
-//        myVecNNLO = getNNLO1jxsec(variable);
-//        genNNLO = (TH1D*) hGenDYJets[0]->Clone();
-//        for(int i = 1; i<= hGenDYJets[0]->GetNbinsX(); i++){
-//            genNNLO->SetBinContent(i, myVecNNLO.at(i-1));
-//            //cout << " genShe01 " << genNNLO->GetBinContent(i) << endl;
-//            genNNLO->SetBinError  (i, 0.000000000000000000001);
-//        }
-//        genNNLO->SetZTitle("NNLO1j ");
-        
-//        TH1D *genNLO2;
-//        vector<double> myVecNLO2;
-//        myVecNLO2 = getNLO1jxsec(variable);
-//        genNLO2 = (TH1D*) hGenDYJets[0]->Clone();
-//        for(int i = 1; i<= hGenDYJets[0]->GetNbinsX(); i++){
-//            genNLO2->SetBinContent(i, myVecNLO2.at(i-1));
-//            cout << " genNLO2 " << genNLO2->GetBinContent(i) << endl;
-//            genNLO2->SetBinError  (i, 0.000000000000000000001);
-//        }
-//        genNLO2->SetZTitle("NLO1j ");
-        
-        
-      //if (gen1 == "sherpa2" && lepSel == "DMu") hGen1CrossSection->Scale(1./3.9731e+09);
-      //if (gen1 == "sherpa2" && lepSel == "DE") hGen1CrossSection->Scale(1./3.9731e+09); 
-      //if (gen2 == "sherpa2" && lepSel == "DMu") hGen2CrossSection->Scale(1./3.9731e+09); 
-      //if (gen2 == "sherpa2" && lepSel == "DE") hGen2CrossSection->Scale(1./3.9731e+09); 
-      // this is for MLM
-      //if (lepSel == "DE")  hPowGenCrossSection->Scale(9.68984524447932094e+06/1.26965652647094554e+18); 
-      //if (lepSel == "DMu") hSheGenCrossSection->Scale(9.67682344591264986e+06/1.56860892310320000e+14); 
-      //if (gen1 == "amcatnlo" && lepSel == "DMu") hGen1CrossSection->Scale(9.67682344591264986e+06/1.93588665458e+18); 
-      //if (gen1 == "amcatnlo" && lepSel == "DE")  hGen1CrossSection->Scale(9.68984524447932094e+06/2.01906738616e+18); 
-      //if (gen2 == "amcatnlo" && lepSel == "DMu") hGen2CrossSection->Scale(9.67682344591264986e+06/1.93588665458e+18); 
-      //if (gen2 == "amcatnlo" && lepSel == "DE")  hGen2CrossSection->Scale(9.68984524447932094e+06/2.01906738616e+18); 
+      }
 
-      // Here is an array of TH1D to store the various unfolded data:
+      //--- Here is an array of TH1D to store the various unfolded data:
       // 0 - Central, 
       // 1 - JES up, 2 - JES down, 
       // 3 - PU up, 4 - PU down, 
@@ -468,142 +265,99 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
       TH2D *hUnfDataStatCovNoScale[18] =  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,};
       TH2D *hUnfMCStatCov[18] =  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,};
       TH2D *hUnfMCStatCovNoScale[18] =  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,};
-      
         
       int nIter[18] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; 
       int svdKterm(0);
-      //if (lepSel == "DMu")
-      if (lepSel == "DMu" || lepSel == "SMu")
-    svdKterm = VAROFINTERESTZJETS[i].MuSVDkterm;
-      else if (lepSel == "DE")   
-    svdKterm = VAROFINTERESTZJETS[i].ESVDkterm;
+      if (lepSel == "DMu" || lepSel == "SMu") svdKterm = VAROFINTERESTZJETS[i].MuSVDkterm;
+      else if (lepSel == "DE") svdKterm = VAROFINTERESTZJETS[i].ESVDkterm;
       else {
-    cerr << "Error: algo " << algo << " or lepSel " << lepSel << "invalid\n"; 
-    cerr << "Aborting...\n";
-    return;
+          cerr << "Error: algo " << algo << " or lepSel " << lepSel << "invalid\n"; 
+          cerr << "Aborting...\n";
+          return;
       }
       bool logy = VAROFINTERESTZJETS[i].log;
 
-      int nSysts = DYSHERPA14FILENAME.Length()? 18 : 17;
-      //int nSysts = DYSHERPA14FILENAME.Length()? 17 : 17;
       //--- Unfold the Data histograms for each systematic ---
+      int nSysts = DYSHERPA14FILENAME.Length()? 18 : 17;
       std::cout << "\n-----> Entering iSyst loop to unfold for Central and every variation for each systematic! <-----" << std::endl;
-      std::cout << "nSysts = " << nSysts << std::endl;
+      std::cout << "-----> nSysts = " << nSysts << std::endl;
+      std::cout << "-----> whichSyst = " << whichSyst << std::endl;
       for (unsigned short iSyst = 0; iSyst < nSysts; ++iSyst) {
-          std::cout << "iSyst = " << iSyst << std::endl;
+          std::cout << "\nStart iSyst = " << iSyst << "!" << std::endl;
 
-    if(iSyst != 0 && whichSyst >= 0 && iSyst != whichSyst) continue;
-    //--- only JES up and down (iSyst = 1 and 2) is applied on data ---
-    unsigned short iData = (iSyst == 1 || iSyst == 2) ? iSyst : 0;
-    unsigned short iBg = 0;
-    if (iSyst == 0 || iSyst == 1 || iSyst == 2 || iSyst == 5 || iSyst == 6 || iSyst == 11 || iSyst == 12 || iSyst == 17) iBg = 0; // Central, JES, JER, LER, Sherpa
-    else if (iSyst == 3 || iSyst == 4) iBg = iSyst - 2; // PU
-    else if (iSyst == 7 || iSyst == 8 || iSyst == 9 || iSyst == 10) iBg = iSyst - 4; // XSec, LES
-    else if (iSyst == 13 || iSyst == 14 || iSyst == 15 || iSyst == 16) iBg = iSyst - 6;  // Lumi, SF
+          if(iSyst != 0 && whichSyst >= 0 && iSyst != whichSyst) continue;
+          //--- only JES up and down (iSyst = 1 and 2) is applied on data ---
+          unsigned short iData = (iSyst == 1 || iSyst == 2) ? iSyst : 0;
+          unsigned short iBg = 0;
+          if (iSyst == 0 || iSyst == 1 || iSyst == 2 || iSyst == 5 || iSyst == 6 || iSyst == 11 || iSyst == 12 || iSyst == 17) iBg = 0; // Central, JES, JER, LER, Sherpa
+          else if (iSyst == 3 || iSyst == 4) iBg = iSyst - 2; // PU
+          else if (iSyst == 7 || iSyst == 8 || iSyst == 9 || iSyst == 10) iBg = iSyst - 4; // XSec, LES
+          else if (iSyst == 13 || iSyst == 14 || iSyst == 15 || iSyst == 16) iBg = iSyst - 6;  // Lumi, SF
 
-    TH1D *hRecDataMinusFakes = (TH1D*) hRecData[iData]->Clone();
-   // if(hRecDataMinusFakes->GetBinContent(1) > 0){
-   //   std::cout <<  __FILE__ << __LINE__ << ": "
-   //         << "hRec: " << hRecDataMinusFakes->GetName()
-   //         <<  " " << hRecDataMinusFakes->GetBinError(1)
-   //     / sqrt(hRecDataMinusFakes->GetBinContent(1)) << "\n";
-   // }
-//  std::cerr << "DEBUG: hRecData[" << iData << "]->GetEntries() = "
-//        << hRecDataMinusFakes->GetEntries()
-//        << ", nbins: " << hRecDataMinusFakes->GetNbinsX()
-//        <<"\n"
-//        << "DEBUG: hRecSumBg[" << iData << "]->GetEntries() = "
-//        << hRecSumBg[iData]->GetEntries()
-//        << ", nbins: " << hRecSumBg[iData]->GetNbinsX()
-//        <<"\n"
-//        << "DEBUG: hPurity[" << iData << "]->GetEntries() = "
-//        << hPurity[iData]->GetEntries()
-//        << ", nbins: " << hPurity[iData]->GetNbinsX()
-//        <<"\n"
-//        << "hRecDYJets[iData]->GetNbins() = " << hRecDYJets[iData]->GetNbinsX()
-//        << std::endl;
-    std::cout << "Subtracting MC BG from reco data!" << std::endl;
-    hRecDataMinusFakes->Add(hRecSumBg[iBg], -1);
-//    if(hRecDataMinusFakes->GetBinContent(1) > 0){
-//      std::cout <<  __FILE__ << __LINE__ << ": "
-//            << "hRecMinusBg: " << hRecDataMinusFakes->GetName()
-//            << " " <<  hRecDataMinusFakes->GetBinError(1)
-//        / sqrt(hRecDataMinusFakes->GetBinContent(1)) << "\n";
-//    }
+          std::cout << "Fetching main reco data histo hRecData[iData], " << "iData = " << iData << std::endl;
+          TH1D *hRecDataMinusFakes = (TH1D*) hRecData[iData]->Clone();
+          std::cout << "From reco data, subtracting MC BG histo hRecSumBg[iBg], " << "iBg = " << iBg << std::endl;
+          hRecDataMinusFakes->Add(hRecSumBg[iBg], -1);
 
-    //Applies purity corrections (aka fake corrections):
-    std::cout << "Removing fakes!" << std::endl;
-    RemoveFakes(hRecDataMinusFakes, hFakDYJets[iSyst], hPurity[iSyst]);
+          //Applies purity corrections (aka fake corrections):
+          std::cout << "Removing fakes using hFakDYJets[iSyst], hPurity[iSyst]!" << std::endl;
+          RemoveFakes(hRecDataMinusFakes, hFakDYJets[iSyst], hPurity[iSyst]);
 
-    //FIXME: use independent samples for subtraction
-    TH1D *hRecDataMinusFakesOdd;
-    TH1D *hRecDataMinusFakesEven;
-    if(iData==0 && hRecDataOdd && hRecDataEven){
-      hRecDataMinusFakesOdd = (TH1D*) hRecDataOdd->Clone();
-      hRecDataMinusFakesOdd->Add(hRecSumBg[iBg], -0.5);
-      RemoveFakes(hRecDataMinusFakesOdd, hFakDYJets[iSyst], hPurity[iSyst]);
-      hRecDataMinusFakesEven = (TH1D*) hRecDataEven->Clone();
-      hRecDataMinusFakesEven->Add(hRecSumBg[iBg], -0.5);
-      RemoveFakes(hRecDataMinusFakesEven, hFakDYJets[iSyst], hPurity[iSyst]);
-    } else{
-      hRecDataMinusFakesEven = hRecDataMinusFakesOdd = 0;
-    }
+          //FIXME: use independent samples for subtraction
+          TH1D *hRecDataMinusFakesOdd;
+          TH1D *hRecDataMinusFakesEven;
+          if(iData==0 && hRecDataOdd && hRecDataEven){
+              hRecDataMinusFakesOdd = (TH1D*) hRecDataOdd->Clone();
+              hRecDataMinusFakesOdd->Add(hRecSumBg[iBg], -0.5);
+              RemoveFakes(hRecDataMinusFakesOdd, hFakDYJets[iSyst], hPurity[iSyst]);
+              hRecDataMinusFakesEven = (TH1D*) hRecDataEven->Clone();
+              hRecDataMinusFakesEven->Add(hRecSumBg[iBg], -0.5);
+              RemoveFakes(hRecDataMinusFakesEven, hFakDYJets[iSyst], hPurity[iSyst]);
+          } 
+          else{
+              hRecDataMinusFakesEven = hRecDataMinusFakesOdd = 0;
+          }
 
-//    if(hRecDataMinusFakes->GetBinContent(1) > 0){
-//      std::cout <<  __FILE__ << __LINE__ << ": "
-//            << "hRecMinusBgMinusFake: " << hRecDataMinusFakes->GetName()
-//            << " " << hRecDataMinusFakes->GetBinError(1)
-//        / sqrt(hRecDataMinusFakes->GetBinContent(1))
-//            << "\t" << hRecDataMinusFakes->GetBinContent(1) /  hRecData[iData]->GetBinContent(1)
-//                << "\t" << hRecDataMinusFakes->GetBinError(3)
-//        / sqrt(hRecDataMinusFakes->GetBinContent(3))
-//            << "\t" << hRecDataMinusFakes->GetBinContent(3) /  hRecData[iData]->GetBinContent(3)
-//            << "\n";
-//    }
+          if (iSyst == 17) cout << "iSyst=17; SHERPAUNFOLDING" << endl;
 
-    
-    if (iSyst == 17) cout << "SHERPAUNFOLDING" << endl;
-    std::cout << "Starting unfolding of " << variable << " "
-          << name[iSyst] << " for  "<< lepSel << " channel." << "\n";
-    if(hRecDataMinusFakes->GetEntries() == 0){
-      std::cerr << "Warning: histogram " << hRecDataMinusFakes->GetName()
-            << " has no entries. Its unfolding will be skipped.\n";
-      continue;
-    }
+          std::cout << "Starting unfolding of " << variable << " " << name[iSyst] << " for  "<< lepSel << " channel." << "\n";
+          if(hRecDataMinusFakes->GetEntries() == 0){
+            std::cerr << "Warning: histogram " << hRecDataMinusFakes->GetName() << " has no entries. Its unfolding will be skipped.\n";
+            continue;
+          }
 
-       //bool unfAlgorithmSwitch= cfg.getB("unfAlgorithmSwitch", true);
-       bool unfAlgorithmSwitch = true; //turns on TUnfold
-       //bool unfAlgorithmSwitch = false; //turns on RooUnfold
-
-       //RooUnfold
-       if(!unfAlgorithmSwitch){
-       std::cout << "\n-----> Using RooUnfold package!" << std::endl;
-       nIter[iSyst] = UnfoldData(lepSel, algo, svdKterm, respDYJets[iSyst], hRecDataMinusFakes, hUnfData[iSyst], hUnfDataNoScale[iSyst],
-          hUnfDataStatCov[iSyst], hUnfDataStatCovNoScale[iSyst], hUnfMCStatCov[iSyst], hUnfMCStatCovNoScale[iSyst], name[iSyst], integratedLumi, logy,
-          hRecDataMinusFakesOdd, hRecDataMinusFakesEven);
-       }
-       //TUnfold (Root package)
-       if(unfAlgorithmSwitch){
-       std::cout << "\n-----> Using TUnfold package!" << std::endl;
-       nIter[iSyst] = TUnfoldData(lepSel, algo, svdKterm, respDYJets[iSyst], hRecDataMinusFakes, hUnfData[iSyst], hUnfDataNoScale[iSyst],
-          hUnfDataStatCov[iSyst], hUnfDataStatCovNoScale[iSyst], hUnfMCStatCov[iSyst], hUnfMCStatCovNoScale[iSyst], name[iSyst], integratedLumi, hGenDYJets[0], logy,
-          hRecDataMinusFakesOdd, hRecDataMinusFakesEven);
-       }
+          //--- Do unfolding here!
+          bool unfAlgorithmSwitch = true; //turns on TUnfold
+          //bool unfAlgorithmSwitch = false; //turns on RooUnfold
+          //TUnfold (Root package)
+          if(unfAlgorithmSwitch){
+          std::cout << "\n-----> Using TUnfold package!" << std::endl;
+          nIter[iSyst] = TUnfoldData(lepSel, algo, svdKterm, respDYJets[iSyst], hRecDataMinusFakes, hUnfData[iSyst], hUnfDataNoScale[iSyst],
+             hUnfDataStatCov[iSyst], hUnfDataStatCovNoScale[iSyst], hUnfMCStatCov[iSyst], hUnfMCStatCovNoScale[iSyst], name[iSyst], integratedLumi, hGenDYJets[0], logy,
+             hRecDataMinusFakesOdd, hRecDataMinusFakesEven);
+          }
+          //RooUnfold
+          if(!unfAlgorithmSwitch){
+          std::cout << "\n-----> Using RooUnfold package!" << std::endl;
+          nIter[iSyst] = UnfoldData(lepSel, algo, svdKterm, respDYJets[iSyst], hRecDataMinusFakes, hUnfData[iSyst], hUnfDataNoScale[iSyst],
+             hUnfDataStatCov[iSyst], hUnfDataStatCovNoScale[iSyst], hUnfMCStatCov[iSyst], hUnfMCStatCovNoScale[iSyst], name[iSyst], integratedLumi, logy,
+             hRecDataMinusFakesOdd, hRecDataMinusFakesEven);
+          }
   
-        //andrew
-        //save the hRecDataMinusFakes i.e. detector level histograms for building correlation matrix,
-        //before loop goes to next iSyst
-        outputRootFile->cd();
-        if (hRecDataMinusFakes){
-            TString detecName = "hRecDataMinusFakes_"+name[iSyst];
-            TString detecTitle = variable;
-            detecTitle += "_detectorlevel";
-            hRecDataMinusFakes->SetNameTitle(detecName, detecTitle);
-            hRecDataMinusFakes->Write();
-        }
-        std::cout << "Exiting iSyst = " << iSyst << std::endl;
-    }
-    std::cout <<  __FILE__ << ", "  << __LINE__ << std::endl;
+          //andrew
+          //save the hRecDataMinusFakes i.e. detector level histograms for building correlation matrix,
+          //before loop goes to next iSyst
+          outputRootFile->cd();
+          if (hRecDataMinusFakes){
+              TString detecName = "hRecDataMinusFakes_"+name[iSyst];
+              TString detecTitle = variable;
+              detecTitle += "_detectorlevel";
+              hRecDataMinusFakes->SetNameTitle(detecName, detecTitle);
+              hRecDataMinusFakes->Write();
+          }
+          std::cout << "Exiting iSyst = " << iSyst << std::endl;
+      }
+      std::cout <<  __FILE__ << ", "  << __LINE__ << std::endl;
 
       //-----------------------------------------------------------------------------------------
         
@@ -617,7 +371,6 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
                   hUnfDataStatCov[0]->Scale(1.0/pow(totUnfData, 2));
                   hUnfMCStatCov[0]->Scale(1.0/pow(totUnfData, 2));
               }
- 
               //the "NoScale" here refers to not scaling by lumi and bin width for xsec
               //we normalize the dist. the same here as with the original ones, however
               //original reson for NoScale dist. is to do ratio calculations, and we need integral number of counts in bins
@@ -927,17 +680,12 @@ void createSystPlots(TString outputFileName, TString variable, TString lepSel, T
     }
 }
 
-//void createInclusivePlots(bool doNormalized, TString outputFileName, TString lepSel, TH1D *hUnfData, TH2D *hCov[], TH1D *hMadGenCrossSection, TH1D *hSheGenCrossSection, TH1D *hPowGenCrossSection)
-//void createInclusivePlots(bool doNormalized, TString outputFileName, TString lepSel, TH1D *hUnfData, TH2D *hCov[], TH1D *hMadGenCrossSection)
 void createInclusivePlots(bool doNormalized, TString outputFileName, TString lepSel, TH1D *hUnfData, TH2D *hCov[], TH1D *hMadGenCrossSection, TH1D *hSheGenCrossSection)
 {
-    //    std::cerr << "createInclusivePlots disabled!" << __FILE__ << __LINE__ << "\n\n";
-    //return;
 
     TH1D *hInc = (TH1D*) hUnfData->Clone("ZNGoodJets_Zinc");
     TH1D *hIncMad = (TH1D*) hMadGenCrossSection->Clone("ZNGoodJets_Zinc_Mad");
     TH1D *hIncShe = (TH1D*) hSheGenCrossSection->Clone("ZNGoodJets_Zinc_She");
-    //TH1D *hIncPow = (TH1D*) hPowGenCrossSection->Clone("ZNGoodJets_Zinc_Pow");
     TH2D *hCovInc[12] = {NULL};
     if(hCov[0]) hCovInc[0] = (TH2D*) hCov[0]->Clone("CovDataStat");
     if(hCov[1]) hCovInc[1] = (TH2D*) hCov[1]->Clone("CovMCStat");
@@ -958,21 +706,17 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
     double binSum = 0;
     double binSumMad = 0;
     double binSumShe = 0;
-    //double binSumPow = 0;
     double binStatError2 = 0;
     double binStatMadError2 = 0;
     double binStatSheError2 = 0;
-    //double binStatPowError2 = 0;
     double binCov[12] = {0};
     for (int j = i; j <= nBins; j++) {
         binSum += hInc->GetBinContent(j);
         binSumMad += hIncMad->GetBinContent(j);
         binSumShe += hIncShe->GetBinContent(j);
-        //binSumPow += hIncPow->GetBinContent(j);
         binStatError2 += pow(hInc->GetBinError(j), 2);
         binStatMadError2 += pow(hIncMad->GetBinError(j), 2);
         binStatSheError2 += pow(hIncShe->GetBinError(j), 2);
-        //binStatPowError2 += pow(hIncPow->GetBinError(j), 2);
         for (int k = 0; k < 12; k++) {
           if(hCovInc[k]) binCov[k] += hCovInc[k]->GetBinContent(j, j);
         }
@@ -980,19 +724,15 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
     hInc->SetBinContent(i, binSum);
     hIncMad->SetBinContent(i, binSumMad);
     hIncShe->SetBinContent(i, binSumShe);
-    //hIncPow->SetBinContent(i, binSumPow);
     hInc->SetBinError(i, sqrt(binStatError2));
     hIncMad->SetBinError(i, sqrt(binStatMadError2));
     hIncShe->SetBinError(i, sqrt(binStatSheError2));
-    //hIncPow->SetBinError(i, sqrt(binStatPowError2));
     for (int k = 0; k < 12; k++) {
       if(hCovInc[k]) hCovInc[k]->SetBinContent(i, i, binCov[k]);
     }
     }
 
-    //TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, TString("ZNGoodJets_Zinc"), doNormalized, hInc, hCovInc[11], hIncMad, hIncShe, hIncPow); 
     TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, TString("ZNGoodJets_Zinc"), doNormalized, hInc, hCovInc[11], hIncMad, hIncShe);
-    //TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, TString("ZNGoodJets_Zinc"), doNormalized, hInc, hCovInc[11], hIncMad); 
     outputFileName.ReplaceAll("_Zexc", "_Zinc");
     crossSectionPlot->Draw();
     crossSectionPlot->SaveAs(outputFileName + ".png");
@@ -1189,182 +929,6 @@ TH1D *hRecDataMinusFakesOdd, TH1D *hRecDataMinusFakesEven)
     
 #ifdef FAST_BAYES
     
-//FAST..    RooUnfoldResponse *respBis = (RooUnfoldResponse*) resp->Clone();
-//FAST..    TH1D *hRecDataMinusFakesBis = (TH1D*) hRecDataMinusFakes->Clone();
-//FAST..
-//FAST..    std::cerr << "========= > " << hRecDataMinusFakes->GetBinError(3) << "\n";
-//FAST..    
-//FAST..    RooUnfold *RObjectForDataTmp = RooUnfold::New(alg, respBis, hRecDataMinusFakesBis, nBinsTmp);
-//FAST..    RObjectForDataTmp->SetVerbose(verbosity);
-//FAST..    //RObjectForDataTmp->UseFlatPrior(true);
-//FAST..    int nBinsToSkip = (TString(hRecDataMinusFakesBis->GetName()).Index("JetPt_Zinc") > 0) ? 2 : 0;
-//FAST..    //nBinsToSkip = 0;
-//FAST..    RObjectForDataTmp->IncludeSystematics(0); // new version of RooUnfold: will compute Cov based on Data Statistics only
-//FAST..    std::auto_ptr<std::vector<TH1*> > hUnfs (new std::vector<TH1*>);
-//FAST..
-//FAST..    //Unfolds the data:
-//FAST..    TH1D* hUnfDataBis = (TH1D*) RObjectForDataTmp->Hreco(RooUnfold::kCovariance, hUnfs.get());
-//FAST..    //RObjectForDataTmp->Hreco(RooUnfold::kCovariance, hUnfs.get());
-//FAST..
-//FAST..    std::cerr << "========= > " << (*hUnfs)[4]->GetBinError(3) << "\n";
-//FAST..    std::cerr << "========= > " << (*hUnfs)[nBinsTmp]->GetBinError(3) << "\n";
-//FAST..    std::cerr << "========= > " << hUnfDataBis->GetBinError(3) << "\n";
-//FAST..    
-//FAST..    //    TString tmpStr2 = TString::Format("%s residuals;Iter;Residual", name.Data());
-//FAST..    TH1* hResMax = new TH1D("hResMax", TString::Format("Max(res) %s %s;Iter;max(res)", variable.Data(), name.Data()),
-//FAST..			    hUnfs->size(), -.5, hUnfs->size() - 0.5);
-//FAST..    
-//FAST..    for (unsigned i = 0; i < hUnfs->size(); ++i) {
-//FAST..      (*hUnfs)[i]->SetName(TString::Format("hUnf%d", i));
-//FAST..      if(i==0){
-//FAST..	(*hUnfs)[i]->SetTitle(TString::Format("Prior for %s %s %d iters", variable.Data(), name.Data(), i));
-//FAST..      } else {
-//FAST..	(*hUnfs)[i]->SetTitle(TString::Format("Unfolded %s %s %d iters", variable.Data(), name.Data(), i));
-//FAST..      }
-//FAST..      (*hUnfs)[i]->Write();
-//FAST..      TH1* hfoldUnfData = foldUnfData((*hUnfs)[i], respBis);
-//FAST..      hfoldUnfData->SetName(TString::Format("datafoldedBack%s_%d", name.Data(), i));
-//FAST..      hfoldUnfData->SetTitle(TString::Format("dataFoldedBack%s_%d", name.Data(), i));
-//FAST..      hfoldUnfData->Write();
-//FAST..
-//FAST..      TH1* hRes = (TH1*) hRecDataMinusFakes->Clone(TString::Format("hRes%s_%d", name.Data(), i+1));
-//FAST..      hRes->Reset();
-//FAST..      hRes->SetTitle(TString::Format("%s %s residuals - iteration %d",
-//FAST..				     variable.Data(), name.Data(), i+1));
-//FAST..      hRes->GetYaxis()->SetTitle("Residuals");
-//FAST..      const int nRes = hfoldUnfData->GetXaxis()->GetLast() - hfoldUnfData->GetXaxis()->GetFirst() + 1;
-//FAST..      Double_t res[nRes];
-//FAST..      double mychi2 = MyChi2Test(hRecDataMinusFakesBis, hfoldUnfData, nBinsToSkip, res);
-//FAST..      if(verbosity) std::cout << "Chi2/nbins of data / folded-unfolded distributions: " << mychi2 << "\n"; 
-//FAST..      if(i > 0) hchi2->SetBinContent(i + 1, mychi2);
-//FAST..      if (mychi2 < 1./sqrt(2) && finalNIter < 0) {
-//FAST..	nIter = i;
-//FAST..	finalNIter = i;
-//FAST..	std::cout << "We will use " << nIter << " iterations with a final Chi2/ndf of: " << mychi2 << std::endl;
-//FAST..      }      
-//FAST..      double maxRes = -1.;
-//FAST..      for(int j = 0; j < nRes; ++j){
-//FAST..	double x = fabs(res[j]);
-//FAST..	  hRes->SetBinContent(hfoldUnfData->GetXaxis()->GetFirst() + j, x);
-//FAST..	  if(x > maxRes) maxRes = x;
-//FAST..      }
-//FAST..      hRes->Write();
-//FAST..      if(i>0) hResMax->Fill(i + 1, maxRes);
-//FAST..    }
-//FAST..    hResMax->Write();
-//FAST..    TH1D *hgen = (TH1D*) respBis->Htruth();
-//FAST..    TString tmpName = "mcGen" + name;
-//FAST..    hgen->SetName(tmpName);
-//FAST..    hgen->SetTitle(tmpName);
-//FAST..    hgen->Write();
-//FAST..    
-//FAST..    TH1D *hfoldgen = foldUnfData(hgen, respBis);
-//FAST..    tmpName = "mcGenFolded" + name;
-//FAST..    hfoldgen->SetName(tmpName);
-//FAST..    hfoldgen->SetTitle(tmpName);
-//FAST..    hfoldgen->Write();
-//FAST..
-//FAST..    TH1D *hmes = (TH1D*) respBis->Hmeasured();
-//FAST..    tmpName = "mcReco" + name;
-//FAST..    hmes->SetName(tmpName);
-//FAST..    hmes->SetTitle(tmpName);
-//FAST..    hmes->Write();
-//FAST..    
-//FAST..    hRecDataMinusFakes->Write("Unf" + name + "_0");
-//FAST..
-//FAST..    if(hRecDataMinusFakesOdd && hRecDataMinusFakesEven){
-//FAST..
-//FAST..	//hchi2Xval = (TH1D*) hchi2->Clone("hchi2Xval");
-//FAST..	//hchi2Xval->Reset();
-//FAST..      
-//FAST..      RooUnfoldResponse *respBis2 = (RooUnfoldResponse*) resp->Clone();
-//FAST..      TH1D *hRecDataMinusFakesBisOdd = (TH1D*) hRecDataMinusFakesOdd->Clone();
-//FAST..      TH1D *hRecDataMinusFakesBisEven = (TH1D*) hRecDataMinusFakesEven->Clone();
-//FAST..
-//FAST..      //std::cout << "Chi2/ndf odd/even: " << MyChi2Test(hRecDataMinusFakesOdd, hRecDataMinusFakesEven) << "\n";
-//FAST..      //      std::cout << "ROOT Chi2/ndf odd/even: "
-//FAST..      //		<< hRecDataMinusFakesOdd->Chi2Test(hRecDataMinusFakesEven, "WW,P,CHI2/NDF") << "\n";
-//FAST..      
-//FAST..      RooUnfold *RObjectForDataTmp2 = RooUnfold::New(alg, respBis2, hRecDataMinusFakesBisOdd, nBinsTmp);
-//FAST..      RObjectForDataTmp2->SetVerbose(verbosity);
-//FAST..      //      RObjectForDataTmp2->UseFlatPrior(true);
-//FAST..      //    int nBinsToSkip = (TString(hRecDataMinusFakesBis->GetName()).Index("JetPt_Zinc") > 0) ? 2 : 0;
-//FAST..      int nBinsToSkip = 0;
-//FAST..      RObjectForDataTmp2->IncludeSystematics(0); // new version of RooUnfold: will compute Cov based on Data Statistics only
-//FAST..      std::auto_ptr<std::vector<TH1*> > hUnfs2 (new std::vector<TH1*>);
-//FAST..      
-//FAST..      //Unfolds the data:
-//FAST..      //TH1D* hUnfDataBis = (TH1D*) RObjectForDataTmp->Hreco(RooUnfold::kCovariance, hUnfs.get());
-//FAST..      RObjectForDataTmp2->Hreco(RooUnfold::kCovariance, hUnfs2.get());
-//FAST..      
-//FAST..      TH1* hResMaxXval = new TH1D("hResMaxXval",
-//FAST..				  TString::Format("Max(res) %s %s;Iter;max(res) cross-validation",
-//FAST..						  variable.Data(), name.Data()),
-//FAST..				  hUnfs->size(), -.5, hUnfs->size() - 0.5);
-//FAST..      
-//FAST..      for (unsigned i = 0; i < hUnfs2->size(); ++i) {
-//FAST..	(*hUnfs2)[i]->SetName(TString::Format("hUnfXval%d", i));
-//FAST..	if(i==0){
-//FAST..	  (*hUnfs2)[i]->SetTitle(TString::Format("Prior for %s %s", variable.Data(), name.Data()));
-//FAST..	} else {
-//FAST..	  (*hUnfs2)[i]->SetTitle(TString::Format("Unfolded %s %s %d iters, cross-validation", variable.Data(), name.Data(), i));
-//FAST..	}
-//FAST..	(*hUnfs2)[i]->Write();
-//FAST..	TH1* hfoldUnfDataOdd = foldUnfData((*hUnfs2)[i], respBis);
-//FAST..	hfoldUnfDataOdd->SetName(TString::Format("dataOddfoldedBack%s_%d", name.Data(), i));
-//FAST..	hfoldUnfDataOdd->SetTitle(TString::Format("dataOddFoldedBack%s_%d", name.Data(), i));
-//FAST..	hfoldUnfDataOdd->Write();
-//FAST..	
-//FAST..	TH1* hResXval = (TH1*) hRecDataMinusFakes->Clone(TString::Format("hResXval%s_%d", name.Data(), i+1));
-//FAST..	hResXval->Reset();
-//FAST..	hResXval->SetTitle(TString::Format("%s %s residuals - iteration %d, cross validation",
-//FAST..				       variable.Data(), name.Data(), i+1));
-//FAST..	hResXval->GetYaxis()->SetTitle("Residuals");
-//FAST..	
-//FAST..	const int nRes = hfoldUnfDataOdd->GetXaxis()->GetLast() - hfoldUnfDataOdd->GetXaxis()->GetFirst() + 1;
-//FAST..	Double_t resXval[nRes];
-//FAST..	double mychi2 = MyChi2Test(hfoldUnfDataOdd, hRecDataMinusFakesBisEven, nBinsToSkip, resXval);
-//FAST..	if(verbosity) std::cout << "Chi2/nbins of data / folded-unfolded distributions: " << mychi2 << "\n"; 
-//FAST..
-//FAST..	if(i > 0) hchi2Xval->SetBinContent(i + 1, mychi2);
-//FAST..	
-//FAST..	if (mychi2 < 1. && finalNIterXval < 0) {
-//FAST..	  nIterXval = i;
-//FAST..	  finalNIterXval = i;
-//FAST..	  std::cout << "We will use " << nIter << " iterations with a final Chi2/ndf of: " << mychi2 << std::endl;
-//FAST..	}      
-//FAST..	double maxRes = -1.;
-//FAST..	for(int j = 0; j < nRes; ++j){
-//FAST..	  double x = fabs(resXval[j]);
-//FAST..	  hResXval->SetBinContent(hfoldUnfDataOdd->GetXaxis()->GetFirst() + j, x);
-//FAST..	  if(x > maxRes) maxRes = x;
-//FAST..	}
-//FAST..	hResXval->Write();
-//FAST..	if(i > 0) hResMaxXval->Fill(i+1, maxRes);
-//FAST..      } //next hUnfs2
-//FAST..      
-//FAST..      hResMaxXval->Write();
-//FAST..      TH1D *hgen = (TH1D*) respBis->Htruth();
-//FAST..      TString tmpName = "mcGen" + name;
-//FAST..      hgen->SetName(tmpName);
-//FAST..      hgen->SetTitle(tmpName);
-//FAST..      hgen->Write();
-//FAST..      
-//FAST..      TH1D *hfoldgen = foldUnfData(hgen, respBis);
-//FAST..      tmpName = "mcGenFolded" + name;
-//FAST..      hfoldgen->SetName(tmpName);
-//FAST..      hfoldgen->SetTitle(tmpName);
-//FAST..      hfoldgen->Write();
-//FAST..      
-//FAST..      TH1D *hmes = (TH1D*) respBis->Hmeasured();
-//FAST..      tmpName = "mcReco" + name;
-//FAST..      hmes->SetName(tmpName);
-//FAST..      hmes->SetTitle(tmpName);
-//FAST..      hmes->Write();
-//FAST..      hRecDataMinusFakesOdd->Write("UnfOdd" + name + "_0");
-//FAST..      hRecDataMinusFakesEven->Write("UnfEven" + name + "_0");
-//FAST..    }//cross-validation
-    
 #else
     TH1* hResMax = new TH1D("hResMax", TString::Format("Max(res) %s %s;Iter;max(res)", variable.Data(), name.Data()),
 			    nBinsTmp+1, -.5, nBinsTmp + 0.5);
@@ -1492,9 +1056,6 @@ TH1D *hRecDataMinusFakesOdd, TH1D *hRecDataMinusFakesEven)
        
 
 #endif
-    //    nIter = min(nIter, 20);
-    //nIter = max(nIter, 2);
-   // nIter = 4;
 
     if (variable == "ZNGoodJets_Zexc") maxIter = 4;
     int chosenIter = 0;
@@ -1686,16 +1247,6 @@ TH1D *hRecDataMinusFakesOdd, TH1D *hRecDataMinusFakesEven)
     hUnfData->Scale(1./integratedLumi);
     hUnfDataStatCov->Scale(1./(integratedLumi*integratedLumi));
     hUnfMCStatCov->Scale(1./(integratedLumi*integratedLumi));
-    //if ("LumiUp" == name) {
-    //    hUnfData->Scale(1./1.026);
-    //    hUnfDataStatCov->Scale(1./(1.026*1.026));
-    //    hUnfMCStatCov->Scale(1./(1.026*1.026));
-    //}
-    //else if ("LumiDown" == name) {
-    //    hUnfData->Scale(1./0.974);
-    //    hUnfDataStatCov->Scale(1./(0.974*0.974));
-    //    hUnfMCStatCov->Scale(1./(0.974*0.974));
-    //}
     if ("LumiUp" == name) {
         hUnfData->Scale(1./(1+lumiUnc));
         hUnfDataStatCov->Scale(1./((1+lumiUnc)*(1+lumiUnc)));
@@ -1706,7 +1257,6 @@ TH1D *hRecDataMinusFakesOdd, TH1D *hRecDataMinusFakesEven)
         hUnfDataStatCov->Scale(1./((1-lumiUnc)*(1-lumiUnc)));
         hUnfMCStatCov->Scale(1./((1-lumiUnc)*(1-lumiUnc)));
     }
-
 
     //--- divide by bin width to get cross section ---
     int nBins = hUnfData->GetNbinsX();
@@ -1740,7 +1290,7 @@ int TUnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfol
 TH2D* &hUnfDataStatCov, TH2D* &hUnfDataStatCovNoScale, TH2D* &hUnfMCStatCov, TH2D* &hUnfMCStatCovNoScale, TString name, double integratedLumi, TH1D* hGenDYJets, 
 bool logy, TH1D *hRecDataMinusFakesOdd, TH1D *hRecDataMinusFakesEven){
 
-    printf("\n\n=========================================================================\n");
+    printf("=========================================================================\n");
     printf("Root based TUnfold (vs the RooUnfold package version)\n");
     printf("Name of systematic: %s\n", name.Data());
 
@@ -1864,12 +1414,11 @@ bool logy, TH1D *hRecDataMinusFakesOdd, TH1D *hRecDataMinusFakesEven){
     //int regParam_=1;
     int iBest=regParam_;
 
-    TGraph *lCurve=0;
-    const char *SCAN_DISTRIBUTION="signal";
-    const char *SCAN_AXISSTEERING=0;
-    Int_t nScan=100;
+    Int_t nScan=30;
+    //Int_t nScan=100;
     TSpline *logTauX,*logTauY;
     TSpline *rhoLogTau=0;
+    TGraph *lCurve=0;
     
     if (regParam_ < 0) {
         printf("\n-----> Doing ScanLcurve method\n");
@@ -1881,10 +1430,6 @@ bool logy, TH1D *hRecDataMinusFakesOdd, TH1D *hRecDataMinusFakesEven){
     }
     else if(regParam_ > 0) {
         printf("\n-----> Doing ScanTau method\n");
-        //iBest=unfold.ScanTau(nScan,0.,0.,&rhoLogTau,
-        //           TUnfoldDensity::kEScanTauRhoMax,
-        //         SCAN_DISTRIBUTION,SCAN_AXISSTEERING,
-        //         &lCurve);  
         iBest=unfold.ScanTau(50,0.0,0.0,&rhoLogTau,TUnfoldDensity::kEScanTauRhoAvg);
     }
     else {
@@ -1908,7 +1453,7 @@ bool logy, TH1D *hRecDataMinusFakesOdd, TH1D *hRecDataMinusFakesEven){
         canLCurve->Write();
     }
     Double_t tauFinal = unfold.GetTau();
-    printf("Final value of tau: %f\n", tauFinal);
+    printf("Final value of tau*10^8: %f\n", tauFinal*100000000.);
     
     //Variables modified by TUnfoldData.
     hUnfData = (TH1D*)unfold.GetOutput("UnfData_"+name)->Clone();
@@ -1940,8 +1485,6 @@ bool logy, TH1D *hRecDataMinusFakesOdd, TH1D *hRecDataMinusFakesEven){
     hUnfMCStatCovNoScale = (TH2D*) hUnfMCStatCov->Clone("UnfMCStatCov_"+name+"_NoScale");
     hUnfMCStatCovNoScale->Write();
 
-    printf("chi2A = %F\n",unfold.GetChi2A());
-    printf("number of degrees of freedom = %d\n",unfold.GetNdf());
     TH1D *foldedData = (TH1D*)unfold.GetFoldedOutput("foldedData");
 
     //printf("---> Input data:\n");
@@ -1966,6 +1509,9 @@ bool logy, TH1D *hRecDataMinusFakesOdd, TH1D *hRecDataMinusFakesEven){
         }
         foldedClosureRatio->Write();
     }
+
+    printf("\nChi2A = %F\n",unfold.GetChi2A());
+    printf("Number of degrees of freedom = %d\n",unfold.GetNdf());
     //TH2D *probabilityMatrix = (TH2D*)unfold.GetProbabilityMatrix("probabilityMatrix")->Clone();
     //probabilityMatrix->Write();
     TH2D *corrCoeffMatrix = (TH2D*)unfold.GetRhoIJtotal("corrCoeffMatrix")->Clone();
@@ -1973,7 +1519,8 @@ bool logy, TH1D *hRecDataMinusFakesOdd, TH1D *hRecDataMinusFakesEven){
     
     //--- divide by luminosity ---
     double lumiUnc = cfg.getD("lumiUnc", 0.027);
-    printf("Scaling data %s by int. lumi = %F... \n",hUnfData->GetName(), integratedLumi);
+    printf("\nScaling data %s by int. lumi = %F... \n",hUnfData->GetName(), integratedLumi);
+    printf("With lumiUnc = %F\n",lumiUnc);
     hUnfData->Scale(1./integratedLumi);
     if(hUnfDataStatCov) hUnfDataStatCov->Scale(1./(integratedLumi*integratedLumi));
     if(hUnfMCStatCov) hUnfMCStatCov->Scale(1./(integratedLumi*integratedLumi));
@@ -1988,7 +1535,7 @@ bool logy, TH1D *hRecDataMinusFakesOdd, TH1D *hRecDataMinusFakesEven){
         if(hUnfMCStatCov) hUnfMCStatCov->Scale(1./((1-lumiUnc)*(1-lumiUnc)));
     }
     //--- divide by bin width to get cross section ---
-    printf("Normalizing to bin widths to get cross section...\n");
+    printf("\nNormalizing to bin widths to get cross section...\n");
     int nBins = hUnfData->GetNbinsX();
     for (int i = 1; i <= nBins; ++i) {
         double binWidth = hUnfData->GetBinWidth(i);
@@ -2039,31 +1586,32 @@ TH2D* makeCovFromUpAndDown(const TH1D* hUnfDataCentral, const TH1D* hUnfDataUp, 
     TH2D* h = new TH2D(name, name, nBins, 0, nBins, nBins, 0, nBins);
 
     for (int i = 1; i <= nBins; ++i) {
-    double sigmaMeani = 0.5*fabs(hUnfDataUp->GetBinContent(i) - hUnfDataDown->GetBinContent(i)); 
-    if (name.Index("Sherpa") >= 0) sigmaMeani *= 2;
-    int signi = (hUnfDataUp->GetBinContent(i) - hUnfDataDown->GetBinContent(i) < 0) ? -1 : 1;
-    if (i > 1 && i < nBins) {
-        if ((hUnfDataUp->GetBinContent(i-1) - hUnfDataDown->GetBinContent(i-1)) * (hUnfDataUp->GetBinContent(i+1) - hUnfDataDown->GetBinContent(i+1)) < 0) {
-        sigmaMeani = 0.5*(0.5*fabs(hUnfDataUp->GetBinContent(i-1) - hUnfDataDown->GetBinContent(i-1)) + 0.5*fabs(hUnfDataUp->GetBinContent(i+1) - hUnfDataDown->GetBinContent(i+1)));
+        double sigmaMeani = 0.5*fabs(hUnfDataUp->GetBinContent(i) - hUnfDataDown->GetBinContent(i)); 
         if (name.Index("Sherpa") >= 0) sigmaMeani *= 2;
+        int signi = (hUnfDataUp->GetBinContent(i) - hUnfDataDown->GetBinContent(i) < 0) ? -1 : 1;
+        if (i > 1 && i < nBins) {
+            if ((hUnfDataUp->GetBinContent(i-1) - hUnfDataDown->GetBinContent(i-1)) * (hUnfDataUp->GetBinContent(i+1) - hUnfDataDown->GetBinContent(i+1)) < 0) {
+                sigmaMeani = 0.5*(0.5*fabs(hUnfDataUp->GetBinContent(i-1) - hUnfDataDown->GetBinContent(i-1)) + 0.5*fabs(hUnfDataUp->GetBinContent(i+1) - hUnfDataDown->GetBinContent(i+1)));
+                if (name.Index("Sherpa") >= 0) sigmaMeani *= 2;
+            }
         }
-    }
 
-    for (int j = 1; j <= nBins; ++j) {
-        double sigmaMeanj = 0.5*fabs(hUnfDataUp->GetBinContent(j) - hUnfDataDown->GetBinContent(j)); 
-        if (name.Index("Sherpa") >= 0) sigmaMeanj *= 2;
-        int signj = (hUnfDataUp->GetBinContent(j) - hUnfDataDown->GetBinContent(j) < 0) ? -1 : 1;
-        if (j > 1 && j < nBins) {
-        if ((hUnfDataUp->GetBinContent(j-1) - hUnfDataDown->GetBinContent(j-1)) * (hUnfDataUp->GetBinContent(j+1) - hUnfDataDown->GetBinContent(j+1)) < 0) {
-            sigmaMeanj = 0.5*(0.5*fabs(hUnfDataUp->GetBinContent(j-1) - hUnfDataDown->GetBinContent(j-1)) + 0.5*fabs(hUnfDataUp->GetBinContent(j+1) - hUnfDataDown->GetBinContent(j+1)));
+        for (int j = 1; j <= nBins; ++j) {
+            double sigmaMeanj = 0.5*fabs(hUnfDataUp->GetBinContent(j) - hUnfDataDown->GetBinContent(j)); 
             if (name.Index("Sherpa") >= 0) sigmaMeanj *= 2;
-        }
-        }
+            int signj = (hUnfDataUp->GetBinContent(j) - hUnfDataDown->GetBinContent(j) < 0) ? -1 : 1;
+            if (j > 1 && j < nBins) {
+                if ((hUnfDataUp->GetBinContent(j-1) - hUnfDataDown->GetBinContent(j-1)) * (hUnfDataUp->GetBinContent(j+1) - hUnfDataDown->GetBinContent(j+1)) < 0) {
+                    sigmaMeanj = 0.5*(0.5*fabs(hUnfDataUp->GetBinContent(j-1) - hUnfDataDown->GetBinContent(j-1)) + 0.5*fabs(hUnfDataUp->GetBinContent(j+1) - hUnfDataDown->GetBinContent(j+1)));
+                    if (name.Index("Sherpa") >= 0) sigmaMeanj *= 2;
+                }
+            }
 
-        double correlation = (i == j) ? 1 : 1;
-        h->SetBinContent(i, j, correlation * signi * signj * sigmaMeani * sigmaMeanj);
-    }
-    }
+            double correlation = (i == j) ? 1 : 1;
+            h->SetBinContent(i, j, correlation * signi * signj * sigmaMeani * sigmaMeanj);
+
+        }//end second loop over nBins
+    } //end first loop over nBins
 
     return h;
 }
