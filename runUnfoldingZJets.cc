@@ -10,27 +10,32 @@ int main(int argc, char **argv)
 {
     //--- Loads configuration -----------------------------------------------------
 
-    TString histoDir   = cfg.getS("histoDir");
-    TString unfoldDir  = cfg.getS("unfoldDir");
-    TString lepSel     = cfg.getS("lepSel");
-    TString algo       = cfg.getS("algo");
-    int jetPtMin       = cfg.getI("jetPtMin");
-    int jetEtaMax      = cfg.getI("jetEtaMax");
-    int whichSyst      = cfg.getI("whichSyst");
-    //TString generator1 = cfg.getS("generator1", "sherpa2");
-    //TString generator2 = cfg.getS("generator2", "amcatnlo");
+    //andrew -- 5 march 2019 -- current defaults for these options commented to the right
+    TString lepSel     = cfg.getS("lepSel"); //SMu
+    TString algo       = cfg.getS("algo"); //TUnfold (can switch to Bayes if want to use RooUnfold Bayes)
+    TString histoDir   = cfg.getS("histoDir"); //HistoFiles
+    TString unfoldDir  = cfg.getS("unfoldDir"); //UnfoldedFiles
+    int jetPtMin       = cfg.getI("jetPtMin"); //30
+    int jetEtaMax      = cfg.getI("jetEtaMax"); //24
+    int whichSyst      = cfg.getI("whichSyst"); //-1 (can set on command line to 1 or higher to select on a syst)
 
     TString variable = "";
     bool doNormalized(false);
-
-    //-----------------------------------------------------------------------------
 
     //--- Parse the arguments -----------------------------------------------------
     if (argc > 1) {
         for (int i = 1; i < argc; ++i) {
             TString currentArg = argv[i];
             //--- possible options ---
-            if (currentArg.BeginsWith("histoDir=")) {
+            if (currentArg.BeginsWith("lepSel=")) {
+                getArg(currentArg, lepSel);
+                cfg.set("lepSel", lepSel);
+            }
+            else if (currentArg.BeginsWith("algo=")) {
+                getArg(currentArg, algo);
+                cfg.set("algo", algo);
+            }
+            else if (currentArg.BeginsWith("histoDir=")) {
                 getArg(currentArg, histoDir);
 		cfg.set("histoDir", histoDir);
             }
@@ -38,22 +43,6 @@ int main(int argc, char **argv)
                 getArg(currentArg, unfoldDir);
 		cfg.set("unfoldDir", unfoldDir);
             }
-            else if (currentArg.BeginsWith("lepSel=")) {
-                getArg(currentArg, lepSel);
-		cfg.set("lepSel", lepSel);
-            }
-            else if (currentArg.BeginsWith("algo=")) {
-                getArg(currentArg, algo);
-		cfg.set("algo", algo);
-            }
-            /*else if (currentArg.BeginsWith("generator1=")) {
-                getArg(currentArg, generator1);
-		cfg.set("generator1", generator1);
-            }
-            else if (currentArg.BeginsWith("generator2=")) {
-                getArg(currentArg, generator2);
-		cfg.set("generator2", generator2);
-            }*/
             else if (currentArg.BeginsWith("jetPtMin=")) {
                 getArg(currentArg, jetPtMin);
 		cfg.set("jetPtMin", jetPtMin);
@@ -92,11 +81,10 @@ int main(int argc, char **argv)
 
     if (!histoDir.EndsWith("/")) histoDir += "/";
     if (!unfoldDir.EndsWith("/")) unfoldDir += "/";
+    
+    std::cout << "\n >>>>> Executing UnfoldingZJets(\"" << lepSel << "\", \"" <<  algo << "\", \"" << histoDir << "\", \"" << unfoldDir << "\", " << jetPtMin << ", " << jetEtaMax << ", " << variable << ", " << doNormalized << ", " << whichSyst << ");" << std::endl;
+    std::cout << " >>>>> Where UnfoldingZJets(lepSel, algo, histoDir, unfoldDir, jetPtMin, jetEtaMax, variable, doNormalized, whichSyst)" << std::endl;
 
-    std::cout << "\n executing UnfoldingZJets(\"" << lepSel << "\", \"" <<  algo << "\", \"" << histoDir << "\", \"" << unfoldDir << "\", " << jetPtMin << ", " << jetEtaMax << ", &argc, argv);" << std::endl;
-    //-----------------------------------------------------------------------------
-
-    //UnfoldingZJets(lepSel, algo, histoDir, unfoldDir, jetPtMin, jetEtaMax, generator1, generator2, variable, doNormalized);
     UnfoldingZJets(lepSel, algo, histoDir, unfoldDir, jetPtMin, jetEtaMax, variable, doNormalized, whichSyst);
 
     return 0;
