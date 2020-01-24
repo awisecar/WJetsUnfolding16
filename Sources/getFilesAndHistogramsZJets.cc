@@ -115,11 +115,11 @@ void getFiles(TString histoDir, TFile *Files[], TString lepSel, TString energy, 
 //        Syst.push_back("6_Down");    // 6 down: BtagSF down
 //    };
 
-    //1=PU, 3=XSEC, 4=JER
+    //1=PU, 2=JES, 3=XSEC, 4=JER, 6=BtagSF
     if (Name.Index("Data") >= 0 ) { // for data we have:
         Syst.push_back("0");                 //   0: central
-        Syst.push_back("0");              //   2 up: JES up
-        Syst.push_back("0");            //   2 down: JES down
+        Syst.push_back("2_Up");              //   2 up: JES up
+        Syst.push_back("2_Down");            //   2 down: JES down
     }
     else if (Name.Index("UNFOLDING") >= 0 && /*Name.Index("DYJets") >= 0 &&*/ Name.Index("Tau") < 0) {
         // for DYJets in case of Z+Jets or for WJets in case of W+Jets analysis we have:
@@ -130,8 +130,8 @@ void getFiles(TString histoDir, TFile *Files[], TString lepSel, TString energy, 
         Syst.push_back("4_Down");    // 4 down: JER down
         Syst.push_back("0");      // 5 up: LepSF up
         Syst.push_back("0");    // 5 down: LepSF down
-        Syst.push_back("0");      // 6 up: BtagSF up
-        Syst.push_back("0");    // 6 down: BtagSF down
+        Syst.push_back("6_Up");      // 6 up: BtagSF up
+        Syst.push_back("6_Down");    // 6 down: BtagSF down
     }
     else { // for background we have
         Syst.push_back("0");         // 0: central
@@ -139,8 +139,8 @@ void getFiles(TString histoDir, TFile *Files[], TString lepSel, TString energy, 
         Syst.push_back("1_Down");    // 1 down: PU down
         Syst.push_back("3_Up");      // 3 up: XSec up
         Syst.push_back("3_Down");    // 3 down: Xsec down
-        Syst.push_back("0");      // 6 up: BtagSF up
-        Syst.push_back("0");    // 6 down: BtagSF down
+        Syst.push_back("6_Up");      // 6 up: BtagSF up
+        Syst.push_back("6_Down");    // 6 down: BtagSF down
     };
 
 //    // No systematics
@@ -340,42 +340,48 @@ TH1D* getHisto(TFile *File, const TString variable)
 	TString fileName = gSystem->BaseName(File->GetName());
 	bool isTTbar = (fileName.Index("SMu_13TeV_TT") >= 0);
 
-        //andrew -- no TTbar scale factors yet derived for 2016 data -- 7.12.2017
-        isTTbar = false;
+        //andrew -- ttBar SFs for 2016 data added -- 3 May 2019
+        std::cout << "isTTbar = " << isTTbar << std::endl;
 	if (isTTbar){
-		if (variable.Index("Zinc2jet") >= 0) histo->Scale(1.00624717);
-		else if (variable.Index("Zinc3jet") >= 0) histo->Scale(0.95995655);
-		else if (variable.Index("Zinc4jet") >= 0) histo->Scale(0.91573438);
-
+                std::cout << " ----- Scaling ttbar BG for " << variable << "!" << std::endl;
+                // inclusive distributions
+		if (variable.Index("Zinc2jet") >= 0) histo->Scale(1.04904374);
+		else if (variable.Index("Zinc3jet") >= 0) histo->Scale(0.99624372);
+		else if (variable.Index("Zinc4jet") >= 0) histo->Scale(0.97243212);
+		else if (variable.Index("Zinc5jet") >= 0) histo->Scale(0.94750793);
+		else if (variable.Index("Zinc6jet") >= 0) histo->Scale(0.92506162);
+                // exclusive distributions
+		else if (variable.Index("Zexc2jet") >= 0) histo->Scale(1.28532061);
+		else if (variable.Index("Zexc3jet") >= 0) histo->Scale(1.02880218);
+		else if (variable.Index("Zexc4jet") >= 0) histo->Scale(0.98994466);
+		else if (variable.Index("Zexc5jet") >= 0) histo->Scale(0.95915763);
+		else if (variable.Index("Zexc6jet") >= 0) histo->Scale(0.93695869);
+                // jet multiplicity distributions
 		else if (variable.Index("ZNGoodJets_Zinc") >= 0 || variable.Index("ZNGoodJetsFull_Zinc") >= 0) {
-			histo->SetBinContent(3, histo->GetBinContent(3)*1.00624717);
-			histo->SetBinContent(4, histo->GetBinContent(4)*0.95995655);
-			histo->SetBinContent(5, histo->GetBinContent(5)*0.91573438);
-			histo->SetBinContent(6, histo->GetBinContent(6)*0.85241859);
-			histo->SetBinContent(7, histo->GetBinContent(7)*0.75126800);
-			histo->SetBinContent(8, histo->GetBinContent(8)*0.74294841);
+			histo->SetBinContent(3, histo->GetBinContent(3)*1.04904374);
+			histo->SetBinContent(4, histo->GetBinContent(4)*0.99624372);
+			histo->SetBinContent(5, histo->GetBinContent(5)*0.97243212);
+			histo->SetBinContent(6, histo->GetBinContent(6)*0.94750793);
+			histo->SetBinContent(7, histo->GetBinContent(7)*0.92506162);
 			
-			histo->SetBinError(3, histo->GetBinError(3)*1.00624717);
-			histo->SetBinError(4, histo->GetBinError(4)*0.95995655);
-			histo->SetBinError(5, histo->GetBinError(5)*0.91573438);
-			histo->SetBinError(6, histo->GetBinError(6)*0.85241859);
-			histo->SetBinError(7, histo->GetBinError(7)*0.75126800);
-			histo->SetBinError(8, histo->GetBinError(8)*0.74294841);
+			histo->SetBinError(3, histo->GetBinError(3)*1.04904374);
+			histo->SetBinError(4, histo->GetBinError(4)*0.99624372);
+			histo->SetBinError(5, histo->GetBinError(5)*0.97243212);
+			histo->SetBinError(6, histo->GetBinError(6)*0.94750793);
+			histo->SetBinError(7, histo->GetBinError(7)*0.92506162);
 		}
 		else if (variable.Index("ZNGoodJets_Zexc") >= 0 || variable.Index("ZNGoodJetsFull_Zexc") >= 0) {
-			histo->SetBinContent(3, histo->GetBinContent(3)*1.13995359);
-			histo->SetBinContent(4, histo->GetBinContent(4)*1.01319751);
-			histo->SetBinContent(5, histo->GetBinContent(5)*0.95978845);
-			histo->SetBinContent(6, histo->GetBinContent(6)*0.90872393);
-			histo->SetBinContent(7, histo->GetBinContent(7)*0.75519978);
-			histo->SetBinContent(8, histo->GetBinContent(8)*0.79367983);
+			histo->SetBinContent(3, histo->GetBinContent(3)*1.28532061);
+			histo->SetBinContent(4, histo->GetBinContent(4)*1.02880218);
+			histo->SetBinContent(5, histo->GetBinContent(5)*0.98994466);
+			histo->SetBinContent(6, histo->GetBinContent(6)*0.95915763);
+			histo->SetBinContent(7, histo->GetBinContent(7)*0.93695869);
 			
-			histo->SetBinError(3, histo->GetBinError(3)*1.13995359);
-			histo->SetBinError(4, histo->GetBinError(4)*1.01319751);
-			histo->SetBinError(5, histo->GetBinError(5)*0.95978845);
-			histo->SetBinError(6, histo->GetBinError(6)*0.90872393);
-			histo->SetBinError(7, histo->GetBinError(7)*0.75519978);
-			histo->SetBinError(8, histo->GetBinError(8)*0.79367983);
+			histo->SetBinError(3, histo->GetBinError(3)*1.28532061);
+			histo->SetBinError(4, histo->GetBinError(4)*1.02880218);
+			histo->SetBinError(5, histo->GetBinError(5)*0.98994466);
+			histo->SetBinError(6, histo->GetBinError(6)*0.95915763);
+			histo->SetBinError(7, histo->GetBinError(7)*0.93695869);
 		}
 	}	
 		
@@ -416,45 +422,49 @@ void getHistos(TH1D *histograms[], TFile *Files[], TString variable)
         histograms[i] = (TH1D*) Files[i]->Get(variable);	
 
         //--- ttbar rescaling
-        //andrew -- no TTbar SFs yet derived for 2016 data -- 7.12.2017
-        isTTbar = false;
-        //std::cout << "isTTbar = " << isTTbar << std::endl;
+        //andrew -- ttBar SFs for 2016 data added -- 3 May 2019
 	if (isTTbar){
-                std::cout << "Scaling ttbar BG for " << variable << "!" << std::endl;
-		if (variable.Index("Zinc2jet") >= 0) histograms[i]->Scale(1.00624717);
-		else if (variable.Index("Zinc3jet") >= 0) histograms[i]->Scale(0.95995655);
-		else if (variable.Index("Zinc4jet") >= 0) histograms[i]->Scale(0.91573438);
+                std::cout << " ----- Scaling ttbar BG for " << variable << "!" << std::endl;
+                // inclusive distributions
+		if (variable.Index("Zinc2jet") >= 0) histograms[i]->Scale(1.04904374);
+		else if (variable.Index("Zinc3jet") >= 0) histograms[i]->Scale(0.99624372);
+		else if (variable.Index("Zinc4jet") >= 0) histograms[i]->Scale(0.97243212);
+		else if (variable.Index("Zinc5jet") >= 0) histograms[i]->Scale(0.94750793);
+		else if (variable.Index("Zinc6jet") >= 0) histograms[i]->Scale(0.92506162);
+                // exclusive distributions
+		else if (variable.Index("Zexc2jet") >= 0) histograms[i]->Scale(1.28532061);
+		else if (variable.Index("Zexc3jet") >= 0) histograms[i]->Scale(1.02880218);
+		else if (variable.Index("Zexc4jet") >= 0) histograms[i]->Scale(0.98994466);
+		else if (variable.Index("Zexc5jet") >= 0) histograms[i]->Scale(0.95915763);
+		else if (variable.Index("Zexc6jet") >= 0) histograms[i]->Scale(0.93695869);
+                // jet multiplicity distributions
 		else if (variable.Index("ZNGoodJets_Zinc") >= 0 || variable.Index("ZNGoodJetsFull_Zinc") >= 0) {
 
-			histograms[i]->SetBinContent(3, histograms[i]->GetBinContent(3)*1.00624717);
-			histograms[i]->SetBinContent(4, histograms[i]->GetBinContent(4)*0.95995655);
-			histograms[i]->SetBinContent(5, histograms[i]->GetBinContent(5)*0.91573438);
-			histograms[i]->SetBinContent(6, histograms[i]->GetBinContent(6)*0.85241859);
-			histograms[i]->SetBinContent(7, histograms[i]->GetBinContent(7)*0.75126800);
-			histograms[i]->SetBinContent(8, histograms[i]->GetBinContent(8)*0.74294841);
+			histograms[i]->SetBinContent(3, histograms[i]->GetBinContent(3)*1.04904374);
+			histograms[i]->SetBinContent(4, histograms[i]->GetBinContent(4)*0.99624372);
+			histograms[i]->SetBinContent(5, histograms[i]->GetBinContent(5)*0.97243212);
+			histograms[i]->SetBinContent(6, histograms[i]->GetBinContent(6)*0.94750793);
+			histograms[i]->SetBinContent(7, histograms[i]->GetBinContent(7)*0.92506162);
 			
-			histograms[i]->SetBinError(3, histograms[i]->GetBinError(3)*1.00624717);
-			histograms[i]->SetBinError(4, histograms[i]->GetBinError(4)*0.95995655);
-			histograms[i]->SetBinError(5, histograms[i]->GetBinError(5)*0.91573438);
-			histograms[i]->SetBinError(6, histograms[i]->GetBinError(6)*0.85241859);
-			histograms[i]->SetBinError(7, histograms[i]->GetBinError(7)*0.75126800);
-			histograms[i]->SetBinError(8, histograms[i]->GetBinError(8)*0.74294841);
+			histograms[i]->SetBinError(3, histograms[i]->GetBinError(3)*1.04904374);
+			histograms[i]->SetBinError(4, histograms[i]->GetBinError(4)*0.99624372);
+			histograms[i]->SetBinError(5, histograms[i]->GetBinError(5)*0.97243212);
+			histograms[i]->SetBinError(6, histograms[i]->GetBinError(6)*0.94750793);
+			histograms[i]->SetBinError(7, histograms[i]->GetBinError(7)*0.92506162);
 		}
 		else if (variable.Index("ZNGoodJets_Zexc") >= 0 || variable.Index("ZNGoodJetsFull_Zexc") >= 0) {
 
-			histograms[i]->SetBinContent(3, histograms[i]->GetBinContent(3)*1.13995359);
-			histograms[i]->SetBinContent(4, histograms[i]->GetBinContent(4)*1.01319751);
-			histograms[i]->SetBinContent(5, histograms[i]->GetBinContent(5)*0.95978845);
-			histograms[i]->SetBinContent(6, histograms[i]->GetBinContent(6)*0.90872393);
-			histograms[i]->SetBinContent(7, histograms[i]->GetBinContent(7)*0.75519978);
-			histograms[i]->SetBinContent(8, histograms[i]->GetBinContent(8)*0.79367983);
+			histograms[i]->SetBinContent(3, histograms[i]->GetBinContent(3)*1.28532061);
+			histograms[i]->SetBinContent(4, histograms[i]->GetBinContent(4)*1.02880218);
+			histograms[i]->SetBinContent(5, histograms[i]->GetBinContent(5)*0.98994466);
+			histograms[i]->SetBinContent(6, histograms[i]->GetBinContent(6)*0.95915763);
+			histograms[i]->SetBinContent(7, histograms[i]->GetBinContent(7)*0.93695869);
 			
-			histograms[i]->SetBinError(3, histograms[i]->GetBinError(3)*1.13995359);
-			histograms[i]->SetBinError(4, histograms[i]->GetBinError(4)*1.01319751);
-			histograms[i]->SetBinError(5, histograms[i]->GetBinError(5)*0.95978845);
-			histograms[i]->SetBinError(6, histograms[i]->GetBinError(6)*0.90872393);
-			histograms[i]->SetBinError(7, histograms[i]->GetBinError(7)*0.75519978);
-			histograms[i]->SetBinError(8, histograms[i]->GetBinError(8)*0.79367983);
+			histograms[i]->SetBinError(3, histograms[i]->GetBinError(3)*1.28532061);
+			histograms[i]->SetBinError(4, histograms[i]->GetBinError(4)*1.02880218);
+			histograms[i]->SetBinError(5, histograms[i]->GetBinError(5)*0.98994466);
+			histograms[i]->SetBinError(6, histograms[i]->GetBinError(6)*0.95915763);
+			histograms[i]->SetBinError(7, histograms[i]->GetBinError(7)*0.93695869);
 		}
 		
 	}//end ttbar rescaling section	
@@ -703,8 +713,12 @@ TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJe
             wmes += pow(hResDYJets->GetBinError(i, j), 2);
             //if (s) wmes += pow(hResDYJets->GetBinError(i, j), 2);
         }
+        // nmes is all of the entries summed up in one reco x-column over all gen y-rows
+        // this would be all of the reco events that had a corresponding gen event, such that the hresponse histo was filled
+        // fakes would be the number of entries in the 1D reco histogram that don't have a corresponding gen-partner in the hresponse histo
         double fake = hRecDYJets->GetBinContent(i) - nmes;
  //       printf("Integral of reco column %d in hResDYJets: %F, Corresponding bin count in hRecDYJets: %F, Estimated fakes: %F\n", i, nmes, (hRecDYJets->GetBinContent(i)), fake);
+        // and now the fakes histogram is the number of fakes scaled to makeup for the discrepancy between signal and BG-subtracted data
         hFakDYJets->SetBinContent(i, factor*fake);
 
         //Error calculation comes from simple error propagation
@@ -716,7 +730,6 @@ TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJe
         hFakDYJets->SetBinError(i, sqrt (err2)); //neglecting uncertainty introduced by the scale factor
         //hFakDYJets->SetBinError   (i, sqrt (wmes + (sm ? pow(hRecDYJets->GetBinError(i),2) : hRecDYJets->GetBinContent(i))));
     }
-    //NOTE: not sure what this does exactly -- andrew -- 21 jan 2019
     hFakDYJets->SetEntries(hFakDYJets->GetEffectiveEntries());  // 0 entries if 0 fakes
 
     return hFakDYJets;
@@ -725,7 +738,7 @@ TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJe
 
 void getFakes(TH1D *hFakDYJets[18], TH1D *hRecData[3], TH1D *hRecSumBg[11], TH1D *hRecDYJets[13], TH2D *hResDYJets[13])
 {
-    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
+    // std::cout << __FILE__ << ":" << __LINE__ << std::endl;
     hFakDYJets[0] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[0], hResDYJets[0]);
     hFakDYJets[1] = getFakes(hRecDYJets[0], hRecData[1], hRecSumBg[0], hResDYJets[0]);
     hFakDYJets[2] = getFakes(hRecDYJets[0], hRecData[2], hRecSumBg[0], hResDYJets[0]);
@@ -735,10 +748,10 @@ void getFakes(TH1D *hFakDYJets[18], TH1D *hRecData[3], TH1D *hRecSumBg[11], TH1D
     hFakDYJets[6] = getFakes(hRecDYJets[4], hRecData[0], hRecSumBg[0], hResDYJets[4]);
     hFakDYJets[7] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[3], hResDYJets[0]);
     hFakDYJets[8] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[4], hResDYJets[0]);
-    hFakDYJets[9] = getFakes(hRecDYJets[5], hRecData[0], hRecSumBg[5], hResDYJets[5]);
-    hFakDYJets[10] = getFakes(hRecDYJets[6], hRecData[0], hRecSumBg[6], hResDYJets[6]);
-    hFakDYJets[11] = getFakes(hRecDYJets[7], hRecData[0], hRecSumBg[0], hResDYJets[7]);
-    hFakDYJets[12] = getFakes(hRecDYJets[8], hRecData[0], hRecSumBg[0], hResDYJets[8]);
+    hFakDYJets[9] = getFakes(hRecDYJets[5], hRecData[0], hRecSumBg[0], hResDYJets[5]);
+    hFakDYJets[10] = getFakes(hRecDYJets[6], hRecData[0], hRecSumBg[0], hResDYJets[6]);
+    hFakDYJets[11] = getFakes(hRecDYJets[7], hRecData[0], hRecSumBg[5], hResDYJets[7]);
+    hFakDYJets[12] = getFakes(hRecDYJets[8], hRecData[0], hRecSumBg[6], hResDYJets[8]);
     hFakDYJets[13] = getFakes(hRecDYJets[9], hRecData[0], hRecSumBg[7], hResDYJets[9]);
     hFakDYJets[14] = getFakes(hRecDYJets[10], hRecData[0], hRecSumBg[8], hResDYJets[10]);
     hFakDYJets[15] = getFakes(hRecDYJets[11], hRecData[0], hRecSumBg[9], hResDYJets[11]);

@@ -36,7 +36,7 @@ const processInfoStruct Samples[] = {
 
 const int NSamples = sizeof(Samples) / sizeof(Samples[0]);
 const int DATA(0);
-const int DYJETS(NSamples - 1); // Signal MC is the seconf from the last sample of the list.
+const int DYJETS(NSamples - 1); // Signal MC is the last sample in the list.
 
 // Total number of samples after sample grouping, including real data, background MC, and signal MC
 const unsigned int NFILESDYJETS = 9;

@@ -47,9 +47,9 @@ CXXFLAGS      += -MD -Wall
 
 # list of all source files
 SOURCES = \
-ZJets_newformat.cc ArgParser.cc variablesOfInterestZJets.cc getFilesAndHistogramsZJets.cc \
-ConfigVJets.cc HistoSetZJets.cc functions.cc UnfoldingZJets.cc \
-RecoComparison.cc PlotSettings.cc muresolution_run2.cc rochcor2015.cc
+ArgParser.cc variablesOfInterestZJets.cc getFilesAndHistogramsZJets.cc \
+ConfigVJets.cc functions.cc UnfoldingZJets.cc  UnfoldingZJetsRatios.cc \
+PlotSettings.cc 
 
 SRCLIST = $(addprefix $(SRCDIR), $(SOURCES))
 OBJLIST = $(SRCLIST:.cc=.o)
@@ -57,9 +57,8 @@ DEPS    = $(SRCLIST:.cc=.d)
 
 .PHONY: all clean
 
-all: runRecoComparison \
-runZJets_newformat \
-runUnfoldingZJets
+all: runUnfoldingZJets \
+runUnfoldingZJetsRatios
 
 
 #in untested branch:
@@ -77,13 +76,10 @@ runUnfoldingZJets
 #run%: run%.o $(OBJLIST) RooUnfold/libRooUnfold.so
 #	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
-runZJets_newformat: runZJets_newformat.o $(OBJLIST) RooUnfold/libRooUnfold.so
-	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
-
-runRecoComparison: runRecoComparison.o $(OBJLIST) RooUnfold/libRooUnfold.so
-	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
-
 runUnfoldingZJets: runUnfoldingZJets.o $(OBJLIST) RooUnfold/libRooUnfold.so
+	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
+
+runUnfoldingZJetsRatios: runUnfoldingZJetsRatios.o $(OBJLIST) RooUnfold/libRooUnfold.so
 	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
 RooUnfold/libRooUnfold.so:
