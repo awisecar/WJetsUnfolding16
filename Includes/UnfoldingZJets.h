@@ -6,9 +6,8 @@
 #include <TCanvas.h>
 #include <TString.h>
 
-void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfoldDir, int jetPtMin, int jetEtaMax, TString variable = "", bool noramlized = false, int whichSyst = -1);
+void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TString unfoldDir, int jetPtMin, int jetEtaMax, TString variable = "", bool noramlized = false, int whichSyst = -1);
 
-int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfoldResponse *resp, TH1D *hRecData, TH1D* &hUnfData, TH1D* &hUnfDataNoScale, TH2D* &hUnfDataStatCov, TH2D* &hUnfDataStatCovNoScale, TH2D* &hUnfMCStatCov, TH2D* &hUnfMCStatCovNoScale, TString name, double integratedLumi, bool logy = false, TH1D *hRecDataMinusFakesOdd = 0, TH1D *hRecDataMinusFakesEven = 0);
 int TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRecData, TH1D* &hUnfData, TH1D* &hUnfDataNoScale, TH2D* &hUnfDataStatCov, TH2D* &hUnfDataStatCovNoScale, TH2D* &hUnfMCStatCov, TH2D* &hUnfMCStatCovNoScale, TString name, double integratedLumi, TH1D* hGenDYJets, bool logy = false, bool doRatioUnfold = false);
 TH2D* M2H(TMatrixD m);
 TH2D* makeCovFromUpAndDown(const TH1D* hUnfDataCentral, const TH1D* hUnfDataUp, const TH1D* hUnfDataDown, TString name);

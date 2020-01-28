@@ -35,7 +35,7 @@ bool ConfigVJets::readConfigVJets(const char* filename){
         return false;
     }
 
-    std::cout << "\n\tReading configuration from file " << filename << "\n";
+    std::cout << "\nReading configuration from file " << filename << "\n";
     std::cout << "--------------------------------------------------\n";
 
     std::string line;

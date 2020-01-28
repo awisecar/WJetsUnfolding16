@@ -4,29 +4,27 @@ Quick start
 Set up a CMSSW environment:
 
 ```
-   $ cmsrel CMSSW_7_4_11
-   $ cd CMSSW_7_4_11
+   $ cmsrel CMSSW_7_6_7
+   $ cd CMSSW_7_6_7/src
    $ cmsenv
-   $ cd ..
 ```
 
 Clone the project to your working directory:
 
     git clone https://github.com/awisecar/WJetsUnfolding16.git
-    or (depending on how much coffee github has had today)
+    or ---
     git clone git@github.com:awisecar/WJetsUnfolding16.git
 
 Build the code:
 
 ```
-    $ cd WJets13TeVUnfolding
+    $ cd WJetsUnfolding16
     $ make clean
     $ make
 ```
 
 Configuration is stored in vjet.cfg. A commented example can be found in example.cfg
 vjets.cfg is used for customizing the parameters, the one stored on git should be fine.
-(Unless you have already your own configuration file, copy it from the example.cfg)
 
 Note: vjet.cfg file not used currently?? (6.3.2018)
 

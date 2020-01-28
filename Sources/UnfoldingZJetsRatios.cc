@@ -243,9 +243,6 @@ void UnfoldingZJetsRatios(TString lepSel, TString algo, TString histoDir, TStrin
             // hRecDataMinusFakesRATIO[iSyst]->SetNameTitle(nameTemp, titleTemp);
             // hUnfData[iSyst]->Write();
         }
-        else {
-            std::cout << "Why would you use anything else other than TUnfold ?!!!" << std::endl;
-        }
         std::cout << "Exiting iSyst = " << iSyst << std::endl;
     }
 
