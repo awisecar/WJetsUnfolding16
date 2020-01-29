@@ -10,9 +10,6 @@
 #include <TCanvas.h>
 #include <TArrow.h>
 #include <TLine.h>
-#include <RooUnfoldBayes.h>
-#include <RooUnfoldBinByBin.h>
-#include <RooUnfoldSvd.h>
 #include <TSVDUnfold.h>
 #include <TParameter.h>
 #include "fileNamesZJets.h"
@@ -40,7 +37,6 @@
 
 extern ConfigVJets cfg;
 const static bool isdatabug = false;
-static int verbosity = 1;
 
 using namespace std;
 
@@ -94,12 +90,10 @@ void UnfoldingZJetsRatios(TString lepSel, TString algo, TString histoDir, TStrin
     TH1D *hFakDYJetsNUM[18] = {NULL};
     //--- purity "histograms" ---
     TH1D *hPurityNUM[18] = {NULL};
-    //--- response DYJets objects ---
-    RooUnfoldResponse *respDYJetsNUM[18] = {NULL};
     //--- Get all numerator histograms ---
     //note: andrew -- ttbar scaling done inside getAllHistos
     getAllHistos(variableNUM, hRecDataNUM, fData, hRecDYJetsNUM, hGenDYJetsNUM, hResDYJetsNUM, fDYJets, 
-        hRecBgNUM, hRecSumBgNUM, fBg, NBGDYJETS, respDYJetsNUM, hFakDYJetsNUM, hPurityNUM);
+        hRecBgNUM, hRecSumBgNUM, fBg, NBGDYJETS, hFakDYJetsNUM, hPurityNUM);
 
     // DENOMINATOR HISTOGRAMS
     std::cout << "\n----- Opening all histograms for DENOMINATOR! ----- " << std::endl;
@@ -119,12 +113,10 @@ void UnfoldingZJetsRatios(TString lepSel, TString algo, TString histoDir, TStrin
     TH1D *hFakDYJetsDENOM[18] = {NULL};
     //--- purity "histograms" ---
     TH1D *hPurityDENOM[18] = {NULL};
-    //--- response DYJets objects ---
-    RooUnfoldResponse *respDYJetsDENOM[18] = {NULL};
     //--- Get all denominator histograms ---
     //note: andrew -- ttbar scaling done inside getAllHistos
     getAllHistos(variableDENOM, hRecDataDENOM, fData, hRecDYJetsDENOM, hGenDYJetsDENOM, hResDYJetsDENOM, fDYJets, 
-        hRecBgDENOM, hRecSumBgDENOM, fBg, NBGDYJETS, respDYJetsDENOM, hFakDYJetsDENOM, hPurityDENOM);
+        hRecBgDENOM, hRecSumBgDENOM, fBg, NBGDYJETS, hFakDYJetsDENOM, hPurityDENOM);
 
     //--- Here is an array of TH1D to store the various unfolded data:
     // 0 - Central, 

@@ -1,6 +1,5 @@
 #include <iostream>
 #include <sstream>
-#include <RooUnfoldResponse.h>
 #include <TFile.h>
 #include <TString.h>
 #include <TSystem.h>
@@ -14,13 +13,7 @@ using namespace std;
 
 extern ConfigVJets cfg;
 
-void setNegBinZero(TH2D *histograms2D);
-
-TString getEnergy()
-{
-    double s = cfg.getI("energy", 13);
-    return TString::Format("%gTeV", s);
-}
+//////////////////////////////////////////////////////////////////////////////////////////////////
 
 TFile* getFile(TString histoDir, TString lepSel, TString energy, TString Name, int jetPtMin, int jetEtaMax, TString closureTest, TString syst)
 {
@@ -204,73 +197,6 @@ void getAllFiles(TString histoDir, TString lepSel, TString energy, int jetPtMin,
     //------------------------------------------------------------------------------------------ 
 }
 
-void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hRecDYJets[13], TH1D *hGenDYJets[11], TH2D *hResDYJets[13], TFile *fDYJets[9], TH1D *hRecBg[][11], TH1D *hRecSumBg[11], TFile *fBg[][7], int nBg, RooUnfoldResponse *respDYJets[], TH1D* hFakDYJets[18], TH1D *hPurityDYJets[18])
-{
-
-    //--- get rec Data histograms ---
-    //hRecData will contain Central, JES up/down (3 objects)
-    std::cout << "\n-----> Grabbing rec data histos hRecData!" << std::endl;
-    getHistos(hRecData, fData, variable);
-
-    //--- get rec DYJets histograms ---
-    //hRecDYJets will contain histos from the 9 fDYJets files, and then 4 more at the end for Lumi up/down, then SF up/down (13 objects)
-    std::cout << "\n-----> Grabbing rec signal histos hRecDYJets!" << std::endl;
-    getHistos(hRecDYJets, fDYJets, variable);
-
-    //--- get gen DYJets histograms ---
-    //hGenDYJets will contain histos from the 9 fDYJets files, and then 2 more at the end for Lumi up/down (11 objects)
-    std::cout << "\n-----> Grabbing gen signal histos hGenDYJets!" << std::endl;
-    getHistos(hGenDYJets, fDYJets, "gen" + variable);
-
-    //--- get res DYJets histograms ---
-    //hResDYJets will contain histos from the 9 fDYJets files, and then 4 more at the end for Lumi up/down, then SF up/down (13 objects)
-    std::cout << "\n-----> Grabbing hresponse signal histos hResDYJets!" << std::endl;
-    getHistos(hResDYJets, fDYJets, "hresponse" + variable);
-
-    //--- get rec Bg histograms ---
-    //hRecBg, hRecSumBg will contain histos from the 7 fBg files, and then 4 more at the end for Lumi up/down, then SF up/down (11 objects)
-    std::cout << "\n-----> Grabbing rec BG histos hRecBg and hRecSumBg!" << std::endl;
-    for (unsigned short iBg = 0; iBg < nBg; ++iBg) {
-        std::cout << "\n" << __FILE__ << ":" << __LINE__ << ". variable = " << variable << " file = " << fBg[iBg][0]->GetName() << std::endl;
-        getHistos(hRecBg[iBg], fBg[iBg], variable);
-        for (unsigned short iSyst = 0; iSyst < 11; ++iSyst) {
-            if(hRecBg[iBg][iSyst] == 0){
-                std::cerr << __FILE__ << ":" << __LINE__ << ". Missing histogram " << variable
-          		<< ", systematic id " << iSyst << " for process with central value file " 
-          		<< fBg[iBg][0]->GetName() << ". Exiting.\n";
-                exit(1);
-            }	  
-            if (iBg == 0) hRecSumBg[iSyst] = (TH1D*) hRecBg[0][iSyst]->Clone();
-            else{
-                if(hRecSumBg[iSyst]->GetXaxis()->GetNbins()!=hRecBg[iBg][iSyst]->GetXaxis()->GetNbins()){
-          	  std::cerr << __FILE__ << ":" <<  __LINE__ << ". "
-          		    << "Histogram " << hRecSumBg[iSyst]->GetName()
-          		    << "for systematic index " << iSyst
-          		    << " and background index " << iBg
-          		    << " has a different bining than the background #0.\n";
-                }
-            hRecSumBg[iSyst]->Add(hRecBg[iBg][iSyst]);
-            }
-        }
-    }
-    
-    //--- get response DYJets objects ---
-    //there are 18 respDYJets objects
-    std::cout << "\n-----> Grabbing response objects respDYJets!" << std::endl;
-    getResps(respDYJets, hRecDYJets, hGenDYJets, hResDYJets);
-
-    //--- get fakes DYJets ---
-    //there are 18 hFakDYJets objects
-    std::cout << "\n-----> Grabbing fakes objects hFakDYJets!" << std::endl;
-    getFakes(hFakDYJets, hRecData, hRecSumBg, hRecDYJets, hResDYJets);
-
-    //--- get purities DYJets ---
-    //there are 18 hPurityDYJets objects
-    std::cout << "\n-----> Grabbing purities objects hPurityDYJets!" << std::endl;
-    std::cout << "^^^ SKIPPING THIS!!! (because it doesnt look like our fake subtraction method uses it anyway)" << std::endl;
-    //getPurities(hPurityDYJets, hRecData, hRecSumBg, hRecDYJets, hResDYJets);
-}
-
 void closeFile(TFile *File)
 {
     if (File) {
@@ -325,6 +251,26 @@ void closeAllFiles(TFile *fData[3], TFile *fDYJets[9], TFile *fBg[][7], int nBg)
     }
     //----------------------------------l------------------------------------------------------- 
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+void setNegBinZero(TH2D *histograms2D)
+{
+    int nBinsX(histograms2D->GetNbinsX());
+    int nBinsY(histograms2D->GetNbinsY());
+    
+    for (int i = 1; i <= nBinsX; i++){
+        for(int j = 1; j <= nBinsY; j++){
+            if ( histograms2D->GetBinContent(i,j) < 0 ){
+                histograms2D->SetBinContent(i, j, 0.);
+                histograms2D->SetBinError(i, j, 0.);
+            }
+        }
+    }
+    
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
 
 TH1D* getHisto(TFile *File, const TString variable)
 {
@@ -610,69 +556,65 @@ void getHistos(TH2D *histograms[], TFile *Files[], TString variable)
     }
 }
 
-void getResp(RooUnfoldResponse *response, TFile *File, TString variable)
-{
-    TH1D *hRec = (TH1D*) File->Get(variable)->Clone();
-    hRec->Reset();
-    
-    TH2D *h_Resp = (TH2D*) File->Get("hresponse" + variable);
-    setNegBinZero(h_Resp);
-    
-    response = new RooUnfoldResponse(
-            hRec, 
-            (TH1D*) File->Get("gen" + variable), 
-            h_Resp
-            ); 
-    response->UseOverflow();
-}
+void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hRecDYJets[13], TH1D *hGenDYJets[11], TH2D *hResDYJets[13], TFile *fDYJets[9], TH1D *hRecBg[][11], TH1D *hRecSumBg[11], TFile *fBg[][7], int nBg, TH1D* hFakDYJets[18], TH1D *hPurityDYJets[18]){
 
-RooUnfoldResponse* getResp(TFile *File, TString variable)
-  {
-    TObject* o = File->Get(variable);
-    if(!o){
-      std::cerr << __FILE__ << ":" << __LINE__
-		<< ". Variable " << variable << " was not found in file "
-		<< File->GetName() << "\n";
-      return 0;
+    //--- get rec Data histograms ---
+    //hRecData will contain Central, JES up/down (3 objects)
+    std::cout << "\n-----> Grabbing rec data histos hRecData!" << std::endl;
+    getHistos(hRecData, fData, variable);
+
+    //--- get rec DYJets histograms ---
+    //hRecDYJets will contain histos from the 9 fDYJets files, and then 4 more at the end for Lumi up/down, then SF up/down (13 objects)
+    std::cout << "\n-----> Grabbing rec signal histos hRecDYJets!" << std::endl;
+    getHistos(hRecDYJets, fDYJets, variable);
+
+    //--- get gen DYJets histograms ---
+    //hGenDYJets will contain histos from the 9 fDYJets files, and then 2 more at the end for Lumi up/down (11 objects)
+    std::cout << "\n-----> Grabbing gen signal histos hGenDYJets!" << std::endl;
+    getHistos(hGenDYJets, fDYJets, "gen" + variable);
+
+    //--- get res DYJets histograms ---
+    //hResDYJets will contain histos from the 9 fDYJets files, and then 4 more at the end for Lumi up/down, then SF up/down (13 objects)
+    std::cout << "\n-----> Grabbing hresponse signal histos hResDYJets!" << std::endl;
+    getHistos(hResDYJets, fDYJets, "hresponse" + variable);
+
+    //--- get rec Bg histograms ---
+    //hRecBg, hRecSumBg will contain histos from the 7 fBg files, and then 4 more at the end for Lumi up/down, then SF up/down (11 objects)
+    std::cout << "\n-----> Grabbing rec BG histos hRecBg and hRecSumBg!" << std::endl;
+    for (unsigned short iBg = 0; iBg < nBg; ++iBg) {
+        std::cout << "\n" << __FILE__ << ":" << __LINE__ << ". variable = " << variable << " file = " << fBg[iBg][0]->GetName() << std::endl;
+        getHistos(hRecBg[iBg], fBg[iBg], variable);
+        for (unsigned short iSyst = 0; iSyst < 11; ++iSyst) {
+            if(hRecBg[iBg][iSyst] == 0){
+                std::cerr << __FILE__ << ":" << __LINE__ << ". Missing histogram " << variable
+          		<< ", systematic id " << iSyst << " for process with central value file " 
+          		<< fBg[iBg][0]->GetName() << ". Exiting.\n";
+                exit(1);
+            }	  
+            if (iBg == 0) hRecSumBg[iSyst] = (TH1D*) hRecBg[0][iSyst]->Clone();
+            else{
+                if(hRecSumBg[iSyst]->GetXaxis()->GetNbins()!=hRecBg[iBg][iSyst]->GetXaxis()->GetNbins()){
+          	  std::cerr << __FILE__ << ":" <<  __LINE__ << ". "
+          		    << "Histogram " << hRecSumBg[iSyst]->GetName()
+          		    << "for systematic index " << iSyst
+          		    << " and background index " << iBg
+          		    << " has a different bining than the background #0.\n";
+                }
+            hRecSumBg[iSyst]->Add(hRecBg[iBg][iSyst]);
+            }
+        }
     }
 
-    TH1D *hRec = (TH1D*) o->Clone();
-    hRec->Reset();
+    //--- get fakes DYJets ---
+    //there are 18 hFakDYJets objects
+    std::cout << "\n-----> Grabbing fakes objects hFakDYJets!" << std::endl;
+    getFakes(hFakDYJets, hRecData, hRecSumBg, hRecDYJets, hResDYJets);
 
-    TH2D *h_Resp = (TH2D*) File->Get("hresponse" + variable);
-    setNegBinZero(h_Resp);
-      
-    RooUnfoldResponse *response = new RooUnfoldResponse(
-            hRec, 
-            (TH1D*) File->Get("gen" + variable), 
-            h_Resp
-            ); 
-    response->UseOverflow();
-    return response;
-}
-
-void getResps(RooUnfoldResponse *responses[], TFile *Files[], TString variable)
-{
-    TString fileName = gSystem->BaseName(Files[0]->GetName());
-    int nFiles;
-    if (fileName.Index("Data") >= 0 || fileName.Index("data") >= 0 || fileName.Index("DATA") >= 0) nFiles = 3;
-    else if (/*fileName.Index("DYJets") >= 0 &&*/ fileName.Index("UNFOLDING") >=0 && fileName.Index("Tau") < 0) nFiles = 9;
-    else nFiles = 7;
-
-    for (int i(0); i < nFiles; i++){
-        Files[i]->cd();
-        TH1D *hRec = (TH1D*) Files[i]->Get(variable)->Clone();
-        hRec->Reset();
-        TH2D *h_Resp = (TH2D*) Files[i]->Get("hresponse" + variable);
-        setNegBinZero(h_Resp);
-
-        responses[i] = new RooUnfoldResponse(
-                hRec, 
-                (TH1D*) Files[i]->Get("gen" + variable), 
-                h_Resp
-                ); 
-        responses[i]->UseOverflow();
-    } 
+    //--- get purities DYJets ---
+    //there are 18 hPurityDYJets objects
+    std::cout << "\n-----> Grabbing purities objects hPurityDYJets!" << std::endl;
+    std::cout << "^^^ SKIPPING THIS!!! (because it doesnt look like our fake subtraction method uses it anyway)" << std::endl;
+    //getPurities(hPurityDYJets, hRecData, hRecSumBg, hRecDYJets, hResDYJets);
 }
 
 TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJets)
@@ -785,196 +727,4 @@ void getPurities(TH1D *hPurityDYJets[18], TH1D *hRecData[3], TH1D *hRecSumBg[11]
     hPurityDYJets[15] = getPurities(hRecDYJets[11], hRecData[0], hRecSumBg[9], hResDYJets[11]);
     hPurityDYJets[16] = getPurities(hRecDYJets[12], hRecData[0], hRecSumBg[10], hResDYJets[12]);
     hPurityDYJets[17] = getPurities(hRecDYJets[0], hRecData[0], hRecSumBg[0], hResDYJets[0]);
-}
-
-//this is the getResps function actually used (as of 5 March 2019)
-void getResps(RooUnfoldResponse *responses[], TH1D *hRecDYJets[13], TH1D *hGenDYJets[11], TH2D *hResDYJets[13])
-{
-  if(hGenDYJets[0]==0){
-    std::cerr << "\n" << __FILE__ << ":" << __LINE__ << ". Error. Generator histogram pointer is null\n\n";
-    return;
-  }
-
-    TH1D *hRec = (TH1D*) hRecDYJets[0]->Clone();
-    hRec->Reset();
-    //--- build response object for central ---
-    responses[0] = new RooUnfoldResponse(hRec, hGenDYJets[0], hResDYJets[0]); 
-    responses[0]->UseOverflow();
-
-    //--- build response object for JES up (same as central because JES is done on data) ---
-    responses[1] = new RooUnfoldResponse(hRec, hGenDYJets[0], hResDYJets[0]); 
-    responses[1]->UseOverflow();
-
-    //--- build response object for JES down (same as central because JES is done on data) ---
-    responses[2] = new RooUnfoldResponse(hRec, hGenDYJets[0], hResDYJets[0]); 
-    responses[2]->UseOverflow();
-
-    //--- build response object for PU up ---
-    //responses[3] = new RooUnfoldResponse(hRec, hGenDYJets[1], hResDYJets[1]); 
-    responses[3] = new RooUnfoldResponse(hRecDYJets[1], hGenDYJets[1], hResDYJets[1]); 
-    responses[3]->UseOverflow();
-
-    //--- build response object for PU down ---
-    //responses[4] = new RooUnfoldResponse(hRec, hGenDYJets[2], hResDYJets[2]); 
-    responses[4] = new RooUnfoldResponse(hRecDYJets[2], hGenDYJets[2], hResDYJets[2]);
-    responses[4]->UseOverflow();
-
-    //--- build response object for JER up ---
-    //responses[5] = new RooUnfoldResponse(hRec, hGenDYJets[3], hResDYJets[3]); 
-    responses[5] = new RooUnfoldResponse(hRecDYJets[3], hGenDYJets[3], hResDYJets[3]); 
-    responses[5]->UseOverflow();
-
-    //--- build response object for JER down ---
-    //responses[6] = new RooUnfoldResponse(hRec, hGenDYJets[4], hResDYJets[4]); 
-    responses[6] = new RooUnfoldResponse(hRecDYJets[4], hGenDYJets[4], hResDYJets[4]);
-    responses[6]->UseOverflow();
-
-    //--- build response object for XSec up ---
-    responses[7] = new RooUnfoldResponse(hRec, hGenDYJets[0], hResDYJets[0]); 
-    responses[7]->UseOverflow();
-
-    //--- build response object for XSec down ---
-    responses[8] = new RooUnfoldResponse(hRec, hGenDYJets[0], hResDYJets[0]); 
-    responses[8]->UseOverflow();
-
-    //--- build response object for LES up ---
-    responses[9] = new RooUnfoldResponse(hRec, hGenDYJets[5], hResDYJets[5]);  //hRecDYJets[5]?
-    responses[9]->UseOverflow();
-
-    //--- build response object for LES down ---
-    responses[10] = new RooUnfoldResponse(hRec, hGenDYJets[6], hResDYJets[6]); //hRecDYJets[6]?
-    responses[10]->UseOverflow();
-
-    //--- build response object for LER up ---
-    responses[11] = new RooUnfoldResponse(hRec, hGenDYJets[7], hResDYJets[7]); //hRecDYJets[7]?
-    responses[11]->UseOverflow();
-
-    //--- build response object for LER down ---
-    responses[12] = new RooUnfoldResponse(hRec, hGenDYJets[8], hResDYJets[8]); //hRecDYJets[8]?
-    responses[12]->UseOverflow();
-
-    //--- build response object for Lumi up ---
-    //responses[13] = new RooUnfoldResponse(hRec, hGenDYJets[9], hResDYJets[9]); 
-    responses[13] = new RooUnfoldResponse(hRecDYJets[9], hGenDYJets[9], hResDYJets[9]);
-    responses[13]->UseOverflow();
-
-    //--- build response object for Lumi down ---
-    //responses[14] = new RooUnfoldResponse(hRec, hGenDYJets[10], hResDYJets[10]); 
-    responses[14] = new RooUnfoldResponse(hRecDYJets[10], hGenDYJets[10], hResDYJets[10]);
-    responses[14]->UseOverflow();
-
-    //--- build response object for SF up ---
-    //responses[15] = new RooUnfoldResponse(hRec, hGenDYJets[0], hResDYJets[11]); 
-    responses[15] = new RooUnfoldResponse(hRecDYJets[11], hGenDYJets[0], hResDYJets[11]);
-    responses[15]->UseOverflow();
-
-    //--- build response object for SF down ---
-    //responses[16] = new RooUnfoldResponse(hRec, hGenDYJets[0], hResDYJets[12]); 
-    responses[16] = new RooUnfoldResponse(hRecDYJets[12], hGenDYJets[0], hResDYJets[12]);
-    responses[16]->UseOverflow();
-
-}
-
-void getStatistics(TString lepSel, int jetPtMin, int jetEtaMax, const TString& variable)
-{
-    TString energy = getEnergy();
-
-    //--- make sure lepSel is short version ---
-    if (lepSel == "Muons" || lepSel == "DMu_") lepSel = "DMu";
-    else if (lepSel == "Electrons" || lepSel == "DE_") lepSel = "DE";
-    //-----------------------------------------------
-
-    // jet counter
-    int NBins = 8;
-    double DataEv[20][20] = {{0}};
-
-    //-- fetch the data files and histograms --------------
-    int usedFiles = NFILESDYJETS; 
-
-    TString histoDir = cfg.getS("histoDir");
-
-    for (int i(0); i < usedFiles; i++) {
-        TFile *fData;
-        int sel = FilesDYJets[i];
-
-        fData = getFile(histoDir,  lepSel, energy, Samples[sel].name, jetPtMin, jetEtaMax);
-	if(!fData) continue;
-
-        TH1D *hTemp = getHisto(fData, variable);
-	
-	if(hTemp){
-	  for (int j = 1 ; j < NBins + 1 ; j++ ){
-            Double_t binContent = hTemp->GetBinContent(j);
-            DataEv[i][j] = binContent;
-            if ( i > 0 ) DataEv[usedFiles][j]+=int(binContent);
-	  }
-	}
-        // close all input root files
-        fData->Close();
-    }
-
-    cout << "Closed all files" << endl;
-
-    system("mkdir Statistics");
-    
-    ostringstream nameStr;
-    nameStr << "Statistics/outputTable_" << lepSel << "_" << variable << "_JetPtMin_"
-	    << jetPtMin << "_JetEtaMax_" << jetEtaMax;
-    nameStr << ".tex";
-
-    FILE *outFile = fopen(nameStr.str().c_str(),"w");
-    fprintf( outFile, "\\footnotesize{\n\\begin{tabular}{l|cccccccc} \n ");
-    fprintf( outFile, " &  $N_{\\text{jets}} = 0 $ & $N_{\\text{jets}} = 1 $ & $N_{\\text{jets}} = 2 $ & $N_{\\text{jets}} = 3 $ & $N_{\\text{jets}} = 4 $ & $N_{\\text{jets}} = 5 $ & $N_{\\text{jets}} = 6 $ & $N_{\\text{jets}} = 7$ \\\\ \\hline \n ");
-
-    //// print statistics of all the MC samples
-    for (int i=1; i< usedFiles + 1 ; i++){
-        int sel = FilesDYJets[i];
-
-        if (i < usedFiles) fprintf(outFile, " %s        & ", Samples[sel].legendAN.Data());
-        else {
-            fprintf( outFile, "\\hline \n");
-            fprintf( outFile, " TOTAL & ");
-        }
-        for (int j = 1 ; j < NBins + 1  ; j++ ) {
-            if (j < NBins ) fprintf( outFile, "%d & ", int(DataEv[i][j]));
-            else fprintf( outFile, "%d \\\\ \n ", int(DataEv[i][j]));
-
-        }
-        std::cout << std::endl;
-    }
-
-    // print data statistics
-    fprintf( outFile, "\\hline \n");
-    fprintf( outFile, " Data          & ");
-    for (int j = 1; j< NBins + 1 ; j++){
-        if (j < NBins ) fprintf( outFile, "%d & ",  int(DataEv[0][j]));
-        else fprintf( outFile, "%d \\\\ \n ",  int(DataEv[0][j]));
-    }
-    // print ratio of MC/data
-    fprintf( outFile, " Ratio          & ");
-    for (int j=1; j<NBins + 1; j++){
-        double temp= DataEv[usedFiles][j]/DataEv[0][j];
-        std:: cout << DataEv[usedFiles][j] << "   " << DataEv[0][j] << std::endl;
-        if (j<NBins) fprintf( outFile, "%f & ", float(temp));
-        else fprintf( outFile, "%f \\\\ \n ",temp);
-
-    }
-    fprintf( outFile, "\\end{tabular}}");
-    fclose(outFile);
-}
-
-void setNegBinZero(TH2D *histograms2D)
-{
-    int nBinsX(histograms2D->GetNbinsX());
-    int nBinsY(histograms2D->GetNbinsY());
-    
-    for (int i = 1; i <= nBinsX; i++){
-        for(int j = 1; j <= nBinsY; j++){
-            if ( histograms2D->GetBinContent(i,j) < 0 ){
-                histograms2D->SetBinContent(i, j, 0.);
-                histograms2D->SetBinError(i, j, 0.);
-            }
-        }
-    }
-    
 }

@@ -5,7 +5,6 @@
 #include <cstdarg>
 #include <vector>
 #include <TLorentzVector.h>
-#include <RooUnfoldResponse.h>
 
 using namespace std;
 
@@ -84,11 +83,8 @@ class table{
         vector<record> recd;
 };
 
-double SmearLepPt(double recoPt, double genPt, int smearlepton, double smearFactor);
-double SmearJetPt(double, double, double, int);
 void bestTwoJetsCandidatesPt(vector<jetStruct>, pair<TLorentzVector, TLorentzVector>&);
 void bestTwoJetsCandidatesPhi(vector<jetStruct>, pair<TLorentzVector, TLorentzVector>&);
-void BTagModification(double randNumber, double pt, double eta, int jetFlavour, bool &passBJets);
 
 /** Open in read mode a file on eos or a local file. For EOS file,
  * performance might be limited and it should be kept to small file:
@@ -108,14 +104,5 @@ FILE* eosOpen(const char* path, int (**closeFunc)(FILE*));
  * @return true iff the file is a ROOT file.
  */
 bool isRootFile(const char* path);
-
-/** Adds histograms and RooUnfoldResponse objects  with same name
- * and definition read from different files and writes the result
- * in a new file.
- * @param src list of input files
- * @param dest output files
- * @return true on success, false on failure
- */
-bool mergeHistFiles(const std::vector<std::string>& src, const std::string& dest);
 
 #endif

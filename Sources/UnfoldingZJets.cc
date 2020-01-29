@@ -10,9 +10,6 @@
 #include <TCanvas.h>
 #include <TArrow.h>
 #include <TLine.h>
-#include <RooUnfoldBayes.h>
-#include <RooUnfoldBinByBin.h>
-#include <RooUnfoldSvd.h>
 #include <TSVDUnfold.h>
 #include <TParameter.h>
 #include "fileNamesZJets.h"
@@ -204,18 +201,16 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
         TH1D *hFakDYJets[18] = {NULL};
         //--- purity "histograms" ---
         TH1D *hPurity[18] = {NULL};
-        //--- response DYJets objects ---
-        RooUnfoldResponse *respDYJets[18] = {NULL};
         
         //--- Get all histograms needed for unfolding! ---
         // Note: andrew -- ttbar scaling done inside getAllHistos
         std::cout << "\nGrabbing all needed histograms from files opened above..." << std::endl;
-        getAllHistos(variable, hRecData, fData, hRecDYJets, hGenDYJets, hResDYJets, fDYJets, hRecBg, hRecSumBg, fBg, NBGDYJETS, respDYJets, hFakDYJets, hPurity);
+        getAllHistos(variable, hRecData, fData, hRecDYJets, hGenDYJets, hResDYJets, fDYJets, hRecBg, hRecSumBg, fBg, NBGDYJETS, hFakDYJets, hPurity);
         
         //--- Get histos from theory files (if files opened above)
         TH1D *hGen1 = NULL;
         TH1D *hGen2 = NULL;
-        if (DYSHERPA14FILENAME.Length() > 0 ) respDYJets[17] = getResp(fSheUnf, variable); // Sherpa Unfolding response (Resp Syst)
+        // if (DYSHERPA14FILENAME.Length() > 0 ) respDYJets[17] = getResp(fSheUnf, variable); // Sherpa Unfolding response (Resp Syst)
         if (DYMGPYTHIA8FILENAME.Length() > 0 ) hGen1 = getHisto(fGen1, "gen" + variable);
         if (NNLO1JFILENAME.Length() > 0 ){
             if (variable == "FirstJetPt_Zinc1jet" || variable == "JetsHT_Zinc1jet" || variable == "FirstJetAbsRapidity_Zinc1jet" || variable == "dRptmin100LepCloseJetCo300dR04_Zinc1jet" || variable == "dPhiLepJet1_Zinc1jet"){
@@ -532,7 +527,6 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
         hMadGenCrossSection->Write("hMadGenDYJetsCrossSection"); //gen MC for W+jets NLO FxFx signal (also)
         hGen1CrossSection->Write("hGen1DYJetsCrossSection"); //gen MC for W+jets LO MLM signal
         //hGen2CrossSection->Write("hGen2DYJetsCrossSection");
-        respDYJets[0]->Write("respDYJetsCentral"); //RooUnfoldResponse object for constructed for signal 
         hResDYJets[0]->Write("hResDYJetsCentral"); //hResDYJets is the TH2 used to form response objects respDYJets
         std::cout <<  __FILE__ << ", "  << __LINE__ << std::endl;
       //write out unfolded histograms
@@ -581,8 +575,333 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
 
 }
 
-void createSystPlots(TString outputFileName, TString variable, TString lepSel, TH1D *hUnfData[], bool logy)
-{
+int TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRecDataMinusFakes, TH1D* &hUnfData, TH1D* &hUnfDataNoScale, 
+TH2D* &hUnfDataStatCov, TH2D* &hUnfDataStatCovNoScale, TH2D* &hUnfMCStatCov, TH2D* &hUnfMCStatCovNoScale, TString name, double integratedLumi, TH1D* hGenDYJets, 
+bool logy, bool doRatioUnfold){
+
+    printf("=========================================================================\n");
+    printf("Beginning TUnfoldData function...\n");
+    printf("Name of systematic: %s\n", name.Data());
+    std::cout << "----------------------------" << std::endl;
+
+    // Create output file ---
+    TString variable = TString(hRecDataMinusFakes->GetName());
+    TString unfoldOutputDir = "UnfoldingCheck";
+    if (doRatioUnfold) unfoldOutputDir += "Ratio";
+    unfoldOutputDir += "/";
+    system("mkdir -p "+unfoldOutputDir);
+    TFile *f = new TFile(unfoldOutputDir + lepSel + "_" + variable + "_" + name + ".root", "RECREATE");
+    f->cd();
+
+    // ---------------------------------------------------------------------------
+
+    // BG subtracted, fakes removed from reco data distribution
+    TH1D * recoData = (TH1D*) hRecDataMinusFakes->Clone(); 
+    TH1D * genDY = (TH1D*) hGenDYJets->Clone();
+    TH2D * responseMatrix = (TH2D*) resp->Clone();
+
+    // ----- RECO DISTRIBUTION ----- 
+    printf("\n >>>>> recoData->GetNbinsX=%d\n", recoData->GetNbinsX());
+    double recoEventCounter = 0.;
+    for(int i = 1; i <= recoData->GetNbinsX(); i++){
+        recoEventCounter += recoData->GetBinContent(i);
+        printf("Bin %i, (%F, %F): %F\n", i, recoData->GetBinLowEdge(i), recoData->GetXaxis()->GetBinUpEdge(i), recoData->GetBinContent(i));
+    }
+    printf("#Events in input reco dist.: %F\n", recoEventCounter);
+
+    // ----- GEN DISTRIBUTION ----- 
+    printf("\n >>>>> genDY->GetNbinsX=%d\n", genDY->GetNbinsX());
+    double genEventCounter = 0.;
+    for(int i = 1; i <= genDY->GetNbinsX(); i++){
+        genEventCounter += genDY->GetBinContent(i);
+        printf("Bin %i, (%F, %F): %F\n", i, genDY->GetBinLowEdge(i), genDY->GetXaxis()->GetBinUpEdge(i), genDY->GetBinContent(i));
+    }
+    printf("#Events in input gen dist.: %F\n", genEventCounter);
+
+    // ----- RESPONSE MATRIX ----- 
+    int nBinsRespX = responseMatrix->GetNbinsX();
+    int nBinsRespY = responseMatrix->GetNbinsY();
+    printf("\n >>>>> responseMatrix->GetNbinsX=%d, responseMatrix->GetNbinsY=%d\n", nBinsRespX, nBinsRespY);
+    // Add non-reconstructed fiducial events (of gen origin) in underflow reco bins
+    // (b/c response matrix is filled with events that pass gen and reco cuts)
+    // this is necessary for proper normalization of response matrix within TUnfold
+    printf(" --- Normalizing response matrix taking non-reconstructed gen events into account...\n");
+    std::vector<double> dataEfficiency;
+    for(int i=1; i <= nBinsRespY; i++) { // GEN
+        double genBin = genDY->GetBinContent(i);
+        double recBin = 0;
+        for(int j=1; j <= nBinsRespX+1; j++) { // RECO (include overflow)
+            recBin += responseMatrix->GetBinContent(j,i);
+        }
+        //printf("Gen bin content = %F, Reco bin content (integrated over gen row) = %F, Efficiency = %F\n",genBin,recBin,recBin/genBin);
+        dataEfficiency.push_back(recBin/genBin);
+        //if(genBin-recBin <= 0) printf("Bin %d totally efficient (%f/%f/%f)\n",i,genBin,recBin,genBin-recBin);
+        //if(i==1) printf("Bin %d totally efficient (%f/%f/%f)\n",i,genBin,recBin,genBin-recBin);
+        printf(" - Efficiency of reconstruction for gen bin #%d: %F\n", i, dataEfficiency[i-1]);
+        printf("Before: %F  After: %F\n",responseMatrix->GetBinContent(0,i),TMath::Max(genBin-recBin,0.0));
+        responseMatrix->SetBinContent(0,i,TMath::Max(genBin-recBin,0.0));
+    }
+    //Set some gen overflow bins to 0 in response matrix:
+    for(int i=1; i<=responseMatrix->GetNbinsX(); i++) {
+        responseMatrix->SetBinContent(i, responseMatrix->GetNbinsY()+1, 0.0);
+    }
+    //and the reco overflow bins to 0 as well
+    for(int i=1; i<=responseMatrix->GetNbinsY(); i++) {
+        responseMatrix->SetBinContent(responseMatrix->GetNbinsX()+1, i, 0.0);
+    }
+
+  //  //print overflow and underflow bins
+  //  std::cout << "Printing response matrix bin content: " << std::endl;
+  //  printf("responseMatrix->GetNbinsX=%d, responseMatrix->GetNbinsY=%d\n", nBinsRespX, nBinsRespY);
+  //  for(int i=0; i < nBinsRespX+2; i++){
+  //      for(int j=0; j < nBinsRespY+2; j++){
+  //          printf("Value in Bin(%i,%i): %f\n", i, j, responseMatrix->GetBinContent(i,j));
+  //      }
+  //  }
+    
+    //This should be done in the unfolding (check on this), keeping for reference.
+    /*
+    for(int i=1;i<=recoData->GetNbinsX();i++){
+  printf("recoData->GetBinContent(%d)=%F -> recoData->GetBinContent(%d)=%F\n",i,
+         recoData->GetBinContent(i), i, recoData->GetBinContent(i)/dataEfficiency[i-1]);
+  recoData->SetBinContent(i,recoData->GetBinContent(i)/dataEfficiency[i-1]);
+    }
+    */
+    
+    recoData->Write();
+    genDY->Write();
+    responseMatrix->Write();
+
+    // ---------------------------------------------------------------------------
+    
+    printf("\n-----> Doing the unfolding \n");
+    TUnfold::ERegMode regMode = TUnfold::kRegModeCurvature;
+    TUnfold::EConstraint constraintMode = TUnfold::kEConstraintArea; // preserve the area (constrain)
+    TUnfoldDensity::EDensityMode densityFlags = TUnfoldDensity::kDensityModeBinWidth;
+    //Define constructor and use SetInput to input the measurement that is to be unfolded
+    TUnfoldDensity unfold(responseMatrix, TUnfold::kHistMapOutputVert, regMode, constraintMode, densityFlags);
+    unfold.SetInput(recoData);
+
+    //--- Manual unfolding ---
+    //Double_t tau=1.E-4;
+    Double_t tau=0.0;
+    // Double_t biasScale=0.0;
+    //--- ---
+
+    int regParam_=-3;
+    //int regParam_=0;
+    //int regParam_=1;
+    int iBest=regParam_;
+
+    Int_t nScan=30;
+    //Int_t nScan=100;
+    TSpline *logTauX,*logTauY;
+    TSpline *rhoLogTau=0;
+    TGraph *lCurve=0;
+    
+    if (regParam_ < 0){
+        printf("\n-----> Doing ScanLcurve method\n");
+        // this method scans the parameter tau and finds the kink in the L curve
+        //   // finally, the unfolding is done for the best choice of tau
+        iBest = unfold.ScanLcurve(nScan,0.,0.,&lCurve,&logTauX,&logTauY);
+        //iBest=unfold.ScanTau(nScan,0.,0.,&rhoLogTau,
+        //           TUnfoldDensity::kEScanTauRhoMax);
+    }
+    else if(regParam_ > 0){
+        printf("\n-----> Doing ScanTau method\n");
+        iBest=unfold.ScanTau(50,0.0,0.0,&rhoLogTau,TUnfoldDensity::kEScanTauRhoAvg);
+    }
+    else{
+        printf("\n-----> Doing manual DoUnfold method\n");
+        std::cout << "manually set tau value = " << tau << std::endl;
+        unfold.DoUnfold(tau);
+    }
+    
+    if(lCurve) {
+        Double_t t[1],x[1],y[1];
+        TGraph *bestLcurve;
+        logTauX->GetKnot(iBest,t[0],x[0]);
+        logTauY->GetKnot(iBest,t[0],y[0]);
+        bestLcurve = new TGraph(1,x,y);
+        printf("Writing out L-curve plot...\n");
+        TCanvas *canLCurve = new TCanvas("LCurveScan", "LCurveScan", 500, 500);
+        canLCurve->cd();
+        lCurve->Draw("AL");
+        bestLcurve->SetMarkerColor(kRed);
+        bestLcurve->Draw("*");
+        canLCurve->Write();
+    }
+    Double_t tauFinal = unfold.GetTau();
+    printf("Final value of tau*10^8: %f\n", tauFinal*100000000.);
+    
+    // ---------------------------------------------------------------------------
+
+    // Get output from unfolding ---
+    hUnfData = (TH1D*)unfold.GetOutput("UnfData_"+name)->Clone();
+    hUnfData->SetTitle(hRecDataMinusFakes->GetTitle());
+    hUnfData->GetXaxis()->SetTitle(hRecDataMinusFakes->GetXaxis()->GetTitle());
+    hUnfData->GetYaxis()->SetTitle(hRecDataMinusFakes->GetYaxis()->GetTitle());
+    printf("\nUnfolded data:");
+    printf("\n >>>>> hUnfData->GetNbinsX=%d\n", hUnfData->GetNbinsX());
+    double unfEventCounter = 0;
+    for(int i = 1; i <= hUnfData->GetNbinsX(); i++){
+        unfEventCounter += hUnfData->GetBinContent(i);
+        printf("Bin %i, (%F, %F): %F\n", i, hUnfData->GetBinLowEdge(i), hUnfData->GetXaxis()->GetBinUpEdge(i), hUnfData->GetBinContent(i));
+    }
+    printf("#Events in unfolded dist.: %F\n", unfEventCounter);
+    hUnfDataNoScale = (TH1D*) hUnfData->Clone("UnfData_"+name+"_NoScale");
+    hUnfDataNoScale->Write();
+
+    //Get covariance contribution from the input uncertainties (data statistical uncertainties) 
+    hUnfDataStatCov = (TH2D*)unfold.GetEmatrixInput("dataStatCov", "dataStatCov", 0, 0, kTRUE)->Clone(); //Last 3 inputs are default;
+    hUnfDataStatCov->SetName("UnfDataStatCov_" + name);
+    hUnfDataStatCov->SetTitle(hRecDataMinusFakes->GetTitle());
+    hUnfDataStatCovNoScale = (TH2D*) hUnfDataStatCov->Clone("UnfDataStatCov_"+name+"_NoScale");
+    hUnfDataStatCovNoScale->Write();
+    
+    //Retreive covariance contribution from uncorrelated (statistical) uncertainties of the response matrix. 
+    //Equivalent to RooUnfold::Ereco(RooUnfold::kCovariance) with IncludeSystematics(2). 
+    hUnfMCStatCov = (TH2D*)unfold.GetEmatrixSysUncorr("respStatCov", "respStatCov", 0, 0, kTRUE)->Clone(); //Last 3 inputs are default;
+    hUnfMCStatCov->SetName("UnfMCStatCov_" + name);
+    hUnfMCStatCov->SetTitle(hRecDataMinusFakes->GetTitle());
+    hUnfMCStatCovNoScale = (TH2D*) hUnfMCStatCov->Clone("UnfMCStatCov_"+name+"_NoScale");
+    hUnfMCStatCovNoScale->Write();
+
+    printf("\nChi2A = %F\n",unfold.GetChi2A());
+    printf("Number of degrees of freedom = %d\n",unfold.GetNdf());
+    //TH2D *probabilityMatrix = (TH2D*)unfold.GetProbabilityMatrix("probabilityMatrix")->Clone();
+    //probabilityMatrix->Write();
+    TH2D *corrCoeffMatrix = (TH2D*)unfold.GetRhoIJtotal("corrCoeffMatrix")->Clone();
+    corrCoeffMatrix->Write();
+
+    TH1D *foldedData = (TH1D*)unfold.GetFoldedOutput("foldedData");
+    //printf("---> Input data:\n");
+    //for(int i=1;i<=recoData->GetNbinsX();i++){
+    //    printf("bin %i: %F\n",i,recoData->GetBinContent(i));
+    //}
+    if(foldedData){
+        foldedData->Write();
+        //printf("---> Folded result:\n");
+        //for(int i=1;i<=foldedData->GetNbinsX();i++){
+        //    printf("bin %i: %F\n",i,foldedData->GetBinContent(i));
+        //}
+        printf("\n >>>>> Ratio of RecoData/Folded:\n"); 
+        TH1D *foldedClosureRatio = (TH1D*) recoData->Clone();
+        foldedClosureRatio->SetName("foldedClosureRatio");
+        foldedClosureRatio->SetTitle("foldedClosureRatio");
+        foldedClosureRatio->GetXaxis()->SetTitle(hRecDataMinusFakes->GetXaxis()->GetTitle());
+        foldedClosureRatio->GetYaxis()->SetTitle("RecoData/Folded");
+        foldedClosureRatio->Divide(foldedData);
+        for(int i = 1; i <= foldedData->GetNbinsX(); i++){
+            printf("Bin %i: %F\n", i, foldedClosureRatio->GetBinContent(i));
+        }
+        foldedClosureRatio->Write();
+    }
+
+    // Get Unfolded/Reco to quantify the effects of the unfolding ---
+    // 1) Have to first merge the split bins of the reco-level distribution
+    // to match the binning of the unfolded dist (which should be the same as gen-level)
+
+    //set bin content of this new histo using bin contents from original
+    TH1D *recoDataNominal = (TH1D*) recoData->Clone();
+    int numBinsXRecoNominal = recoDataNominal->GetNbinsX();
+
+    //create the resized histo using binning info from unfolded dist
+    int numBinsUnf =  hUnfData->GetNbinsX();
+    // double xminUnf = hUnfData->GetXaxis()->GetXmin();
+    // double xmaxUnf = hUnfData->GetXaxis()->GetXmax();
+    Double_t xBinsUnf[numBinsUnf+1]; //array of bin edges from unfolded dist.
+    for (int i(1); i < numBinsUnf + 2; i++){ //use low bin edge of overflow bin for upper bin edge of last real bin
+        double binlowUnf = hUnfData->GetBinLowEdge(i);
+        // double binhighUnf = hUnfData->GetXaxis()->GetBinUpEdge(i);
+        xBinsUnf[i-1] = binlowUnf;
+    }
+
+    // create new reco-level histogram with binning of unfolded distribution
+    // logic below only works because the num. of reco bins is even
+    // because #reco bins = 2 * #gen bins...
+    TH1D *recoData_binsMerged = new TH1D("", "", numBinsUnf, xBinsUnf);
+    int newHistoCounter = 1;
+    for (int i(1); i < numBinsXRecoNominal + 1; i += 2){
+        double bincount1 = recoDataNominal->GetBinContent(i);
+        double bincount2 = recoDataNominal->GetBinContent(i+1);
+        recoData_binsMerged->SetBinContent(newHistoCounter, (bincount1 + bincount2));
+        newHistoCounter++;
+    }
+
+    // 2) Then take the ratio
+    if(hUnfData){
+        printf("\nRatio of Unfolded/RecoData:"); 
+        TH1D *UnfRecoRatio = (TH1D*) hUnfData->Clone();
+        UnfRecoRatio->Divide(recoData_binsMerged);
+        printf("\n >>>>> UnfRecoRatio->GetNbinsX=%d\n", UnfRecoRatio->GetNbinsX());
+        for(int i = 1; i <= UnfRecoRatio->GetNbinsX(); i++){
+            printf("Bin %i: %F\n", i, UnfRecoRatio->GetBinContent(i));
+        }
+        UnfRecoRatio->SetName("unfRecoRatio");
+        UnfRecoRatio->SetTitle("unfRecoRatio");
+        UnfRecoRatio->GetXaxis()->SetTitle(hRecDataMinusFakes->GetXaxis()->GetTitle());
+        UnfRecoRatio->GetYaxis()->SetTitle("Unfolded/Reco");
+        // set y-axis bounds between 0.5 and 1.5...
+        UnfRecoRatio->Write();
+    }
+
+    // ---------------------------------------------------------------------------
+    
+    //For single-diff. xsecs, need to scale unfolded event counts by int. lumi and bin widths to get xsec
+    if (!doRatioUnfold){
+        //--- divide by luminosity ---
+        double lumiUnc = cfg.getD("lumiUnc", 0.027);
+        printf("\nScaling data %s by int. lumi = %F... \n",hUnfData->GetName(), integratedLumi);
+        hUnfData->Scale(1./integratedLumi);
+        if(hUnfDataStatCov) hUnfDataStatCov->Scale(1./(integratedLumi*integratedLumi));
+        if(hUnfMCStatCov) hUnfMCStatCov->Scale(1./(integratedLumi*integratedLumi));
+        if ("LumiUp" == name) {
+            printf("With lumiUnc = %F\n",lumiUnc);
+            hUnfData->Scale(1./(1+lumiUnc));
+            if(hUnfDataStatCov) hUnfDataStatCov->Scale(1./((1+lumiUnc)*(1+lumiUnc)));
+            if(hUnfMCStatCov) hUnfMCStatCov->Scale(1./((1+lumiUnc)*(1+lumiUnc)));
+        }
+        else if ("LumiDown" == name) {
+            printf("With lumiUnc = %F\n",lumiUnc);
+            hUnfData->Scale(1./(1-lumiUnc));
+            if(hUnfDataStatCov) hUnfDataStatCov->Scale(1./((1-lumiUnc)*(1-lumiUnc)));
+            if(hUnfMCStatCov) hUnfMCStatCov->Scale(1./((1-lumiUnc)*(1-lumiUnc)));
+        }
+        //--- divide by bin width to get cross section ---
+        printf("Normalizing to bin widths to get cross section...\n");
+        int nBins = hUnfData->GetNbinsX();
+        for (int i = 1; i <= nBins; ++i) {
+            double binWidth = hUnfData->GetBinWidth(i);
+            hUnfData->SetBinContent(i, hUnfData->GetBinContent(i)*(1./binWidth));
+            hUnfData->SetBinError(i, hUnfData->GetBinError(i)*(1./binWidth));
+            for (int j = 1; j <= nBins; ++j) {
+                double binWidth2 = hUnfData->GetBinWidth(j);
+                if(hUnfDataStatCov){
+                    hUnfDataStatCov->SetBinContent(i, j, hUnfDataStatCov->GetBinContent(i, j)*(1./(binWidth*binWidth2)));
+                    hUnfDataStatCov->SetBinError(i, j, hUnfDataStatCov->GetBinError(i, j)*(1./(binWidth*binWidth2)));
+                }
+                if(hUnfMCStatCov){
+                    hUnfMCStatCov->SetBinContent(i, j, hUnfMCStatCov->GetBinContent(i, j)*(1./(binWidth*binWidth2)));
+                    hUnfMCStatCov->SetBinError(i, j, hUnfMCStatCov->GetBinError(i, j)*(1./(binWidth*binWidth2)));
+                }
+            }
+        }
+    }
+
+    hUnfData->Write();
+    hUnfDataStatCov->Write();
+    hUnfMCStatCov->Write();
+
+    // ---------------------------------------------------------------------------
+
+    f->Close();
+    printf("\nExiting TUnfoldData function...");
+    printf("\n=========================================================================\n");
+    return 0;
+}
+
+void createSystPlots(TString outputFileName, TString variable, TString lepSel, TH1D *hUnfData[], bool logy){
 
   // 0 - Central, 
   // 1 - JES up, 2 - JES down, 
@@ -696,8 +1015,7 @@ void createSystPlots(TString outputFileName, TString variable, TString lepSel, T
     }
 }
 
-void createInclusivePlots(bool doNormalized, TString outputFileName, TString lepSel, TH1D *hUnfData, TH2D *hCov[], TH1D *hMadGenCrossSection, TH1D *hSheGenCrossSection)
-{
+void createInclusivePlots(bool doNormalized, TString outputFileName, TString lepSel, TH1D *hUnfData, TH2D *hCov[], TH1D *hMadGenCrossSection, TH1D *hSheGenCrossSection){
 
     TH1D *hInc = (TH1D*) hUnfData->Clone("ZNGoodJets_Zinc");
     TH1D *hIncMad = (TH1D*) hMadGenCrossSection->Clone("ZNGoodJets_Zinc_Mad");
@@ -760,8 +1078,7 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
     createTable(outputFileName, lepSel, TString("ZNGoodJets_Zinc"), doNormalized, hInc, hCovInc);
 }
 
-void createTable(TString outputFileName, TString lepSel, TString variable, bool doNormalized, TH1D *hUnfData, TH2D *hCov[])
-{
+void createTable(TString outputFileName, TString lepSel, TString variable, bool doNormalized, TH1D *hUnfData, TH2D *hCov[]){
     cout << "Hello" << endl;    
     //--- print out break down of errors ---
     TString title = hUnfData->GetTitle();
@@ -872,313 +1189,7 @@ void createTable(TString outputFileName, TString lepSel, TString variable, bool 
     if(verbosity > 0) cout << table << endl;
 }
 
-int TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRecDataMinusFakes, TH1D* &hUnfData, TH1D* &hUnfDataNoScale, 
-TH2D* &hUnfDataStatCov, TH2D* &hUnfDataStatCovNoScale, TH2D* &hUnfMCStatCov, TH2D* &hUnfMCStatCovNoScale, TString name, double integratedLumi, TH1D* hGenDYJets, 
-bool logy, bool doRatioUnfold){
-
-    printf("=========================================================================\n");
-    printf("Beginning TUnfoldData function...\n");
-    printf("Name of systematic: %s\n", name.Data());
-    std::cout << "----------------------------" << std::endl;
-
-    // Create output file ---
-    TString variable = TString(hRecDataMinusFakes->GetName());
-    TString unfoldOutputDir = "UnfoldingCheck";
-    if (doRatioUnfold) unfoldOutputDir += "Ratio";
-    unfoldOutputDir += "/";
-    system("mkdir -p "+unfoldOutputDir);
-    TFile *f = new TFile(unfoldOutputDir + lepSel + "_" + variable + "_" + name + ".root", "RECREATE");
-    f->cd();
-
-    // ---------------------------------------------------------------------------
-
-    // BG subtracted, fakes removed from reco data distribution
-    TH1D * recoData = (TH1D*) hRecDataMinusFakes->Clone(); 
-    TH1D * genDY = (TH1D*) hGenDYJets->Clone();
-    TH2D * responseMatrix = (TH2D*) resp->Clone();
-    //TH2D * responseMatrix = (TH2D*) resp->Hresponse(); //grab the response matrix histo using the Hresponse() method on the RooUnfoldResponse object
-    //Note: Hresponse() method for RooUnfoldResponse class gives a 2D histogram
-    //where gen/truth is on y-axis and reco/measured is on x-axis
-
-    // ----- RECO DISTRIBUTION ----- 
-    printf("\n >>>>> recoData->GetNbinsX=%d\n", recoData->GetNbinsX());
-    double recoEventCounter = 0;
-    for(int i = 1; i <= recoData->GetNbinsX(); i++){
-        recoEventCounter += recoData->GetBinContent(i);
-        printf("Bin %i, (%F, %F): %F\n", i, recoData->GetBinLowEdge(i), recoData->GetXaxis()->GetBinUpEdge(i), recoData->GetBinContent(i));
-    }
-    printf("#Events in input reco dist.: %F\n", recoEventCounter);
-
-    // ----- GEN DISTRIBUTION ----- 
-    printf("\n >>>>> genDY->GetNbinsX=%d\n", genDY->GetNbinsX());
-    double genEventCounter = 0;
-    for(int i = 1; i <= genDY->GetNbinsX(); i++){
-        genEventCounter += genDY->GetBinContent(i);
-        //    printf("bin %i, (%F, %F): %F\n", i, genDY->GetBinLowEdge(i), genDY->GetXaxis()->GetBinUpEdge(i), genDY->GetBinContent(i));
-    }
-    printf("#Events in input gen dist.: %F\n", genEventCounter);
-
-    // ----- RESPONSE MATRIX ----- 
-    int nBinsRespX = responseMatrix->GetNbinsX();
-    int nBinsRespY = responseMatrix->GetNbinsY();
-    printf("\n >>>>> responseMatrix->GetNbinsX=%d, responseMatrix->GetNbinsY=%d\n", nBinsRespX, nBinsRespY);
-    // Add non-reconstructed fiducial events (of gen origin) in underflow reco bins
-    // (b/c response matrix is filled with events that pass gen and reco cuts)
-    // this is necessary for proper normalization of response matrix within TUnfold
-    printf(" --- Normalizing response matrix taking non-reconstructed gen events into account...\n");
-    std::vector<double> dataEfficiency;
-    for(int i=1; i <= nBinsRespY; i++) { // GEN
-        double genBin = genDY->GetBinContent(i);
-        double recBin = 0;
-        for(int j=1; j <= nBinsRespX+1; j++) { // RECO (include overflow)
-            recBin += responseMatrix->GetBinContent(j,i);
-        }
-        //printf("Gen bin content = %F, Reco bin content (integrated over gen row) = %F, Efficiency = %F\n",genBin,recBin,recBin/genBin);
-        dataEfficiency.push_back(recBin/genBin);
-        //if(genBin-recBin <= 0) printf("Bin %d totally efficient (%f/%f/%f)\n",i,genBin,recBin,genBin-recBin);
-        //if(i==1) printf("Bin %d totally efficient (%f/%f/%f)\n",i,genBin,recBin,genBin-recBin);
-        printf(" - Efficiency of reconstruction for gen bin #%d: %F\n", i, dataEfficiency[i-1]);
-        printf("Before: %F  After: %F\n",responseMatrix->GetBinContent(0,i),TMath::Max(genBin-recBin,0.0));
-        responseMatrix->SetBinContent(0,i,TMath::Max(genBin-recBin,0.0));
-    }
-    //Set some gen overflow bins to 0 in response matrix:
-    for(int i=1; i<=responseMatrix->GetNbinsX(); i++) {
-        responseMatrix->SetBinContent(i, responseMatrix->GetNbinsY()+1, 0.0);
-    }
-    //and the reco overflow bins to 0 as well
-    for(int i=1; i<=responseMatrix->GetNbinsY(); i++) {
-        responseMatrix->SetBinContent(responseMatrix->GetNbinsX()+1, i, 0.0);
-    }
-
-  //  //print overflow and underflow bins
-  //  std::cout << "Printing response matrix bin content: " << std::endl;
-  //  printf("responseMatrix->GetNbinsX=%d, responseMatrix->GetNbinsY=%d\n", nBinsRespX, nBinsRespY);
-  //  for(int i=0; i < nBinsRespX+2; i++){
-  //      for(int j=0; j < nBinsRespY+2; j++){
-  //          printf("Value in Bin(%i,%i): %f\n", i, j, responseMatrix->GetBinContent(i,j));
-  //      }
-  //  }
-    
-    //This should be done in the unfolding (check on this), keeping for reference.
-    /*
-    for(int i=1;i<=recoData->GetNbinsX();i++){
-  printf("recoData->GetBinContent(%d)=%F -> recoData->GetBinContent(%d)=%F\n",i,
-         recoData->GetBinContent(i), i, recoData->GetBinContent(i)/dataEfficiency[i-1]);
-  recoData->SetBinContent(i,recoData->GetBinContent(i)/dataEfficiency[i-1]);
-    }
-    */
-    
-    recoData->Write();
-    genDY->Write();
-    responseMatrix->Write();
-
-    // ---------------------------------------------------------------------------
-    
-    printf("\n-----> Doing the unfolding \n");
-    TUnfold::ERegMode regMode = TUnfold::kRegModeCurvature;
-    TUnfold::EConstraint constraintMode = TUnfold::kEConstraintArea; // preserve the area (constrain)
-    TUnfoldDensity::EDensityMode densityFlags = TUnfoldDensity::kDensityModeBinWidth;
-    //Define constructor and use SetInput to input the measurement that is to be unfolded
-    TUnfoldDensity unfold(responseMatrix, TUnfold::kHistMapOutputVert, regMode, constraintMode, densityFlags);
-    unfold.SetInput(recoData);
-
-    //--- Manual unfolding ---
-    //Double_t tau=1.E-4;
-    Double_t tau=0.0;
-    Double_t biasScale=0.0;
-    //--- ---
-
-    int regParam_=-3;
-    //int regParam_=0;
-    //int regParam_=1;
-    int iBest=regParam_;
-
-    Int_t nScan=30;
-    //Int_t nScan=100;
-    TSpline *logTauX,*logTauY;
-    TSpline *rhoLogTau=0;
-    TGraph *lCurve=0;
-    
-    if (regParam_ < 0) {
-        printf("\n-----> Doing ScanLcurve method\n");
-        // this method scans the parameter tau and finds the kink in the L curve
-        //   // finally, the unfolding is done for the best choice of tau
-        iBest = unfold.ScanLcurve(nScan,0.,0.,&lCurve,&logTauX,&logTauY);
-        //iBest=unfold.ScanTau(nScan,0.,0.,&rhoLogTau,
-        //           TUnfoldDensity::kEScanTauRhoMax);
-    }
-    else if(regParam_ > 0) {
-        printf("\n-----> Doing ScanTau method\n");
-        iBest=unfold.ScanTau(50,0.0,0.0,&rhoLogTau,TUnfoldDensity::kEScanTauRhoAvg);
-    }
-    else {
-        printf("\n-----> Doing manual DoUnfold method\n");
-        std::cout << "manually set tau value = " << tau << std::endl;
-        unfold.DoUnfold(tau);
-    }
-    
-    if(lCurve) {
-        Double_t t[1],x[1],y[1];
-        TGraph *bestLcurve;
-        logTauX->GetKnot(iBest,t[0],x[0]);
-        logTauY->GetKnot(iBest,t[0],y[0]);
-        bestLcurve = new TGraph(1,x,y);
-        printf("Writing out L-curve plot...\n");
-        TCanvas *canLCurve = new TCanvas("LCurveScan", "LCurveScan", 500, 500);
-        canLCurve->cd();
-        lCurve->Draw("AL");
-        bestLcurve->SetMarkerColor(kRed);
-        bestLcurve->Draw("*");
-        canLCurve->Write();
-    }
-    Double_t tauFinal = unfold.GetTau();
-    printf("Final value of tau*10^8: %f\n", tauFinal*100000000.);
-    
-    // ---------------------------------------------------------------------------
-
-    // Get output from unfolding ---
-    hUnfData = (TH1D*)unfold.GetOutput("UnfData_"+name)->Clone();
-    hUnfData->SetTitle(hRecDataMinusFakes->GetTitle());
-    hUnfData->GetXaxis()->SetTitle(hRecDataMinusFakes->GetXaxis()->GetTitle());
-    hUnfData->GetYaxis()->SetTitle(hRecDataMinusFakes->GetYaxis()->GetTitle());
-    printf("\n >>>>> Unfolded data:\n");
-    double unfEventCounter = 0;
-    for(int i = 1; i <= hUnfData->GetNbinsX(); i++){
-        unfEventCounter += hUnfData->GetBinContent(i);
-        printf("Bin %i, (%F, %F): %F\n", i, hUnfData->GetBinLowEdge(i), hUnfData->GetXaxis()->GetBinUpEdge(i), hUnfData->GetBinContent(i));
-    }
-    printf("#Events in unfolded dist.: %F\n", unfEventCounter);
-    hUnfDataNoScale = (TH1D*) hUnfData->Clone("UnfData_"+name+"_NoScale");
-    hUnfDataNoScale->Write();
-
-    //Get covariance contribution from the input uncertainties (data statistical uncertainties) 
-    hUnfDataStatCov = (TH2D*)unfold.GetEmatrixInput("dataStatCov", "dataStatCov", 0, 0, kTRUE)->Clone(); //Last 3 inputs are default;
-    hUnfDataStatCov->SetName("UnfDataStatCov_" + name);
-    hUnfDataStatCov->SetTitle(hRecDataMinusFakes->GetTitle());
-    hUnfDataStatCovNoScale = (TH2D*) hUnfDataStatCov->Clone("UnfDataStatCov_"+name+"_NoScale");
-    hUnfDataStatCovNoScale->Write();
-    
-    //Retreive covariance contribution from uncorrelated (statistical) uncertainties of the response matrix. 
-    //Equivalent to RooUnfold::Ereco(RooUnfold::kCovariance) with IncludeSystematics(2). 
-    hUnfMCStatCov = (TH2D*)unfold.GetEmatrixSysUncorr("respStatCov", "respStatCov", 0, 0, kTRUE)->Clone(); //Last 3 inputs are default;
-    hUnfMCStatCov->SetName("UnfMCStatCov_" + name);
-    hUnfMCStatCov->SetTitle(hRecDataMinusFakes->GetTitle());
-    hUnfMCStatCovNoScale = (TH2D*) hUnfMCStatCov->Clone("UnfMCStatCov_"+name+"_NoScale");
-    hUnfMCStatCovNoScale->Write();
-
-    printf("\nChi2A = %F\n",unfold.GetChi2A());
-    printf("Number of degrees of freedom = %d\n",unfold.GetNdf());
-    //TH2D *probabilityMatrix = (TH2D*)unfold.GetProbabilityMatrix("probabilityMatrix")->Clone();
-    //probabilityMatrix->Write();
-    TH2D *corrCoeffMatrix = (TH2D*)unfold.GetRhoIJtotal("corrCoeffMatrix")->Clone();
-    corrCoeffMatrix->Write();
-
-    TH1D *foldedData = (TH1D*)unfold.GetFoldedOutput("foldedData");
-    //printf("---> Input data:\n");
-    //for(int i=1;i<=recoData->GetNbinsX();i++){
-    //    printf("bin %i: %F\n",i,recoData->GetBinContent(i));
-    //}
-    if(foldedData){
-        foldedData->Write();
-        //printf("---> Folded result:\n");
-        //for(int i=1;i<=foldedData->GetNbinsX();i++){
-        //    printf("bin %i: %F\n",i,foldedData->GetBinContent(i));
-        //}
-        printf("\n >>>>> Ratio of RecoData/Folded:\n"); 
-        TH1D *foldedClosureRatio = (TH1D*) recoData->Clone();
-        foldedClosureRatio->SetName("foldedClosureRatio");
-        foldedClosureRatio->SetTitle("foldedClosureRatio");
-        foldedClosureRatio->GetXaxis()->SetTitle(hRecDataMinusFakes->GetXaxis()->GetTitle());
-        foldedClosureRatio->GetYaxis()->SetTitle("RecoData/Folded");
-        foldedClosureRatio->Divide(foldedData);
-        for(int i=1;i<=foldedData->GetNbinsX();i++){
-            printf("Bin %i: %F\n",i,foldedClosureRatio->GetBinContent(i));
-        }
-        foldedClosureRatio->Write();
-    }
-
-    
-
-
-    // Do UNFOLDED/RECO plot here...
-    // To quantify the effects of the unfolding
-
-
-
-
-    // ---------------------------------------------------------------------------
-    
-    //For single-diff. xsecs, need to scale unfolded event counts by int. lumi and bin widths to get xsec
-    if (!doRatioUnfold){
-        //--- divide by luminosity ---
-        double lumiUnc = cfg.getD("lumiUnc", 0.027);
-        printf("\nScaling data %s by int. lumi = %F... \n",hUnfData->GetName(), integratedLumi);
-        hUnfData->Scale(1./integratedLumi);
-        if(hUnfDataStatCov) hUnfDataStatCov->Scale(1./(integratedLumi*integratedLumi));
-        if(hUnfMCStatCov) hUnfMCStatCov->Scale(1./(integratedLumi*integratedLumi));
-        if ("LumiUp" == name) {
-            printf("With lumiUnc = %F\n",lumiUnc);
-            hUnfData->Scale(1./(1+lumiUnc));
-            if(hUnfDataStatCov) hUnfDataStatCov->Scale(1./((1+lumiUnc)*(1+lumiUnc)));
-            if(hUnfMCStatCov) hUnfMCStatCov->Scale(1./((1+lumiUnc)*(1+lumiUnc)));
-        }
-        else if ("LumiDown" == name) {
-            printf("With lumiUnc = %F\n",lumiUnc);
-            hUnfData->Scale(1./(1-lumiUnc));
-            if(hUnfDataStatCov) hUnfDataStatCov->Scale(1./((1-lumiUnc)*(1-lumiUnc)));
-            if(hUnfMCStatCov) hUnfMCStatCov->Scale(1./((1-lumiUnc)*(1-lumiUnc)));
-        }
-        //--- divide by bin width to get cross section ---
-        printf("Normalizing to bin widths to get cross section...\n");
-        int nBins = hUnfData->GetNbinsX();
-        for (int i = 1; i <= nBins; ++i) {
-            double binWidth = hUnfData->GetBinWidth(i);
-            hUnfData->SetBinContent(i, hUnfData->GetBinContent(i)*(1./binWidth));
-            hUnfData->SetBinError(i, hUnfData->GetBinError(i)*(1./binWidth));
-            for (int j = 1; j <= nBins; ++j) {
-                double binWidth2 = hUnfData->GetBinWidth(j);
-                if(hUnfDataStatCov){
-                    hUnfDataStatCov->SetBinContent(i, j, hUnfDataStatCov->GetBinContent(i, j)*(1./(binWidth*binWidth2)));
-                    hUnfDataStatCov->SetBinError(i, j, hUnfDataStatCov->GetBinError(i, j)*(1./(binWidth*binWidth2)));
-                }
-                if(hUnfMCStatCov){
-                    hUnfMCStatCov->SetBinContent(i, j, hUnfMCStatCov->GetBinContent(i, j)*(1./(binWidth*binWidth2)));
-                    hUnfMCStatCov->SetBinError(i, j, hUnfMCStatCov->GetBinError(i, j)*(1./(binWidth*binWidth2)));
-                }
-            }
-        }
-    }
-
-    hUnfData->Write();
-    hUnfDataStatCov->Write();
-    hUnfMCStatCov->Write();
-
-    // ---------------------------------------------------------------------------
-
-    f->Close();
-    printf("\nExiting TUnfoldData function...");
-    printf("\n=========================================================================\n");
-    return 0;
-}
-
-//--- This is needed because we use overflow and the matrices have 2 additional bins ---
-TH2D* M2H(const TMatrixD m) 
-{
-    int nBinsY = m.GetNrows();
-    int nBinsX = m.GetNrows();
-
-    TH2D *h = new TH2D(m.GetName(), m.GetName(), nBinsX-2, 0, nBinsX-2, nBinsY-2, 0, nBinsY-2);
-    for (int i = 0; i < nBinsX; ++i) {
-    for (int j = 0; j < nBinsY; ++j) {
-        h->SetBinContent(i, j, m(i, j));
-    }
-    }
-
-    return h;
-}
-
-TH2D* makeCovFromUpAndDown(const TH1D* hUnfDataCentral, const TH1D* hUnfDataUp, const TH1D* hUnfDataDown, TString name)
-{
+TH2D* makeCovFromUpAndDown(const TH1D* hUnfDataCentral, const TH1D* hUnfDataUp, const TH1D* hUnfDataDown, TString name){
     int nBins = hUnfDataCentral->GetNbinsX();
     TH2D* h = new TH2D(name, name, nBins, 0, nBins, nBins, 0, nBins);
 
@@ -1213,8 +1224,7 @@ TH2D* makeCovFromUpAndDown(const TH1D* hUnfDataCentral, const TH1D* hUnfDataUp, 
     return h;
 }
 
-TH1D* makeCrossSectionHist(TH1D* hGenDYJets, double integratedLumi)
-{
+TH1D* makeCrossSectionHist(TH1D* hGenDYJets, double integratedLumi){
     TH1D *hGenCrossSection = (TH1D*) hGenDYJets->Clone();
     
     if (integratedLumi > 0){
@@ -1231,83 +1241,6 @@ TH1D* makeCrossSectionHist(TH1D* hGenDYJets, double integratedLumi)
     return hGenCrossSection;
 }
 
-TH1D* foldUnfData(TH1 *hUnfData, RooUnfoldResponse *hresp)
-{
-    TH1D *hfoldUnfData = (TH1D*) hUnfData->Clone();
-    RooUnfoldResponse *resp = (RooUnfoldResponse*) hresp->Clone();
-    TH2D *hres = (TH2D*) resp->Hresponse();
-    TH1D *hgen = (TH1D*) resp->Htruth();
-
-
-    int nBins = hfoldUnfData->GetNbinsX();
-
-    for (int i = 0; i <= nBins; ++i) {
-    double totGen = hgen->GetBinContent(i);
-    for (int j = 0; j <= nBins; ++j) {
-        if (totGen != 0.0) {
-        hres->SetBinContent(j, i, hres->GetBinContent(j, i)/totGen);
-        hres->SetBinError(j, i, hres->GetBinError(j, i)/totGen);
-        hres->SetBinError(j, i, 0.0);
-        }
-        else {
-        hres->SetBinContent(i, j, 0);
-        hres->SetBinError(i, j, hres->GetBinError(i, j));
-        hres->SetBinError(i, j, 0.0);
-        }
-    }
-    }
-
-    for (int i = 0; i <= nBins; ++i) {
-    double sum = 0.0;
-    double error2 = 0.0;
-    for (int j = 0; j <= nBins; ++j) {
-        sum += hres->GetBinContent(i, j) * hUnfData->GetBinContent(j);
-        error2 += pow(hres->GetBinContent(i, j) * hUnfData->GetBinError(j), 2);
-    }
-    hfoldUnfData->SetBinContent(i, sum);
-    hfoldUnfData->SetBinError(i, sqrt(error2));
-    }
-    return hfoldUnfData;
-}
-
-void test()
-{
-    TH1D *hreco = new TH1D("hreco", "hreco", 2, 0, 2);
-    TH1D *hgen = new TH1D("hgen", "hgen", 2, 0, 2);
-    TH2D *hresp = new TH2D("hresp", "hresp", 2, 0, 2, 2, 0, 2);
-
-    hreco->Sumw2();
-    hgen->Sumw2();
-    hresp->Sumw2();
-
-    hreco->Fill(0.5, 3.5);
-    hreco->Fill(1.5, 5);
-
-    hgen->Fill(0.5, 4);
-    hgen->Fill(1.5, 6);
-
-    hresp->Fill(0.5, 0.5, 3);
-    hresp->Fill(0.5,1.5,0.5);
-    hresp->Fill(1.5,0.5,0.5);
-    hresp->Fill(1.5,1.5,4.5);
-
-    RooUnfoldResponse *resp = new RooUnfoldResponse(NULL, hgen, hresp);
-
-    RooUnfold *RObjectForData = RooUnfold::New(RooUnfold::kBayes, resp, hreco, 3);
-    TH1D *hUnfData = (TH1D*) RObjectForData->Hreco(RooUnfold::kCovariance);
-
-    TH1D *hfoldUnfData = foldUnfData(hUnfData, resp);
-
-    std::cout << "reco: " << hreco->GetBinContent(1) << "   " << hreco->GetBinContent(2) << std::endl; 
-    std::cout << "gen : " << hgen->GetBinContent(1) << "   " << hgen->GetBinContent(2) << std::endl; 
-    std::cout << "unf : " << hUnfData->GetBinContent(1) << "   " << hUnfData->GetBinContent(2) << std::endl; 
-    std::cout << "fol : " << hfoldUnfData->GetBinContent(1) << "   " << hfoldUnfData->GetBinContent(2) << std::endl; 
-}
-
-/** Correct data histogram for signal purity
- * @param hRecData histogram to correct
- * @param hPurity histogram containing the signal purities
- */
 void RemoveFakes(TH1* hRecData, TH1* hFakes, TH1* hPurity){
     int fakeMethod = cfg.getI("fakeMethod");
     static bool emitMess = true;
@@ -1356,11 +1289,13 @@ void plotRespMat(TH2D *hResp, TString variable, TString unfoldDir, bool addSwitc
 
         //set bin content of this new histo using bin contents from original response matrix
         TH2D *hRespNominal = (TH2D*) hResp->Clone();
+        int numBinsXRespNominal = hRespNominal->GetNbinsX();
+        int numBinsYRespNominal = hRespNominal->GetNbinsY();
 
         //get condition number for matrix before normalization
         TMatrixD respMatrix(hRespNominal->GetNbinsX(), hRespNominal->GetNbinsY());
-        for(int i=1; i<=hRespNominal->GetNbinsX();i++){
-            for(int j=1; j<=hRespNominal->GetNbinsY();j++){
+        for(int i = 1; i <= hRespNominal->GetNbinsX(); i++){
+            for(int j = 1; j <= hRespNominal->GetNbinsY(); j++){
                 respMatrix[i-1][j-1] = hRespNominal->GetBinContent(i,j);
             }
         }
@@ -1370,31 +1305,29 @@ void plotRespMat(TH2D *hResp, TString variable, TString unfoldDir, bool addSwitc
         //printf("Condition # = %F / %F = %F\n", svdRespVector[0], svdRespVector[svdRespVector.GetNoElements()-1], svdRespVector[0]/svdRespVector[svdRespVector.GetNoElements()-1]);  
 
         normalizeTH2D(hRespNominal);
-        int numBinsXRespNominal = hRespNominal->GetNbinsX();
-        int numBinsYRespNominal = hRespNominal->GetNbinsY();
 
         //create the resized response matrix using binning info from gen distribution
         std::cout << "Creating re-sized response matrix to understand magnitude of bin migrations!" << std::endl;
         int numBinsGen =  hGenDYJets->GetNbinsX();
-        double xminGen = hGenDYJets->GetXaxis()->GetXmin();
-        double xmaxGen = hGenDYJets->GetXaxis()->GetXmax();
-      //  printf("\nhGenDYJets Binning --\n");
-      //  printf("numBinsGen = %d, xminGen = %F, xmaxGen = %F\n", numBinsGen, xminGen, xmaxGen);
+        // double xminGen = hGenDYJets->GetXaxis()->GetXmin();
+        // double xmaxGen = hGenDYJets->GetXaxis()->GetXmax();
+        //  printf("\nhGenDYJets Binning --\n");
+        //  printf("numBinsGen = %d, xminGen = %F, xmaxGen = %F\n", numBinsGen, xminGen, xmaxGen);
         Double_t xBinsGen[numBinsGen+1];
         for (int i(1); i < numBinsGen + 2; i++){ //use low bin edge of overflow bin for upper bin edge of last real bin
-            double binlowGen = hGenDYJets->GetBinLowEdge(i);
-            double binhighGen = hGenDYJets->GetXaxis()->GetBinUpEdge(i);
-      //      printf("Bin %d: %F to %F\n", i, binlowGen, binhighGen);
-      //      if(i==numBinsGen + 1) {
-      //          printf("^^^^^last one is overflow bin\n");
-      //      }
+            // double binlowGen = hGenDYJets->GetBinLowEdge(i);
+            // double binhighGen = hGenDYJets->GetXaxis()->GetBinUpEdge(i);
+            //      printf("Bin %d: %F to %F\n", i, binlowGen, binhighGen);
+            //      if(i==numBinsGen + 1) {
+            //          printf("^^^^^last one is overflow bin\n");
+            //      }
             xBinsGen[i-1] = hGenDYJets->GetBinLowEdge(i);
         }
-    //        std::cout << "hGenDYJets Binning" << std::endl;
-    //        for(int i(0); i < numBinsGen + 1; i++){
-    //            std::cout << xBinsGen[i] << " ";
-    //        }
-    //        std::cout << std::endl;
+        //        std::cout << "hGenDYJets Binning" << std::endl;
+        //        for(int i(0); i < numBinsGen + 1; i++){
+        //            std::cout << xBinsGen[i] << " ";
+        //        }
+        //        std::cout << std::endl;
 
 
         hNormResp = new TH2D("", "", numBinsGen, xBinsGen, numBinsGen, xBinsGen);
@@ -1405,7 +1338,7 @@ void plotRespMat(TH2D *hResp, TString variable, TString unfoldDir, bool addSwitc
                 double bincount2 = hRespNominal->GetBinContent(i+1,j);
                 double bincountAdded = bincount1 + bincount2;
                 hNormResp->SetBinContent(newHistoCounter,j,bincountAdded);
- //               printf("Setting bin content for bin(%d,%d) = %F\n",newHistoCounter,j,bincountAdded);
+                // printf("Setting bin content for bin(%d,%d) = %F\n",newHistoCounter,j,bincountAdded);
             }
             newHistoCounter++;
         }
@@ -1429,6 +1362,7 @@ void plotRespMat(TH2D *hResp, TString variable, TString unfoldDir, bool addSwitc
         hNormResp->GetXaxis()->SetTitleSize(0.04);
         hNormResp->GetXaxis()->SetTitleOffset(1.10);   
     }
+
     else{ //the nominal case
         hNormResp = (TH2D*) hResp->Clone();
     
@@ -1499,8 +1433,7 @@ void plotRespMat(TH2D *hResp, TString variable, TString unfoldDir, bool addSwitc
     delete canRespMatrix;
 }
 
-void normalizeTH2D(TH2D *h)
-{
+void normalizeTH2D(TH2D *h){
     //printf("--- Normalizing TH2 by y-axis row! ---\n");
     int xbin(h->GetNbinsX()), ybin(h->GetNbinsY());
     for (int i(0); i <= ybin + 1; i++){
