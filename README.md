@@ -76,3 +76,38 @@ Code organization
 
 The directory contains several runXXX.cc files, which have been compiles in executable called runXXX. Each of these executable runs the code implemented in the class XXX with the corresponding name and defined in Includes/XXX.h and Sources/XXX.cc.  The list of runXXX applications is provided below.
 
+=====================================================================================
+
+compile software with --
+make clean && make
+
+merge files in each folder first (do for all three years) --
+./renameHistograms_NoBVeto.sh
+
+./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetPt_TUnfold_Zinc1jet 
+./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetPt_TUnfold_Zinc2jet
+./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetPt_TUnfold_Zinc3jet
+./runUnfoldingZJets year=2016 variable=FirstJetPt_Zinc1jet_TUnfold
+./runUnfoldingZJets year=2016 variable=FirstJetAbsRapidity_Zinc1jet_TUnfold
+./runUnfoldingZJets year=2016 variable=dPhiLepJet1_Zinc1jet_TUnfold
+./runUnfoldingZJets year=2017 variable=LepPtPlusLeadingJetPt_TUnfold_Zinc1jet 
+./runUnfoldingZJets year=2017 variable=LepPtPlusLeadingJetPt_TUnfold_Zinc2jet
+./runUnfoldingZJets year=2017 variable=LepPtPlusLeadingJetPt_TUnfold_Zinc3jet
+./runUnfoldingZJets year=2017 variable=FirstJetPt_Zinc1jet_TUnfold
+./runUnfoldingZJets year=2017 variable=FirstJetAbsRapidity_Zinc1jet_TUnfold
+./runUnfoldingZJets year=2017 variable=dPhiLepJet1_Zinc1jet_TUnfold
+./runUnfoldingZJets year=2018 variable=LepPtPlusLeadingJetPt_TUnfold_Zinc1jet 
+./runUnfoldingZJets year=2018 variable=LepPtPlusLeadingJetPt_TUnfold_Zinc2jet
+./runUnfoldingZJets year=2018 variable=LepPtPlusLeadingJetPt_TUnfold_Zinc3jet
+./runUnfoldingZJets year=2018 variable=FirstJetPt_Zinc1jet_TUnfold
+./runUnfoldingZJets year=2018 variable=FirstJetAbsRapidity_Zinc1jet_TUnfold
+./runUnfoldingZJets year=2018 variable=dPhiLepJet1_Zinc1jet_TUnfold
+
+
+./runCombineUnfoldedRun2 variable=FirstJetPt_Zinc1jet_TUnfold
+./runCombineUnfoldedRun2 variable=FirstJetAbsRapidity_Zinc1jet_TUnfold
+./runCombineUnfoldedRun2 variable=dPhiLepJet1_Zinc1jet_TUnfold
+./runCombineUnfoldedRun2 variable=LepPtPlusLeadingJetPt_TUnfold_Zinc1jet
+./runCombineUnfoldedRun2 variable=LepPtPlusLeadingJetPt_TUnfold_Zinc2jet
+./runCombineUnfoldedRun2 variable=LepPtPlusLeadingJetPt_TUnfold_Zinc3jet
+

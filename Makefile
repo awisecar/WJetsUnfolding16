@@ -1,5 +1,5 @@
 # ===============================
-# Makefile for ZJets Analysis
+# Makefile for W+Jets Analysis
 # ===============================
 
 # Determine if working at CERN on lxplus machine or at IIHE on m machines
@@ -48,8 +48,8 @@ CXXFLAGS      += -MD -Wall
 # list of all source files
 SOURCES = \
 ArgParser.cc variablesOfInterestZJets.cc getFilesAndHistogramsZJets.cc \
-ConfigVJets.cc functions.cc UnfoldingZJets.cc  UnfoldingZJetsRatios.cc \
-PlotSettings.cc 
+ConfigVJets.cc functions.cc UnfoldingZJets.cc UnfoldingZJetsRatios.cc \
+PlotSettings.cc CombineUnfoldedRun2.cc 
 
 SRCLIST = $(addprefix $(SRCDIR), $(SOURCES))
 OBJLIST = $(SRCLIST:.cc=.o)
@@ -58,15 +58,8 @@ DEPS    = $(SRCLIST:.cc=.d)
 .PHONY: all clean
 
 all: runUnfoldingZJets \
-runUnfoldingZJetsRatios
-
-
-#in untested branch:
-# runCombination \
-# runVJets \
-# runZJets \
-# runMakeStatisticsTable \
-# dispatcher
+runUnfoldingZJetsRatios \
+runCombineUnfoldedRun2
 
 # ===========================================================================
 %.o: %.cc
@@ -80,6 +73,9 @@ runUnfoldingZJets: runUnfoldingZJets.o $(OBJLIST) RooUnfold/libRooUnfold.so
 	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
 runUnfoldingZJetsRatios: runUnfoldingZJetsRatios.o $(OBJLIST) RooUnfold/libRooUnfold.so
+	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
+
+runCombineUnfoldedRun2: runCombineUnfoldedRun2.o $(OBJLIST) RooUnfold/libRooUnfold.so 
 	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
 RooUnfold/libRooUnfold.so:

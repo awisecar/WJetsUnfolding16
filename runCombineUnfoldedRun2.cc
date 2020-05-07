@@ -2,14 +2,14 @@
 #include <TString.h>
 #include "ArgParser.h"
 #include "ConfigVJets.h"
-#include "UnfoldingZJets.h"
+#include "CombineUnfoldedRun2.h"
 
 ConfigVJets cfg;
 
 int main(int argc, char **argv){
     //--- Loads configuration -----------------------------------------------------
 
-    //andrew -- 5 march 2019 -- current defaults for these options commented to the right
+    //andrew -- current defaults for these options commented to the right
     TString lepSel     = cfg.getS("lepSel");    // SMu
     int year           = cfg.getI("year");      // ...
     TString algo       = cfg.getS("algo");      // TUnfold (can switch to Bayes if want to use RooUnfold Bayes)
@@ -76,13 +76,7 @@ int main(int argc, char **argv){
         }
     }
 
-    // if (!histoDir.EndsWith("/")) histoDir += "/";
-    // if (!unfoldDir.EndsWith("/")) unfoldDir += "/";
-    
-    std::cout << "\n >>>>> Executing UnfoldingZJets(\"" << lepSel << "\", \"" <<  year << "\", \"" <<  algo << "\", \"" << histoDir << "\", \"" << unfoldDir << "\", " << jetPtMin << ", " << jetEtaMax << ", " << variable << ", " << doNormalized << ", " << whichSyst << ");" << std::endl;
-    std::cout << " >>>>> Where UnfoldingZJets(lepSel, year, algo, histoDir, unfoldDir, jetPtMin, jetEtaMax, variable, doNormalized, whichSyst)" << std::endl;
-
-    UnfoldingZJets(lepSel, year, algo, histoDir, unfoldDir, jetPtMin, jetEtaMax, variable, doNormalized, whichSyst);
+    CombineUnfoldedRun2(lepSel, year, algo, histoDir, unfoldDir, jetPtMin, jetEtaMax, variable, doNormalized, whichSyst);
 
     return 0;
 }

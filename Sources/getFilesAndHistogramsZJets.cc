@@ -280,23 +280,26 @@ TH1D* getHisto(TFile *File, const TString variable)
 	TString fileName = gSystem->BaseName(File->GetName());
 	bool isTTbar = (fileName.Index("SMu_13TeV_TT") >= 0);
 
-        //andrew -- ttBar SFs for 2016 data added -- 3 May 2019
-        std::cout << "isTTbar = " << isTTbar << std::endl;
+    // ALW 23 APRIL 20
+    isTTbar = false;
+
+    //andrew -- ttBar SFs for 2016 data added -- 3 May 2019
+    std::cout << "isTTbar = " << isTTbar << std::endl;
 	if (isTTbar){
-                std::cout << " ----- Scaling ttbar BG for " << variable << "!" << std::endl;
-                // inclusive distributions
-            if (variable.Index("Zinc2jet") >= 0) histo->Scale(1.04904374);
-            else if (variable.Index("Zinc3jet") >= 0) histo->Scale(0.99624372);
-            else if (variable.Index("Zinc4jet") >= 0) histo->Scale(0.97243212);
-            else if (variable.Index("Zinc5jet") >= 0) histo->Scale(0.94750793);
-            else if (variable.Index("Zinc6jet") >= 0) histo->Scale(0.92506162);
-                // exclusive distributions
+        std::cout << " ----- Scaling ttbar BG for " << variable << "!" << std::endl;
+        // inclusive distributions
+        if (variable.Index("Zinc2jet") >= 0) histo->Scale(1.04904374);
+        else if (variable.Index("Zinc3jet") >= 0) histo->Scale(0.99624372);
+        else if (variable.Index("Zinc4jet") >= 0) histo->Scale(0.97243212);
+        else if (variable.Index("Zinc5jet") >= 0) histo->Scale(0.94750793);
+        else if (variable.Index("Zinc6jet") >= 0) histo->Scale(0.92506162);
+        // exclusive distributions
 		else if (variable.Index("Zexc2jet") >= 0) histo->Scale(1.28532061);
 		else if (variable.Index("Zexc3jet") >= 0) histo->Scale(1.02880218);
 		else if (variable.Index("Zexc4jet") >= 0) histo->Scale(0.98994466);
 		else if (variable.Index("Zexc5jet") >= 0) histo->Scale(0.95915763);
 		else if (variable.Index("Zexc6jet") >= 0) histo->Scale(0.93695869);
-                // jet multiplicity distributions
+        // jet multiplicity distributions
 		else if (variable.Index("ZNGoodJets_Zinc") >= 0 || variable.Index("ZNGoodJetsFull_Zinc") >= 0) {
 			histo->SetBinContent(3, histo->GetBinContent(3)*1.04904374);
 			histo->SetBinContent(4, histo->GetBinContent(4)*0.99624372);
@@ -356,6 +359,9 @@ void getHistos(TH1D *histograms[], TFile *Files[], TString variable)
         Files[i]->cd();
         std::cout << "#" << i << ": Doing filename " << Files[i]->GetName() << std::endl;
         histograms[i] = (TH1D*) Files[i]->Get(variable);	
+
+        // ALW 23 APRIL 20
+        isTTbar = false;
 
         //--- ttbar rescaling
         //andrew -- ttBar SFs for 2016 data added -- 3 May 2019

@@ -205,6 +205,14 @@ const variableStruct VAROFINTERESTZJETS[] = {
     {"ZPtPlusHTover2_2_Zinc2jet",      1,      1,          1,              4,             1,            1 ,               1    },
     {"ZPtPlusHTover2_2_Zinc3jet",      1,      1,          1,              4,             1,            1 ,               1    },
     {"ZPtPlusHTover2_2_Zinc4jet",      1,      1,          1,              4,             1,            1 ,               1    },
+    // new
+    {"LepPtPlusLeadingJetPt_TUnfold_Zinc1jet",      1,      1,          1,              4,             1,            1 ,               1    },
+    {"LepPtPlusLeadingJetPt_TUnfold_Zinc2jet",      1,      1,          1,              4,             1,            1 ,               1    },
+    {"LepPtPlusLeadingJetPt_TUnfold_Zinc3jet",      1,      1,          1,              4,             1,            1 ,               1    },
+    {"LepPtPlusLeadingJetPt_TUnfold_Zinc4jet",      1,      1,          1,              4,             1,            1 ,               1    },
+    {"FirstJetPt_Zinc1jet_TUnfold",      1,      1,          1,              4,             1,            1 ,               1    },
+    {"FirstJetAbsRapidity_Zinc1jet_TUnfold",      1,      1,          1,              4,             1,            1 ,               1    },
+    {"dPhiLepJet1_Zinc1jet_TUnfold",      1,      1,          1,              4,             1,            1 ,               1    },
 }; 
 
 const unsigned int NVAROFINTERESTZJETS = sizeof(VAROFINTERESTZJETS)/sizeof(VAROFINTERESTZJETS[0]);

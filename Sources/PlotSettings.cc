@@ -6,8 +6,7 @@
 
 extern ConfigVJets cfg;
 
-void setAndDrawTPad(TString canvasName, TPad *plot, int plotNumber, int numbOfGenerator)
-{
+void setAndDrawTPad(TString canvasName, TPad *plot, int plotNumber, int numbOfGenerator){
     if (numbOfGenerator == 1) {
         if (plotNumber == 1) {
             plot->SetPad(0.01, 0.35, 0.99, 0.99);
@@ -70,8 +69,7 @@ void setAndDrawTPad(TString canvasName, TPad *plot, int plotNumber, int numbOfGe
     plot->cd();
 }
 
-void customizeLegend(TLegend *legend, int numbOfGenerator)
-{
+void customizeLegend(TLegend *legend, int numbOfGenerator){
     legend->SetFillColor(0);
     legend->SetFillStyle(1001);
     legend->SetBorderSize(1);
@@ -133,14 +131,12 @@ void customizeLegend(TLegend *legend, int genNumb, int numbOfGenerator)
 
 }
 
-void customizeCentral(TGraphAsymmErrors *grCentral, bool ratio)
-{
+void customizeCentral(TGraphAsymmErrors *grCentral, bool ratio){
     customizeCentral(grCentral, (TLegend*) NULL);
     if (ratio) grCentral->SetMarkerSize(0);
 }
 
-void customizeCentral(TGraphAsymmErrors *grCentral, TLegend *legend, TString legText)
-{
+void customizeCentral(TGraphAsymmErrors *grCentral, TLegend *legend, TString legText){
     grCentral->SetLineColor(kBlack);
     grCentral->SetLineWidth(2);
     grCentral->SetMarkerStyle(20);
@@ -168,8 +164,7 @@ void customizeCentral(TGraphAsymmErrors *grCentral, TLegend *legend, TString leg
 
 }
 
-TGraphAsymmErrors* createGrFromHist(const TH1D *h)
-{
+TGraphAsymmErrors* createGrFromHist(const TH1D *h){
     int nPoints = h->GetNbinsX();
     double *xCoor = new double[nPoints];
     double *yCoor = new double[nPoints];
@@ -194,8 +189,7 @@ TGraphAsymmErrors* createGrFromHist(const TH1D *h)
 // The output TGraph has all yCoor set to 1. and y low and high errors
 // representing the relative errors of the input TGraph.
 //======================================================================
-TGraphAsymmErrors* createRatioGraph(const TGraphAsymmErrors* grCentral)
-{       
+TGraphAsymmErrors* createRatioGraph(const TGraphAsymmErrors* grCentral){       
     int nPoints = grCentral->GetN();
     double *xCoor = new double[nPoints];
     double *yCoor = new double[nPoints];
@@ -222,8 +216,7 @@ TGraphAsymmErrors* createRatioGraph(const TGraphAsymmErrors* grCentral)
 // The output TGraph has all yCoor set to 1. and y errors
 // representing the relative errors of the input TGraph.
 //======================================================================
-TGraphErrors* createRatioGraph(const TGraphErrors* grCentral)
-{       
+TGraphErrors* createRatioGraph(const TGraphErrors* grCentral){       
     int nPoints = grCentral->GetN();
     double *xCoor = new double[nPoints];
     double *yCoor = new double[nPoints];
@@ -247,8 +240,7 @@ TGraphErrors* createRatioGraph(const TGraphErrors* grCentral)
 // This function creates a TGraphAsymmErrors from a TH1D and a TGraphAsymmErrors.
 // The output TGraph is the ratio of the TH1D by the TGraphAsymmErrors.
 //================================================================================
-TGraphAsymmErrors *createGenToCentral(const TH1D *gen, const TGraphAsymmErrors *grCentral)
-{
+TGraphAsymmErrors *createGenToCentral(const TH1D *gen, const TGraphAsymmErrors *grCentral){
     int nPoints = grCentral->GetN();
     double *xCoor = new double[nPoints];
     double *yCoor = new double[nPoints];
@@ -270,8 +262,7 @@ TGraphAsymmErrors *createGenToCentral(const TH1D *gen, const TGraphAsymmErrors *
     return grGenToCentral;
 }
 
-TGraphAsymmErrors* createScaleSystGraph(TString lepSel, TString variable, const TGraphAsymmErrors *grGenToCentral)
-{
+TGraphAsymmErrors* createScaleSystGraph(TString lepSel, TString variable, const TGraphAsymmErrors *grGenToCentral){
     int nPoints = grGenToCentral->GetN();
     double *xCoor    = new double[nPoints];
     double *yCoor    = new double[nPoints];
@@ -368,8 +359,7 @@ TGraphAsymmErrors* createScaleSystGraph(TString lepSel, TString variable, const 
 
 }
 
-TGraphAsymmErrors* createPDFSystGraph(const TH1D *hPDFUp, const TH1D *hPDFDown, const TGraphAsymmErrors *grGenToCentral)
-{
+TGraphAsymmErrors* createPDFSystGraph(const TH1D *hPDFUp, const TH1D *hPDFDown, const TGraphAsymmErrors *grGenToCentral){
     int nPoints = grGenToCentral->GetN();
     double *xCoor    = new double[nPoints];
     double *yCoor    = new double[nPoints];
@@ -397,8 +387,7 @@ TGraphAsymmErrors* createPDFSystGraph(const TH1D *hPDFUp, const TH1D *hPDFDown, 
 }
 
 //void customizeGenGraph(TGraphAsymmErrors *gen, TGraphAsymmErrors *gPDF, int genNum, TString yTitle, int numbOfGenerator, TLegend *legend)
-void customizeGenGraph(TH1D *hSyst, TGraphAsymmErrors *gen, TGraphAsymmErrors *gPDF, int genNum, TString yTitle, int numbOfGenerator, TLegend *legend)
-{
+void customizeGenGraph(TH1D *hSyst, TGraphAsymmErrors *gen, TGraphAsymmErrors *gPDF, int genNum, TString yTitle, int numbOfGenerator, TLegend *legend){
     //hSyst->GetYaxis()->SetRangeUser(0.2, 1.8);
     hSyst->GetYaxis()->SetRangeUser(0.01, 2.15);
     hSyst->GetYaxis()->SetNdivisions(507);
@@ -445,8 +434,7 @@ void customizeGenGraph(TH1D *hSyst, TGraphAsymmErrors *gen, TGraphAsymmErrors *g
 
 }
 
-void customizeGenHist(TH1D *gen, int genNumb, TLegend *legend, TString legText)
-{
+void customizeGenHist(TH1D *gen, int genNumb, TLegend *legend, TString legText){
 
     //--- Customize gen Sherpa ---
     gen->SetFillColor(ZJetsFillColor[genNumb-1]);
@@ -464,8 +452,7 @@ void customizeGenHist(TH1D *gen, int genNumb, TLegend *legend, TString legText)
 }
 
 
-void configYaxis(TH1D *grCentralSyst, TH1D *gen1, TH1D *gen2, TH1D *gen3)
-{
+void configYaxis(TH1D *grCentralSyst, TH1D *gen1, TH1D *gen2, TH1D *gen3){
     //--- Configure Y axis of the plot ---
     double minimumToPlot  = grCentralSyst->GetMaximum();
     double minimumToPlot2 = gen1->GetMaximum();
@@ -500,8 +487,7 @@ void configYaxis(TH1D *grCentralSyst, TH1D *gen1, TH1D *gen2, TH1D *gen3)
 }
 
 //void configXaxis(TGraphAsymmErrors *grCentralSyst, TH1D *gen1)
-void configXaxis(TH1D *grCentralSyst, TH1D *gen1, TString variable)
-{
+void configXaxis(TH1D *grCentralSyst, TH1D *gen1, TString variable){
     //--- Configure X axis of the plot ---
     //double minX, tmp;
     //double maxX;
@@ -621,8 +607,7 @@ void configXaxis(TH1D *grCentralSyst, TH1D *gen1, TString variable)
 
 }
 
-std::string getYaxisTitle(bool doNormalized, const TH1D *gen1)
-{
+std::string getYaxisTitle(bool doNormalized, const TH1D *gen1){
     std::string title = "";
     std::string xtitle = gen1->GetXaxis()->GetTitle();
     std::string shortVar = xtitle.substr(0, xtitle.find(" "));
@@ -652,8 +637,7 @@ std::string getYaxisTitle(bool doNormalized, const TH1D *gen1)
     return title;
 }
 
-TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalized, TH1D *hStat, TH2D *hCovSyst, TH1D *hGen1, TH1D *hGen2, TH1D* hGen3, double integratedLumi)
-{
+TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalized, TH1D *hStat, TH2D *hCovSyst, TH1D *hGen1, TH1D *hGen2, TH1D* hGen3, double integratedLumi){
 
   //gStyle->SetOptStat(0);
     //--- Determine how many comparison we have ---
@@ -737,7 +721,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalize
     TGraphAsymmErrors *grCentralSystRatio = createRatioGraph(grCentralSyst);
     TGraphAsymmErrors *grGen1ToCentral = createGenToCentral(hGen1, grCentralStat);
     TGraphAsymmErrors *grGen1PDFSyst = createPDFSystGraph(hPDFUp, hPDFDown, grGen1ToCentral); 
-//andrew    
+    //andrew    
     //TGraphAsymmErrors *grGen1TotSyst = createTotSystGraphAMCNLO(lepSel, variable, grGen1ToCentral);
     TGraphAsymmErrors *grGen2ToCentral = NULL;
     TGraphAsymmErrors *grGen2PDFSyst = NULL;
@@ -816,25 +800,25 @@ TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalize
   //      hSyst->GetXaxis()->SetRangeUser(30, 400);   ///??problematic to set upper range???
   //     // hSyst->GetXaxis()->SetRangeUser(30, hSyst->GetXaxis()->GetXmax());
   //      hSyst->GetYaxis()->SetRangeUser(0.15*minimum, 1.0*maximum);
-//   if (canvasName.Contains("LeadingJetPt_Zinc2jet")){
-//        hSyst->GetXaxis()->SetRangeUser(30,900);
-//        hSyst->GetYaxis()->SetRangeUser(minimum, maximum*100.);
-//    }
-//  //  if (canvasName.Contains("JetPt_Zinc3jet")) {
-//  //      hSyst->GetXaxis()->SetRangeUser(30, 300);
-//  //      //hSyst->GetYaxis()->SetRangeUser(0.002, 10);
-//  //      hSyst->GetYaxis()->SetRangeUser(0.15*minimum, 1.0*maximum);
-//  if (canvasName.Contains("LeadingJetPt_Zinc3jet")){
-//        hSyst->GetXaxis()->SetRangeUser(30,900);
-//        hSyst->GetYaxis()->SetRangeUser(minimum, maximum*100.);
-//    }
-//  //  if (canvasName.Contains("JetPt_Zinc4jet")) {
-//  //      hSyst->GetXaxis()->SetRangeUser(30, 180);
-//  //      hSyst->GetYaxis()->SetRangeUser(0.15*minimum, 1.0);
-//  if (canvasName.Contains("LeadingJetPt_Zinc4jet")){
-//        hSyst->GetXaxis()->SetRangeUser(30,900);
-//        hSyst->GetYaxis()->SetRangeUser(minimum, maximum*100.);
-//    }
+    //   if (canvasName.Contains("LeadingJetPt_Zinc2jet")){
+    //        hSyst->GetXaxis()->SetRangeUser(30,900);
+    //        hSyst->GetYaxis()->SetRangeUser(minimum, maximum*100.);
+    //    }
+    //  //  if (canvasName.Contains("JetPt_Zinc3jet")) {
+    //  //      hSyst->GetXaxis()->SetRangeUser(30, 300);
+    //  //      //hSyst->GetYaxis()->SetRangeUser(0.002, 10);
+    //  //      hSyst->GetYaxis()->SetRangeUser(0.15*minimum, 1.0*maximum);
+    //  if (canvasName.Contains("LeadingJetPt_Zinc3jet")){
+    //        hSyst->GetXaxis()->SetRangeUser(30,900);
+    //        hSyst->GetYaxis()->SetRangeUser(minimum, maximum*100.);
+    //    }
+    //  //  if (canvasName.Contains("JetPt_Zinc4jet")) {
+    //  //      hSyst->GetXaxis()->SetRangeUser(30, 180);
+    //  //      hSyst->GetYaxis()->SetRangeUser(0.15*minimum, 1.0);
+    //  if (canvasName.Contains("LeadingJetPt_Zinc4jet")){
+    //        hSyst->GetXaxis()->SetRangeUser(30,900);
+    //        hSyst->GetYaxis()->SetRangeUser(minimum, maximum*100.);
+    //    }
   if (canvasName.Contains("LepPtPlusHT_Zinc")){
          hSyst->GetXaxis()->SetRangeUser(30,900);
          hSyst->GetYaxis()->SetRangeUser(minimum, maximum*100.);
@@ -863,24 +847,24 @@ TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalize
     if (canvasName.Contains("JetAbsRapidity_Zinc4jet")) {
         hSyst->GetYaxis()->SetRangeUser(0.1, 1.8*maximum);
     }
- //   if (canvasName.Contains("HT_Zinc1jet")) {
- //       //hSyst->GetXaxis()->SetRangeUser(hSyst->GetXaxis()->GetXmin(), 1000);
- //       hSyst->GetXaxis()->SetRangeUser(30, 1500);
- //       hSyst->GetYaxis()->SetRangeUser(0.15*minimum, 1.8*maximum);
- //   }
- //   if (canvasName.Contains("HT_Zinc2jet")) {
- //       hSyst->GetXaxis()->SetRangeUser(60, 1200);
- //       hSyst->GetYaxis()->SetRangeUser(0.15*minimum, 1.8*maximum);
- //   }
- //   if (canvasName.Contains("HT_Zinc3jet")) {
- //       hSyst->GetXaxis()->SetRangeUser(118, 1100);
- //       hSyst->GetYaxis()->SetRangeUser(0.15*minimum, 1.8*maximum);
- //       hSyst->GetXaxis()->SetNdivisions(509);  //Default is 510 //Needed to remove an overlap for the labels, can be removed later on!
- //   }
- //   if (canvasName.Contains("HT_Zinc4jet")) {
- //       hSyst->GetXaxis()->SetRangeUser(203, 910);
- //       hSyst->GetYaxis()->SetRangeUser(0.28*minimum, 3.4*maximum);
- //   }
+    //   if (canvasName.Contains("HT_Zinc1jet")) {
+    //       //hSyst->GetXaxis()->SetRangeUser(hSyst->GetXaxis()->GetXmin(), 1000);
+    //       hSyst->GetXaxis()->SetRangeUser(30, 1500);
+    //       hSyst->GetYaxis()->SetRangeUser(0.15*minimum, 1.8*maximum);
+    //   }
+    //   if (canvasName.Contains("HT_Zinc2jet")) {
+    //       hSyst->GetXaxis()->SetRangeUser(60, 1200);
+    //       hSyst->GetYaxis()->SetRangeUser(0.15*minimum, 1.8*maximum);
+    //   }
+    //   if (canvasName.Contains("HT_Zinc3jet")) {
+    //       hSyst->GetXaxis()->SetRangeUser(118, 1100);
+    //       hSyst->GetYaxis()->SetRangeUser(0.15*minimum, 1.8*maximum);
+    //       hSyst->GetXaxis()->SetNdivisions(509);  //Default is 510 //Needed to remove an overlap for the labels, can be removed later on!
+    //   }
+    //   if (canvasName.Contains("HT_Zinc4jet")) {
+    //       hSyst->GetXaxis()->SetRangeUser(203, 910);
+    //       hSyst->GetYaxis()->SetRangeUser(0.28*minimum, 3.4*maximum);
+    //   }
     if (canvasName.Contains("DPhi")) {
         hSyst->GetYaxis()->SetRangeUser(0.2*minimum, 1.5*maximum);
     }
@@ -1067,14 +1051,14 @@ TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalize
     configXaxis(hSyst, hGen1, variable);
     grGen1PDFSyst->SetFillStyle(1001);
     grGen1PDFSyst->SetFillColor(kBlue-6);
-//andrew    
+    //andrew    
     //grGen1TotSyst->SetFillStyle(1001);
     //grGen1TotSyst->SetFillColor(kBlue-10);
     hSyst->DrawCopy("e");
     grGen1ToCentral->SetName("grGen1ToCentral");
     grGen1ToCentral->Draw("2");
     //grGen1PDFSyst->Draw("2");
-//andrew    
+    //andrew    
     //grGen1TotSyst->Draw("2");
     grCentralSystRatio->SetName("grCentralSystRatio");
     grCentralSystRatio->Draw("2");
@@ -1157,8 +1141,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalize
     return plots;
 }
 
-void createTitleVariableAnddSigma(TString variable, bool doNormalized, TString xtitle, TString& title, TString& var, TString& dSigma) 
-{
+void createTitleVariableAnddSigma(TString variable, bool doNormalized, TString xtitle, TString& title, TString& var, TString& dSigma) {
 
     // jet multiplicity
     if (variable.Index("ZNGoodJets_Zexc") >= 0) {
@@ -1711,7 +1694,6 @@ void createTitleVariableAnddSigma(TString variable, bool doNormalized, TString x
 }
 
 
-
 TGraphAsymmErrors* createScaleSystGraphNNLO1j(TString lepSel, TString variable, const TGraphAsymmErrors *grGenToCentral)
 {
 	int nPoints = grGenToCentral->GetN();
@@ -1768,29 +1750,29 @@ TGraphAsymmErrors* createScaleSystGraphNNLO1j(TString lepSel, TString variable, 
 	return grScaleSyst;
 	
 	
-//    for(int i = 1; i<= nBins; i++){
-//        int nBins = genNNLO->GetNbinsX()
-//        nnlo_ySystUp[i-1] = pow( genScErrUp->GetBinContent(i)/genNNLO->GetBinContent(i) , 2);
-//        nnlo_ySystDn[i-1] = pow( genScErrDn->GetBinContent(i)/genNNLO->GetBinContent(i) , 2);
-//        //nnlo_ySystUp[i-1] += pow( hisHCorr->GetBinError(i)/hisHCorr->GetBinContent(i), 2);
-//        //nnlo_ySystDn[i-1] += pow( hisHCorr->GetBinError(i)/hisHCorr->GetBinContent(i), 2);
-//
-//        //--- correction factor if applicable ---
-//        //genNNLO->Scale(1.011);
-//        //genNNLO->Multiply(hisHCorr);
-//
-//        nnlo_yCoor[i-1] = genNNLO->GetBinContent(i);
-//        nnlo_ySystUp[i-1] = sqrt(nnlo_ySystUp[i-1]) * genNNLO->GetBinContent(i);
-//        nnlo_ySystDn[i-1] = sqrt(nnlo_ySystDn[i-1]) * genNNLO->GetBinContent(i);
-//
-//        nnlo_xCoor[i-1]    = genNNLO->GetBinCenter(i);
-//        nnlo_xErr[i-1]     = 0.5 * genNNLO->GetBinWidth(i);
-//    }
-//
-//    //--- Set up for systematic plot on pad 1
-//    genNNLOgrSyst = new TGraphAsymmErrors(nBins, nnlo_xCoor, nnlo_yCoor, nnlo_xErr, nnlo_xErr, nnlo_ySystDn, nnlo_ySystUp);
-//
-//    return genNNLOgrSyst;
+    //    for(int i = 1; i<= nBins; i++){
+    //        int nBins = genNNLO->GetNbinsX()
+    //        nnlo_ySystUp[i-1] = pow( genScErrUp->GetBinContent(i)/genNNLO->GetBinContent(i) , 2);
+    //        nnlo_ySystDn[i-1] = pow( genScErrDn->GetBinContent(i)/genNNLO->GetBinContent(i) , 2);
+    //        //nnlo_ySystUp[i-1] += pow( hisHCorr->GetBinError(i)/hisHCorr->GetBinContent(i), 2);
+    //        //nnlo_ySystDn[i-1] += pow( hisHCorr->GetBinError(i)/hisHCorr->GetBinContent(i), 2);
+    //
+    //        //--- correction factor if applicable ---
+    //        //genNNLO->Scale(1.011);
+    //        //genNNLO->Multiply(hisHCorr);
+    //
+    //        nnlo_yCoor[i-1] = genNNLO->GetBinContent(i);
+    //        nnlo_ySystUp[i-1] = sqrt(nnlo_ySystUp[i-1]) * genNNLO->GetBinContent(i);
+    //        nnlo_ySystDn[i-1] = sqrt(nnlo_ySystDn[i-1]) * genNNLO->GetBinContent(i);
+    //
+    //        nnlo_xCoor[i-1]    = genNNLO->GetBinCenter(i);
+    //        nnlo_xErr[i-1]     = 0.5 * genNNLO->GetBinWidth(i);
+    //    }
+    //
+    //    //--- Set up for systematic plot on pad 1
+    //    genNNLOgrSyst = new TGraphAsymmErrors(nBins, nnlo_xCoor, nnlo_yCoor, nnlo_xErr, nnlo_xErr, nnlo_ySystDn, nnlo_ySystUp);
+    //
+    //    return genNNLOgrSyst;
 }
 
 
