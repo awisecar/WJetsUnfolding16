@@ -186,12 +186,12 @@ void getAllFiles(TString histoDir, TString lepSel, TString energy, int jetPtMin,
 
     //--- Open Bg files ------------------------------------------------------------------------
     std::cout << "\nOpening BG files" << std::endl;
-    for (unsigned short iBg = 0; iBg < nBg; ++iBg) {
-	assert(iBg+1 < (int)NFILESDYJETS);
-	int j = FilesDYJets[iBg+1];
-	assert(j < NSamples);
-	// std::cout << "-----> "  << __FILE__ << ":" << __LINE__ << ".  Includes background from " << Samples[j].name << "\n";
-    std::cout << "Includes background from " << Samples[j].name << "\n";
+    for (unsigned short iBg = 0; iBg < nBg; ++iBg){
+	    assert(iBg+1 < (int)NFILESDYJETS);
+	    int j = FilesDYJets[iBg+1];
+	    assert(j < NSamples);
+	    // std::cout << "-----> "  << __FILE__ << ":" << __LINE__ << ".  Includes background from " << Samples[j].name << "\n";
+        std::cout << "Includes background from " << Samples[j].name << "\n";
         getFiles(histoDir, fBg[iBg], lepSel, energy, Samples[j].name, jetPtMin, jetEtaMax);
     }
     //------------------------------------------------------------------------------------------ 
@@ -339,8 +339,7 @@ TH1D* getHisto(TFile *File, const TString variable)
     return histo;
 }
 
-void getHistos(TH1D *histograms[], TFile *Files[], TString variable)
-{
+void getHistos(TH1D *histograms[], TFile *Files[], TString variable){
 
     TString fileName = gSystem->BaseName(Files[0]->GetName());
     bool isData = (fileName.Index("Data") >= 0 || fileName.Index("data") >= 0 || fileName.Index("DATA") >= 0);
@@ -480,19 +479,15 @@ void getHistos(TH1D *histograms[], TFile *Files[], TString variable)
 
 }
 
-void getHistos(TH2D *histograms[], TFile *Files[], TString variable)
-{
+void getHistos(TH2D *histograms[], TFile *Files[], TString variable){
+
     TString fileName = gSystem->BaseName(Files[0]->GetName());
     bool isData = (fileName.Index("Data") >= 0 || fileName.Index("data") >= 0 || fileName.Index("DATA") >= 0);
     bool isSignal = (/*fileName.Index("DYJets") >= 0 &&*/ fileName.Index("UNFOLDING") >=0 && fileName.Index("Tau") < 0);
 
     int nFiles = 0;
-    if (fileName.Index("Data") >= 0 || fileName.Index("data") >= 0 || fileName.Index("DATA") >= 0) {
-        nFiles = 3; 
-    }
-    else if (/*fileName.Index("DYJets") >= 0 &&*/ fileName.Index("UNFOLDING") >=0 && fileName.Index("Tau") < 0){
-        nFiles = 9;
-    }
+    if (fileName.Index("Data") >= 0 || fileName.Index("data") >= 0 || fileName.Index("DATA") >= 0) nFiles = 3; 
+    else if (/*fileName.Index("DYJets") >= 0 &&*/ fileName.Index("UNFOLDING") >=0 && fileName.Index("Tau") < 0) nFiles = 9;
     else nFiles = 7; 
 
     std::cout << "Getting histo for variable " << variable << "!" << std::endl;
@@ -514,7 +509,7 @@ void getHistos(TH2D *histograms[], TFile *Files[], TString variable)
         //    2.6% for 8 TeV.
         double lumiErr = cfg.getD("lumiUnc");
         std::cout << "lumiErr = " << lumiErr << std::endl;
-        if (isSignal) {
+        if (isSignal){
             //--- lumi scale up ---
             histograms[9] = (TH2D*) histograms[0]->Clone();
             histograms[9]->Scale(1. + lumiErr);
@@ -537,7 +532,7 @@ void getHistos(TH2D *histograms[], TFile *Files[], TString variable)
         //    is different for the two channels and are estimated to
         //    2.5% for muons and 0.5% for electron for 8 TeV
         //    This should not be applied to gen histograms however.
-	double muEffUnc = cfg.getD("muEffUnc");
+	    double muEffUnc = cfg.getD("muEffUnc");
         double errSF = muEffUnc;
         std::cout << "errSF = " << errSF << std::endl;
         //Scaling for lepton SFs should only be done for reco MC
@@ -587,10 +582,13 @@ void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hR
     //--- get rec Bg histograms ---
     //hRecBg, hRecSumBg will contain histos from the 7 fBg files, and then 4 more at the end for Lumi up/down, then SF up/down (11 objects)
     std::cout << "\n-----> Grabbing rec BG histos hRecBg and hRecSumBg!" << std::endl;
-    for (unsigned short iBg = 0; iBg < nBg; ++iBg) {
-        std::cout << "\n" << __FILE__ << ":" << __LINE__ << ". variable = " << variable << " file = " << fBg[iBg][0]->GetName() << std::endl;
+    for (unsigned short iBg = 0; iBg < nBg; ++iBg){
+
+        // std::cout << "\n" << __FILE__ << ":" << __LINE__ << ". variable = " << variable << " file = " << fBg[iBg][0]->GetName() << std::endl;
+        std::cout << "variable = " << variable << " \nfile = " << fBg[iBg][0]->GetName() << std::endl;
+        
         getHistos(hRecBg[iBg], fBg[iBg], variable);
-        for (unsigned short iSyst = 0; iSyst < 11; ++iSyst) {
+        for (unsigned short iSyst = 0; iSyst < 11; ++iSyst){
             if(hRecBg[iBg][iSyst] == 0){
                 std::cerr << __FILE__ << ":" << __LINE__ << ". Missing histogram " << variable
           		<< ", systematic id " << iSyst << " for process with central value file " 
@@ -599,14 +597,14 @@ void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hR
             }	  
             if (iBg == 0) hRecSumBg[iSyst] = (TH1D*) hRecBg[0][iSyst]->Clone();
             else{
-                if(hRecSumBg[iSyst]->GetXaxis()->GetNbins()!=hRecBg[iBg][iSyst]->GetXaxis()->GetNbins()){
-          	  std::cerr << __FILE__ << ":" <<  __LINE__ << ". "
+                if (hRecSumBg[iSyst]->GetXaxis()->GetNbins()!=hRecBg[iBg][iSyst]->GetXaxis()->GetNbins()){
+          	        std::cerr << __FILE__ << ":" <<  __LINE__ << ". "
           		    << "Histogram " << hRecSumBg[iSyst]->GetName()
           		    << "for systematic index " << iSyst
           		    << " and background index " << iBg
           		    << " has a different bining than the background #0.\n";
                 }
-            hRecSumBg[iSyst]->Add(hRecBg[iBg][iSyst]);
+                hRecSumBg[iSyst]->Add(hRecBg[iBg][iSyst]);
             }
         }
     }

@@ -31,7 +31,8 @@ const processInfoStruct Samples[] = {
     /* 5*/{"WWTo2L2Nu", ' ',     1.,       1.,      1,  0.06,     kViolet+5, kViolet+5, " WW", " WW"},
     /* 6*/{"WZ",    	' ',     1.,       1.,      1,  0.06,     kRed+1,    kRed+1,    " WZ", " WZ"},
     /* 7*/{"DYJets10toInf3", ' ', 1.,    1.,      1,  0.06,     kGreen-8,  kGreen-8,  " DYJets", " Z/#gamma^{*} #rightarrow ll"},
-    /* 8*/{"WJetsToLN_UNFOLDING_FxFx",     ' ',     1.,       1.,      1,  0.06,     kPink, kPink, " WJets", " W"},
+    /* 8*/{"ttV", ' ', 1.,    1.,      1,  0.10,     kGreen,  kGreen,  " ttV", " ttV"},
+    /* 9*/{"WJetsToLN_UNFOLDING_FxFx",     ' ',     1.,       1.,      1,  0.06,     kPink, kPink, " WJets", " W"},
 };
 
 const int NSamples = sizeof(Samples) / sizeof(Samples[0]);
@@ -39,7 +40,7 @@ const int DATA(0);
 const int DYJETS(NSamples - 1); // Signal MC is the last sample in the list.
 
 // Total number of samples after sample grouping, including real data, background MC, and signal MC
-const unsigned int NFILESDYJETS = 9;
+const unsigned int NFILESDYJETS = 10;
 
 // Number of background MC samples: all minus data and the signal MC
 const unsigned int NBGDYJETS = NFILESDYJETS - 2;
@@ -47,7 +48,7 @@ const unsigned int NBGDYJETS = NFILESDYJETS - 2;
 /** List of indices of samples from Samples to be used for ZJets analysis
  * When samples are grouped, only the merged sample is included in this list.
  */
-const unsigned int FilesDYJets[NFILESDYJETS] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
+const unsigned int FilesDYJets[NFILESDYJETS] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
 //--- Use this Flag for Unfolding Resp Syst ---
 const TString DYSHERPA14FILENAME("");
