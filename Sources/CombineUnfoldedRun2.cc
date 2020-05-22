@@ -409,9 +409,9 @@ TCanvas* plotUnfRecoComparison(TString variable, int year, TH1D *hUnf, TH1D *hRe
     hXSecReco->SetMarkerColor(kRed);
     hXSecReco->SetMarkerStyle(20);
 
-    hXSecGen->SetLineColor(kGreen+1);
+    hXSecGen->SetLineColor(kGreen);
     hXSecGen->SetLineWidth(2);
-    hXSecGen->SetMarkerColor(kGreen+1);
+    hXSecGen->SetMarkerColor(kGreen);
     hXSecGen->SetMarkerStyle(20);
 
     hXSecUnf->SetLineColor(kBlack);
@@ -470,7 +470,7 @@ TCanvas* plotUnfRecoComparison(TString variable, int year, TH1D *hUnf, TH1D *hRe
     // axes, titles
     ratioGenToReco->SetTitle("");
     ratioGenToReco->GetYaxis()->SetRangeUser(0.49, 5.2);
-    ratioGenToReco->GetYaxis()->SetTitle("Ratio to Reco'd");
+    ratioGenToReco->GetYaxis()->SetTitle("Ratio to Reco");
     ratioGenToReco->GetYaxis()->CenterTitle();
     ratioGenToReco->GetYaxis()->SetLabelSize(0.073); //0.09
     ratioGenToReco->GetYaxis()->SetLabelOffset(0.002); 

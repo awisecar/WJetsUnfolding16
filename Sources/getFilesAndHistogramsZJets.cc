@@ -71,37 +71,37 @@ void getFiles(TString histoDir, TFile *Files[], TString lepSel, TString energy, 
 
     // ==============================================================
     
-    //    //Full systematics
-    //     if (Name.Index("Data") >= 0 ) { // for data we have:
-    //         Syst.push_back("0");                 //   0: central
-    //         Syst.push_back("2_Up");              //   2 up: JES up
-    //         Syst.push_back("2_Down");            //   2 down: JES down
-    //     }
-    //     else if (Name.Index("UNFOLDING") >= 0 && /*Name.Index("DYJets") >= 0 &&*/ Name.Index("Tau") < 0) {
-    //         // for DYJets in case of Z+Jets or for WJets in case of W+Jets analysis we have:
-    //         Syst.push_back("0");         // 0: central
-    //         Syst.push_back("1_Up");      // 1 up: PU up
-    //         Syst.push_back("1_Down");    // 1 down: PU down
-    //         Syst.push_back("4_Up");      // 4 up: JER up
-    //         Syst.push_back("4_Down");    // 4 down: JER down
-    //         Syst.push_back("5_Up");      // 5 up: LepSF up
-    //         Syst.push_back("5_Down");    // 5 down: LepSF down
-    //         Syst.push_back("6_Up");      // 6 up: BtagSF up
-    //         Syst.push_back("6_Down");    // 6 down: BtagSF down
-    //     }
-    //     else { // for background we have
-    //         Syst.push_back("0");         // 0: central
-    //         Syst.push_back("1_Up");      // 1 up: PU up
-    //         Syst.push_back("1_Down");    // 1 down: PU down
-    //         Syst.push_back("3_Up");      // 3 up: XSec up
-    //         Syst.push_back("3_Down");    // 3 down: Xsec down
-    //         Syst.push_back("6_Up");      // 6 up: BtagSF up
-    //         Syst.push_back("6_Down");    // 6 down: BtagSF down
-    //     };
+    // // Full systematics
+    // if (Name.Index("Data") >= 0 ) { // for data we have:
+    //     Syst.push_back("0");                 //   0: central
+    //     Syst.push_back("2_Up");              //   2 up: JES up
+    //     Syst.push_back("2_Down");            //   2 down: JES down
+    // }
+    // else if (Name.Index("UNFOLDING") >= 0 && /*Name.Index("DYJets") >= 0 &&*/ Name.Index("Tau") < 0) {
+    //     // for DYJets in case of Z+Jets or for WJets in case of W+Jets analysis we have:
+    //     Syst.push_back("0");         // 0: central
+    //     Syst.push_back("1_Up");      // 1 up: PU up
+    //     Syst.push_back("1_Down");    // 1 down: PU down
+    //     Syst.push_back("4_Up");      // 4 up: JER up
+    //     Syst.push_back("4_Down");    // 4 down: JER down
+    //     Syst.push_back("5_Up");      // 5 up: LepSF up
+    //     Syst.push_back("5_Down");    // 5 down: LepSF down
+    //     Syst.push_back("6_Up");      // 6 up: BtagSF up
+    //     Syst.push_back("6_Down");    // 6 down: BtagSF down
+    // }
+    // else { // for background we have
+    //     Syst.push_back("0");         // 0: central
+    //     Syst.push_back("1_Up");      // 1 up: PU up
+    //     Syst.push_back("1_Down");    // 1 down: PU down
+    //     Syst.push_back("3_Up");      // 3 up: XSec up
+    //     Syst.push_back("3_Down");    // 3 down: Xsec down
+    //     Syst.push_back("6_Up");      // 6 up: BtagSF up
+    //     Syst.push_back("6_Down");    // 6 down: BtagSF down
+    // };
 
     // ==============================================================
 
-    // //1=PU, 2=JES, 3=XSEC, 4=JER, 6=BtagSF
+    // 1=PU, 2=JES, 3=XSEC, 4=JER, 6=BtagSF
     // if (Name.Index("Data") >= 0 ) { // for data we have:
     //     Syst.push_back("0");                 //   0: central
     //     Syst.push_back("2_Up");              //   2 up: JES up
@@ -131,33 +131,63 @@ void getFiles(TString histoDir, TFile *Files[], TString lepSel, TString energy, 
 
     // ==============================================================
 
-    // No systematics
-    if (Name.Index("Data") >= 0) { // for data we have:
-       Syst.push_back("0");                 //   0: central
-       Syst.push_back("0");              //   2 up: JES up
-       Syst.push_back("0");            //   2 down: JES down
+    // 2=JES, 3=XSEC
+    if (Name.Index("Data") >= 0 ) { // for data we have:
+        Syst.push_back("0");                 //   0: central
+        Syst.push_back("2_Up");              //   2 up: JES up
+        Syst.push_back("2_Down");            //   2 down: JES down
     }
     else if (Name.Index("UNFOLDING") >= 0 && /*Name.Index("DYJets") >= 0 &&*/ Name.Index("Tau") < 0) {
-       // for DYJets in case of Z+Jets or for WJets in case of W+Jets analysis we have:
-       Syst.push_back("0");         // 0: central
-       Syst.push_back("0");      // 1 up: PU up
-       Syst.push_back("0");    // 1 down: PU down
-       Syst.push_back("0");      // 4 up: JER up
-       Syst.push_back("0");      // 4 down: JER down
-       Syst.push_back("0");      // 5 up: LepSF up
-       Syst.push_back("0");    // 5 down: LepSF down
-       Syst.push_back("0");      // 6 up: BtagSF up
-       Syst.push_back("0");    // 6 down: BtagSF down
+        // for DYJets in case of Z+Jets or for WJets in case of W+Jets analysis we have:
+        Syst.push_back("0");         // 0: central
+        Syst.push_back("0");      // 1 up: PU up
+        Syst.push_back("0");    // 1 down: PU down
+        Syst.push_back("0");      // 4 up: JER up
+        Syst.push_back("0");    // 4 down: JER down
+        Syst.push_back("0");      // 5 up: LepSF up
+        Syst.push_back("0");    // 5 down: LepSF down
+        Syst.push_back("0");      // 6 up: BtagSF up
+        Syst.push_back("0");    // 6 down: BtagSF down
     }
     else { // for background we have
-       Syst.push_back("0");         // 0: central
-       Syst.push_back("0");      // 1 up: PU up
-       Syst.push_back("0");    // 1 down: PU down
-       Syst.push_back("0");      // 3 up: XSec up
-       Syst.push_back("0");    // 3 down: Xsec down
-       Syst.push_back("0");      // 6 up: BtagSF up
-       Syst.push_back("0");    // 6 down: BtagSF down
+        Syst.push_back("0");         // 0: central
+        Syst.push_back("0");      // 1 up: PU up
+        Syst.push_back("0");    // 1 down: PU down
+        Syst.push_back("3_Up");      // 3 up: XSec up
+        Syst.push_back("3_Down");    // 3 down: Xsec down
+        Syst.push_back("0");      // 6 up: BtagSF up
+        Syst.push_back("0");    // 6 down: BtagSF down
     };
+
+    // ==============================================================
+
+    // // No systematics
+    // if (Name.Index("Data") >= 0) { // for data we have:
+    //    Syst.push_back("0");                 //   0: central
+    //    Syst.push_back("0");              //   2 up: JES up
+    //    Syst.push_back("0");            //   2 down: JES down
+    // }
+    // else if (Name.Index("UNFOLDING") >= 0 && /*Name.Index("DYJets") >= 0 &&*/ Name.Index("Tau") < 0) {
+    //    // for DYJets in case of Z+Jets or for WJets in case of W+Jets analysis we have:
+    //    Syst.push_back("0");         // 0: central
+    //    Syst.push_back("0");      // 1 up: PU up
+    //    Syst.push_back("0");    // 1 down: PU down
+    //    Syst.push_back("0");      // 4 up: JER up
+    //    Syst.push_back("0");      // 4 down: JER down
+    //    Syst.push_back("0");      // 5 up: LepSF up
+    //    Syst.push_back("0");    // 5 down: LepSF down
+    //    Syst.push_back("0");      // 6 up: BtagSF up
+    //    Syst.push_back("0");    // 6 down: BtagSF down
+    // }
+    // else { // for background we have
+    //    Syst.push_back("0");         // 0: central
+    //    Syst.push_back("0");      // 1 up: PU up
+    //    Syst.push_back("0");    // 1 down: PU down
+    //    Syst.push_back("0");      // 3 up: XSec up
+    //    Syst.push_back("0");    // 3 down: Xsec down
+    //    Syst.push_back("0");      // 6 up: BtagSF up
+    //    Syst.push_back("0");    // 6 down: BtagSF down
+    // };
 
     // ==============================================================
 
@@ -422,7 +452,7 @@ void getHistos(TH1D *histograms[], TFile *Files[], TString variable){
     }//end loop over files
 
     //--- Scaling some histos for lumi statistics, SF statistics
-    if (!isData && histograms[0]) {
+    if (!isData && histograms[0]){
         Files[0]->cd();
         //--- From central histograms, we simulate the histograms
         //    for lumi up and down systematics. It is just a rescaliing

@@ -1,27 +1,16 @@
 #!/bin/sh
 
-#Correct distributions for TUnfold
-##./runUnfoldingZJetsRatios lepSel=SMu variableNUM=LeadingJetPt_2_Zinc2jet variableDENOM=LeadingJetPt_2_Zinc1jet
-##./runUnfoldingZJetsRatios lepSel=SMu variableNUM=LeadingJetPt_2_Zinc3jet variableDENOM=LeadingJetPt_2_Zinc2jet
-##./runUnfoldingZJetsRatios lepSel=SMu variableNUM=LeadingJetPt_2_Zinc4jet variableDENOM=LeadingJetPt_2_Zinc3jet
-##./runUnfoldingZJetsRatios lepSel=SMu variableNUM=HTover2_2_Zinc3jet variableDENOM=HTover2_2_Zinc2jet
-##./runUnfoldingZJetsRatios lepSel=SMu variableNUM=HTover2_2_Zinc4jet variableDENOM=HTover2_2_Zinc3jet
-##./runUnfoldingZJetsRatios lepSel=SMu variableNUM=LepPtPlusLeadingJetPt_2_Zinc2jet variableDENOM=LepPtPlusLeadingJetPt_2_Zinc1jet
-##./runUnfoldingZJetsRatios lepSel=SMu variableNUM=LepPtPlusLeadingJetPt_2_Zinc3jet variableDENOM=LepPtPlusLeadingJetPt_2_Zinc2jet
-##./runUnfoldingZJetsRatios lepSel=SMu variableNUM=LepPtPlusLeadingJetPt_2_Zinc4jet variableDENOM=LepPtPlusLeadingJetPt_2_Zinc3jet
-##./runUnfoldingZJetsRatios lepSel=SMu variableNUM=LepPtPlusHTover2_2_Zinc3jet variableDENOM=LepPtPlusHTover2_2_Zinc2jet
-##./runUnfoldingZJetsRatios lepSel=SMu variableNUM=LepPtPlusHTover2_2_Zinc4jet variableDENOM=LepPtPlusHTover2_2_Zinc3jet
-##./runUnfoldingZJetsRatios lepSel=SMu variableNUM=ZPt_2_Zinc2jet variableDENOM=ZPt_2_Zinc1jet
-##./runUnfoldingZJetsRatios lepSel=SMu variableNUM=ZPt_2_Zinc3jet variableDENOM=ZPt_2_Zinc2jet
-##./runUnfoldingZJetsRatios lepSel=SMu variableNUM=ZPt_2_Zinc4jet variableDENOM=ZPt_2_Zinc3jet
-##./runUnfoldingZJetsRatios lepSel=SMu variableNUM=ZPtPlusLeadingJetPt_2_Zinc2jet variableDENOM=ZPtPlusLeadingJetPt_2_Zinc1jet
-##./runUnfoldingZJetsRatios lepSel=SMu variableNUM=ZPtPlusLeadingJetPt_2_Zinc3jet variableDENOM=ZPtPlusLeadingJetPt_2_Zinc2jet
-##./runUnfoldingZJetsRatios lepSel=SMu variableNUM=ZPtPlusLeadingJetPt_2_Zinc4jet variableDENOM=ZPtPlusLeadingJetPt_2_Zinc3jet
-##./runUnfoldingZJetsRatios lepSel=SMu variableNUM=ZPtPlusHTover2_2_Zinc3jet variableDENOM=ZPtPlusHTover2_2_Zinc2jet
-##./runUnfoldingZJetsRatios lepSel=SMu variableNUM=ZPtPlusHTover2_2_Zinc4jet variableDENOM=ZPtPlusHTover2_2_Zinc3jet
+## 19 May 20 ---
+# AK4 jets
+./runUnfoldingZJetsRatios  year=2016  variableNUM=LepPtPlusLeadingJetPt_Zinc2jet_TUnfold  variableDENOM=LepPtPlusLeadingJetPt_Zinc1jet_TUnfold # R21
+./runUnfoldingZJetsRatios  year=2016  variableNUM=LepPtPlusLeadingJetPt_Zinc3jet_TUnfold  variableDENOM=LepPtPlusLeadingJetPt_Zinc2jet_TUnfold # R32
+# ./runUnfoldingZJetsRatios  year=2016  variableNUM=LepPtPlusLeadingJetPt_Zexc2jet_TUnfold  variableDENOM=LepPtPlusLeadingJetPt_Zexc1jet_TUnfold # R21 exc
+# ./runUnfoldingZJetsRatios  year=2016  variableNUM=LepPtPlusLeadingJetPt_Zexc3jet_TUnfold  variableDENOM=LepPtPlusLeadingJetPt_Zexc2jet_TUnfold # R32 exc
+./runUnfoldingZJetsRatios  year=2016  variableNUM=LepPtPlusLeadingJetPt_Zinc2jet_TUnfold  variableDENOM=LepPtPlusLeadingJetPt_Zexc1jet_TUnfold # R2inc/1exc
+# AK8 jets
+./runUnfoldingZJetsRatios  year=2016  variableNUM=LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold  variableDENOM=LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold # R21
+# ./runUnfoldingZJetsRatios  year=2016  variableNUM=LepPtPlusLeadingJetAK8Pt_Zinc3jet_TUnfold  variableDENOM=LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold # R32
+# ./runUnfoldingZJetsRatios  year=2016  variableNUM=LepPtPlusLeadingJetAK8Pt_Zexc2jet_TUnfold  variableDENOM=LepPtPlusLeadingJetAK8Pt_Zexc1jet_TUnfold # R21 exc
+# ./runUnfoldingZJetsRatios  year=2016  variableNUM=LepPtPlusLeadingJetAK8Pt_Zexc3jet_TUnfold  variableDENOM=LepPtPlusLeadingJetAK8Pt_Zexc2jet_TUnfold # R32 exc
+./runUnfoldingZJetsRatios  year=2016  variableNUM=LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold  variableDENOM=LepPtPlusLeadingJetAK8Pt_Zexc1jet_TUnfold # R2inc/1exc
 
-#Getting the reco&gen distributions with the nominal binning to try 
-#bin-by-bin particle-level corrections derived using W+jets signal MC
-#9 May 2019
-./runUnfoldingZJetsRatios lepSel=SMu variableNUM=LeadingJetPt_Zinc2jet variableDENOM=LeadingJetPt_Zinc1jet
-./runUnfoldingZJetsRatios lepSel=SMu variableNUM=LepPtPlusLeadingJetPt_Zinc2jet variableDENOM=LepPtPlusLeadingJetPt_Zinc1jet

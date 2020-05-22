@@ -1,74 +1,41 @@
 #!/bin/sh
 
-####Running all of the relevant variables for alpha-s analysis
-## RooUnfold
-####./runUnfoldingZJets lepSel=SMu variable=ZNGoodJets_Zinc
-####./runUnfoldingZJets lepSel=SMu variable=ZNGoodJets_Zexc
-###./runUnfoldingZJets lepSel=SMu variable=LeadingJetPt_Zinc1jet_R21
-###./runUnfoldingZJets lepSel=SMu variable=LeadingJetPt_Zinc2jet_R21
-###./runUnfoldingZJets lepSel=SMu variable=LeadingJetPt_Zinc2jet_R32
-###./runUnfoldingZJets lepSel=SMu variable=LeadingJetPt_Zinc3jet_R32
-###./runUnfoldingZJets lepSel=SMu variable=LeadingJetPt_Zinc3jet_R43
-###./runUnfoldingZJets lepSel=SMu variable=LeadingJetPt_Zinc4jet_R43
-###./runUnfoldingZJets lepSel=SMu variable=HTover2_Zinc2jet_R32
-###./runUnfoldingZJets lepSel=SMu variable=HTover2_Zinc3jet_R32
-###./runUnfoldingZJets lepSel=SMu variable=HTover2_Zinc3jet_R43
-###./runUnfoldingZJets lepSel=SMu variable=HTover2_Zinc4jet_R43
-###./runUnfoldingZJets lepSel=SMu variable=LepPtPlusLeadingJetPt_Zinc1jet_R21
-###./runUnfoldingZJets lepSel=SMu variable=LepPtPlusLeadingJetPt_Zinc2jet_R21
-###./runUnfoldingZJets lepSel=SMu variable=LepPtPlusLeadingJetPt_Zinc2jet_R32
-###./runUnfoldingZJets lepSel=SMu variable=LepPtPlusLeadingJetPt_Zinc3jet_R32
-###./runUnfoldingZJets lepSel=SMu variable=LepPtPlusLeadingJetPt_Zinc3jet_R43
-###./runUnfoldingZJets lepSel=SMu variable=LepPtPlusLeadingJetPt_Zinc4jet_R43
-###./runUnfoldingZJets lepSel=SMu variable=LepPtPlusHTover2_Zinc2jet_R32
-###./runUnfoldingZJets lepSel=SMu variable=LepPtPlusHTover2_Zinc3jet_R32
-###./runUnfoldingZJets lepSel=SMu variable=LepPtPlusHTover2_Zinc3jet_R43
-###./runUnfoldingZJets lepSel=SMu variable=LepPtPlusHTover2_Zinc4jet_R43
-###./runUnfoldingZJets lepSel=SMu variable=ZPt_Zinc1jet
-###./runUnfoldingZJets lepSel=SMu variable=ZPt_Zinc2jet
-###./runUnfoldingZJets lepSel=SMu variable=ZPt_Zinc3jet
-###./runUnfoldingZJets lepSel=SMu variable=ZPt_Zinc4jet
-###./runUnfoldingZJets lepSel=SMu variable=ZPtPlusLeadingJetPt_Zinc1jet
-###./runUnfoldingZJets lepSel=SMu variable=ZPtPlusLeadingJetPt_Zinc2jet
-###./runUnfoldingZJets lepSel=SMu variable=ZPtPlusLeadingJetPt_Zinc3jet
-###./runUnfoldingZJets lepSel=SMu variable=ZPtPlusLeadingJetPt_Zinc4jet
-###./runUnfoldingZJets lepSel=SMu variable=ZPtPlusHTover2_Zinc2jet
-###./runUnfoldingZJets lepSel=SMu variable=ZPtPlusHTover2_Zinc3jet
-###./runUnfoldingZJets lepSel=SMu variable=ZPtPlusHTover2_Zinc4jet
+# 8 May 20 --
+#./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetPt_TUnfold_Zinc1jet 
+#./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetPt_TUnfold_Zinc2jet
+#./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetPt_TUnfold_Zinc3jet
+#./runUnfoldingZJets year=2016 variable=FirstJetPt_Zinc1jet_TUnfold
+#./runUnfoldingZJets year=2016 variable=FirstJetAbsRapidity_Zinc1jet_TUnfold
+#./runUnfoldingZJets year=2016 variable=dPhiLepJet1_Zinc1jet_TUnfold
+#./runUnfoldingZJets year=2017 variable=LepPtPlusLeadingJetPt_TUnfold_Zinc1jet 
+#./runUnfoldingZJets year=2017 variable=LepPtPlusLeadingJetPt_TUnfold_Zinc2jet
+#./runUnfoldingZJets year=2017 variable=LepPtPlusLeadingJetPt_TUnfold_Zinc3jet
+#./runUnfoldingZJets year=2017 variable=FirstJetPt_Zinc1jet_TUnfold
+#./runUnfoldingZJets year=2017 variable=FirstJetAbsRapidity_Zinc1jet_TUnfold
+#./runUnfoldingZJets year=2017 variable=dPhiLepJet1_Zinc1jet_TUnfold
+#./runUnfoldingZJets year=2018 variable=LepPtPlusLeadingJetPt_TUnfold_Zinc1jet 
+#./runUnfoldingZJets year=2018 variable=LepPtPlusLeadingJetPt_TUnfold_Zinc2jet
+#./runUnfoldingZJets year=2018 variable=LepPtPlusLeadingJetPt_TUnfold_Zinc3jet
+#./runUnfoldingZJets year=2018 variable=FirstJetPt_Zinc1jet_TUnfold
+#./runUnfoldingZJets year=2018 variable=FirstJetAbsRapidity_Zinc1jet_TUnfold
+#./runUnfoldingZJets year=2018 variable=dPhiLepJet1_Zinc1jet_TUnfold
 
-#./runUnfoldingZJets lepSel=SMu variable=JetsHT_Zinc1jet
-#./runUnfoldingZJets lepSel=SMu variable=JetsHT_Zinc2jet
-#./runUnfoldingZJets lepSel=SMu variable=FirstJetAbsRapidity_Zinc1jet
+# 18 May 20 --
+./runUnfoldingZJets year=2016 variable=FirstJetPt_Zinc1jet_TUnfold
+./runUnfoldingZJets year=2016 variable=FirstJetAbsRapidity_Zinc1jet_TUnfold
+./runUnfoldingZJets year=2016 variable=dPhiLepJet1_Zinc1jet_TUnfold
+./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetPt_Zinc1jet_TUnfold
+./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetPt_Zinc2jet_TUnfold
+./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetPt_Zinc3jet_TUnfold
+./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetPt_Zexc1jet_TUnfold
+./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetPt_Zexc2jet_TUnfold
+./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetPt_Zexc3jet_TUnfold
+./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold
+./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold
+./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetAK8Pt_Zinc3jet_TUnfold
+./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetAK8Pt_Zexc1jet_TUnfold
+./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetAK8Pt_Zexc2jet_TUnfold
+./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetAK8Pt_Zexc3jet_TUnfold
 
-# Alternative binnings for TUnfold
-# ./runUnfoldingZJets lepSel=SMu variable=LeadingJetPt_2_Zinc1jet
-# ./runUnfoldingZJets lepSel=SMu variable=LeadingJetPt_2_Zinc2jet
-# ./runUnfoldingZJets lepSel=SMu variable=LeadingJetPt_2_Zinc3jet
-# ./runUnfoldingZJets lepSel=SMu variable=LeadingJetPt_2_Zinc4jet
-# ./runUnfoldingZJets lepSel=SMu variable=HTover2_2_Zinc2jet
-# ./runUnfoldingZJets lepSel=SMu variable=HTover2_2_Zinc3jet
-# ./runUnfoldingZJets lepSel=SMu variable=HTover2_2_Zinc4jet
-# ./runUnfoldingZJets lepSel=SMu variable=LepPtPlusLeadingJetPt_2_Zinc1jet
-# ./runUnfoldingZJets lepSel=SMu variable=LepPtPlusLeadingJetPt_2_Zinc2jet
-# ./runUnfoldingZJets lepSel=SMu variable=LepPtPlusLeadingJetPt_2_Zinc3jet
-# ./runUnfoldingZJets lepSel=SMu variable=LepPtPlusLeadingJetPt_2_Zinc4jet
-# ./runUnfoldingZJets lepSel=SMu variable=LepPtPlusHTover2_2_Zinc2jet
-# ./runUnfoldingZJets lepSel=SMu variable=LepPtPlusHTover2_2_Zinc3jet
-# ./runUnfoldingZJets lepSel=SMu variable=LepPtPlusHTover2_2_Zinc4jet
-# ./runUnfoldingZJets lepSel=SMu variable=ZPt_2_Zinc1jet
-# ./runUnfoldingZJets lepSel=SMu variable=ZPt_2_Zinc2jet
-# ./runUnfoldingZJets lepSel=SMu variable=ZPt_2_Zinc3jet
-# ./runUnfoldingZJets lepSel=SMu variable=ZPt_2_Zinc4jet
-# ./runUnfoldingZJets lepSel=SMu variable=ZPtPlusLeadingJetPt_2_Zinc1jet
-# ./runUnfoldingZJets lepSel=SMu variable=ZPtPlusLeadingJetPt_2_Zinc2jet
-# ./runUnfoldingZJets lepSel=SMu variable=ZPtPlusLeadingJetPt_2_Zinc3jet
-# ./runUnfoldingZJets lepSel=SMu variable=ZPtPlusLeadingJetPt_2_Zinc4jet
-# ./runUnfoldingZJets lepSel=SMu variable=ZPtPlusHTover2_2_Zinc2jet
-# ./runUnfoldingZJets lepSel=SMu variable=ZPtPlusHTover2_2_Zinc3jet
-# ./runUnfoldingZJets lepSel=SMu variable=ZPtPlusHTover2_2_Zinc4jet
-
-# Testing unfolding package
-./runUnfoldingZJets lepSel=SMu variable=LepPtPlusLeadingJetPt_TUnfold_Zinc1jet
-# ./runUnfoldingZJets lepSel=SMu variable=LepPtPlusLeadingJetPt_INCLUDELOWPT_TUnfold_Zinc1jet
 
 

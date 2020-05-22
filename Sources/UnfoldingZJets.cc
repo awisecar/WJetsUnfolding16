@@ -211,7 +211,8 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
         //--- Get all histograms needed for unfolding! ---
         // Note: andrew -- ttbar scaling done inside getAllHistos
         std::cout << "\nGrabbing all needed histograms from files opened above..." << std::endl;
-        getAllHistos(variable, hRecData, fData, hRecDYJets, hGenDYJets, hResDYJets, fDYJets, hRecBg, hRecSumBg, fBg, NBGDYJETS, hFakDYJets, hPurity);
+        getAllHistos(variable, hRecData, fData, hRecDYJets, hGenDYJets, hResDYJets, fDYJets, 
+            hRecBg, hRecSumBg, fBg, NBGDYJETS, hFakDYJets, hPurity);
         
         //--- Get histos from theory files (if files opened above)
         TH1D *hGen1 = NULL;
@@ -263,49 +264,39 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
         //andrew -- re-check that the following order of systematics is replicated in the order that the histos are read in from the files
         //Lumi and SF are not read in from files; they are clones of the Central histo that's globally scaled by a single factor
         //as of 6 March 2019
+        // int nSysts = DYSHERPA14FILENAME.Length()? 18 : 17;
+        int nSysts = 18;
         TString name[] = {"Central", "JESUp", "JESDown", "PUUp", "PUDown", "JERUp", "JERDown", "XSECUp", "XSECDown", 
-                            "blank1", "blank2", "BtagSFUp", "BtagSFDown", "LumiUp", "LumiDown", "SFUp", "SFDown", "blank5"};
+            "blank1", "blank2", "BtagSFUp", "BtagSFDown", "LumiUp", "LumiDown", "SFUp", "SFDown", "blank5"};
 
-        TH1D *hUnfData[18] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,};
-        TH1D *hUnfDataNoScale[18] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,};
-        TH2D *hUnfDataStatCov[18] =  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,};
-        TH2D *hUnfDataStatCovNoScale[18] =  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,};
-        TH2D *hUnfMCStatCov[18] =  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,};
-        TH2D *hUnfMCStatCovNoScale[18] =  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,};
-        int nIter[18] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; 
+        TH1D *hUnfData[18]               = {};
+        TH1D *hUnfDataNoScale[18]        = {};
+        TH2D *hUnfDataStatCov[18]        = {};
+        TH2D *hUnfDataStatCovNoScale[18] = {};
+        TH2D *hUnfMCStatCov[18]          = {};
+        TH2D *hUnfMCStatCovNoScale[18]   = {};
 
-        int nSysts = DYSHERPA14FILENAME.Length()? 18 : 17;
+        TH1D *hRecDataBinsMerged[18]     = {};
+
         bool logy = VAROFINTERESTZJETS[i].log;
 
         //--- Unfold the Data histograms for each systematic ---
         std::cout << "\nEntering iSyst loop to unfold for Central and every variation for each systematic..." << std::endl;
         std::cout << "nSysts = " << nSysts << std::endl;
         std::cout << "whichSyst = " << whichSyst << std::endl;
-        for (unsigned short iSyst = 0; iSyst < nSysts; ++iSyst){
+        for (int iSyst = 0; iSyst < nSysts; ++iSyst){
             std::cout << "\n >>>>>>>>>> Start iSyst = " << iSyst << "! <<<<<<<<<<" << std::endl;
             if(iSyst != 0 && whichSyst >= 0 && iSyst != whichSyst) continue;
 
 
-
             // ALW 27 Jan 20
             // temporary, while working on code...
-            if (iSyst != 0) continue;
+            // if (iSyst != 0) continue;
 
 
-
-            //--- This section selects the correct hRecData file and hRecSumBg files to use for background subtraction, and then unfolding
-            //For JES (iSyst=1,2), select correctly varied data file; otherwise, use Central
-            unsigned short iData = (iSyst == 1 || iSyst == 2) ? iSyst : 0;
-            //Select correct BG sum for BG-based systematics
-            unsigned short iBg = 0;
-            //for central, JES, JER, LER, Sherpa unf --> use central background distribution
-            if (iSyst == 0 || iSyst == 1 || iSyst == 2 || iSyst == 5 || iSyst == 6 || iSyst == 9 || iSyst == 10 || iSyst == 17) iBg = 0;
-            //for PU, use iBg=1,2
-            else if (iSyst == 3 || iSyst == 4) iBg = iSyst - 2;
-            //for XSEC, use iBg=3,4;
-            else if (iSyst == 7 || iSyst == 8) iBg = iSyst - 4;
-            //for BtagSF, use iBg=5,6; for Lumi, use iBg=7,8; for SF, use iBg=9,10
-            else if (iSyst == 11 || iSyst == 12 || iSyst == 13 || iSyst == 14 || iSyst == 15 || iSyst == 16) iBg = iSyst - 6;
+            // Grab file indices for reco, gen, response distributions relevant for unfolding
+            int iData(0), iBg(0), iGen(0), iResp(0); 
+            unfoldingFileSelector(iSyst, iData, iBg, iGen, iResp);
 
             //Grab reco data
             std::cout << "\nFetching main reco data histo hRecData[iData], " << "iData = " << iData << std::endl;
@@ -317,57 +308,21 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
             std::cout << "Removing fakes using hFakDYJets[iSyst], hPurity[iSyst]!" << std::endl;
             RemoveFakes(hRecDataMinusFakes, hFakDYJets[iSyst], hPurity[iSyst]);
 
-
-
-            //This section picks the correct hGenDYJets histogram for calculating efficiencies with respect to the response matrix (inside TUnfoldData)
-            unsigned short iGen = 0;
-            unsigned short iResp = 0; //for picking correct response matrix from hResDYJets
-            //Central, JES, XSEC, SF, Alt. Unfolding
-            if (iSyst == 0 || iSyst == 1 || iSyst == 2 || iSyst == 7 || iSyst == 8 || iSyst == 15 || iSyst == 16 || iSyst == 17){
-                iGen = 0;
-                iResp = 0;
-                if (iSyst == 15) iResp = 11;
-                else if (iSyst == 16) iResp = 12;
-            }
-            //PU, JER
-            else if (iSyst == 3 || iSyst == 4 || iSyst == 5 || iSyst == 6){
-                iGen = iSyst - 2;
-                iResp = iSyst - 2;
-            }
-            //blank1, blank2, BtagSF, Lumi
-            else if (iSyst == 9 || iSyst == 10 || iSyst == 11 || iSyst == 12 || iSyst == 13 || iSyst == 14){
-                iGen = iSyst - 4;
-                iResp = iSyst - 4;
-            }
             //Output indices for correct response and gen signal histos
             std::cout << "Fetching gen signal histo hGenDYJets[iGen], " << "iGen = " << iGen << std::endl;
             std::cout << "Fetching response matrix histo hResDYJets[iResp], " << "iResp = " << iResp << std::endl;
 
-
-
-            std::cout << "\n ===> Unfold: " << variable << ", " << name[iSyst] << " for " << lepSel << " channel <===" << "\n";
+            // Now unfold
+            std::cout << "\n ===> Unfold: " << variable << ", " << name[iSyst] << "\n";
             if(hRecDataMinusFakes->GetEntries() == 0){
                 std::cerr << "Warning: histogram " << hRecDataMinusFakes->GetName() << " has no entries. Its unfolding will be skipped.\n";
                 continue;
             }
-            if (algo == "TUnfold") {
+
+            if (algo == "TUnfold"){
                 //use the original hResDYJets histograms as the response matrix
-                nIter[iSyst] = TUnfoldData(lepSel, algo, hResDYJets[iResp], hRecDataMinusFakes, hUnfData[iSyst], hUnfDataNoScale[iSyst],
-                    hUnfDataStatCov[iSyst], hUnfDataStatCovNoScale[iSyst], hUnfMCStatCov[iSyst], hUnfMCStatCovNoScale[iSyst], 
-                    name[iSyst], integratedLumi, hGenDYJets[iGen], logy, false, year);
-            }
-    
-
-
-            // Save the hRecDataMinusFakes i.e. detector level histograms for building 
-            // correlation matrix, before loop goes to next iSyst
-            outputRootFile->cd();
-            if (hRecDataMinusFakes){
-                TString detecName = "hRecDataMinusFakes_"+name[iSyst];
-                TString detecTitle = variable;
-                detecTitle += "_detectorlevel";
-                hRecDataMinusFakes->SetNameTitle(detecName, detecTitle);
-                hRecDataMinusFakes->Write();
+                TUnfoldData(lepSel, algo, hResDYJets[iResp], hRecDataMinusFakes, hRecDataBinsMerged[iSyst], hUnfData[iSyst], hUnfDataNoScale[iSyst], hUnfDataStatCov[iSyst], hUnfDataStatCovNoScale[iSyst], 
+                    hUnfMCStatCov[iSyst], hUnfMCStatCovNoScale[iSyst], name[iSyst], integratedLumi, hGenDYJets[iGen], logy, false, year);
             }
 
         } // END loop over all systematic variations
@@ -397,103 +352,94 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
             }
         }
 
-        std::cout << "\n<=========================================================================================>" << std::endl;
+        std::cout << "\n<=========================================================================================>\n" << std::endl;
         
         //--- Now create the covariance matrices ---
         int nCovs = nSysts > 17 ? 11 : 10;
         
-        TH2D *hCov[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,};
+        TH2D *hCov[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        if (hUnfDataStatCov[0]){
+            std::cout << "Cloning hUnfDataStatCov[0]..." << std::endl;
+            hCov[0] = (TH2D*) hUnfDataStatCov[0]->Clone("CovDataStat");
+        }
+        if (hUnfMCStatCov[0]){
+            std::cout << "Cloning hUnfMCStatCov[0]..." << std::endl;
+            hCov[1] = (TH2D*) hUnfMCStatCov[0]->Clone("CovMCStat");
+        }
+        // if(hUnfData[1])  hCov[2] = makeCovFromUpAndDown(hUnfData[0], hUnfData[1], hUnfData[2], "CovJES");
+        // if(hUnfData[3])  hCov[3] = makeCovFromUpAndDown(hUnfData[0], hUnfData[3], hUnfData[4], "CovPU");
+        // if(hUnfData[5])  hCov[4] = makeCovFromUpAndDown(hUnfData[0], hUnfData[5], hUnfData[6], "CovJER");
+        // if(hUnfData[7])  hCov[5] = makeCovFromUpAndDown(hUnfData[0], hUnfData[7], hUnfData[8], "CovXSec");
+        // if(hUnfData[9])  hCov[6] = makeCovFromUpAndDown(hUnfData[0], hUnfData[9], hUnfData[10], "CovBlank1");
+        // if(hUnfData[11]) hCov[7] = makeCovFromUpAndDown(hUnfData[0], hUnfData[11], hUnfData[12], "CovBtagSF");
+        // if(hUnfData[13]) hCov[8] = makeCovFromUpAndDown(hUnfData[0], hUnfData[13], hUnfData[14], "CovLumi");
+        // if(hUnfData[15]) hCov[9] = makeCovFromUpAndDown(hUnfData[0], hUnfData[15], hUnfData[16], "CovSF");
+        // if(hUnfData[17]) hCov[10] = makeCovFromUpAndDown(hUnfData[0], hUnfData[17], hUnfData[0], "CovBlank5");
+        if(hUnfMCStatCov[0]) hCov[11] = (TH2D*) hUnfMCStatCov[0]->Clone("CovTotSyst");
+        // if (hCov[11]){
+        //     for (int i = 2; i < nCovs; ++i){
+        //         if(hCov[i]) hCov[11]->Add(hCov[i]);
+        //     }
+        // }
+       
+        //andrew
+        //Create covariance matrices not scaled for cross section
+        // TH2D *hCovNoScale[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,};
+        // if(hUnfDataStatCovNoScale[0]) hCovNoScale[0] = (TH2D*) hUnfDataStatCovNoScale[0]->Clone("CovDataStat_NoScale");
+        // if(hUnfMCStatCovNoScale[0]) hCovNoScale[1] = (TH2D*) hUnfMCStatCovNoScale[0]->Clone("CovMCStat_NoScale");
+        // if(hUnfDataNoScale[1])  hCovNoScale[2] = makeCovFromUpAndDown(hUnfData[0], hUnfDataNoScale[1], hUnfDataNoScale[2], "CovJES_NoScale");
+        // if(hUnfDataNoScale[3])  hCovNoScale[3] = makeCovFromUpAndDown(hUnfData[0], hUnfDataNoScale[3], hUnfDataNoScale[4], "CovPU_NoScale");
+        // if(hUnfDataNoScale[5])  hCovNoScale[4] = makeCovFromUpAndDown(hUnfData[0], hUnfDataNoScale[5], hUnfDataNoScale[6], "CovJER_NoScale");
+        // if(hUnfDataNoScale[7])  hCovNoScale[5] = makeCovFromUpAndDown(hUnfData[0], hUnfDataNoScale[7], hUnfDataNoScale[8], "CovXSec_NoScale");
+        // if(hUnfDataNoScale[9])  hCovNoScale[6] = makeCovFromUpAndDown(hUnfData[0], hUnfDataNoScale[9], hUnfDataNoScale[10], "CovLES_NoScale");
+        // if(hUnfDataNoScale[11]) hCovNoScale[7] = makeCovFromUpAndDown(hUnfData[0], hUnfDataNoScale[11], hUnfDataNoScale[12], "CovLER_NoScale");
+        // if(hUnfDataNoScale[13]) hCovNoScale[8] = makeCovFromUpAndDown(hUnfData[0], hUnfDataNoScale[13], hUnfDataNoScale[14], "CovLumi_NoScale");
+        // if(hUnfDataNoScale[15]) hCovNoScale[9] = makeCovFromUpAndDown(hUnfData[0], hUnfDataNoScale[15], hUnfDataNoScale[16], "CovSF_NoScale");
+        // if(hUnfDataNoScale[17]) hCovNoScale[10] = makeCovFromUpAndDown(hUnfData[0], hUnfDataNoScale[17], hUnfDataNoScale[0], "CovSherpaUnf_NoScale");
+        // if(hUnfMCStatCovNoScale[0]) hCovNoScale[11] = (TH2D*) hUnfMCStatCovNoScale[0]->Clone("CovTotSyst_NoScale");
+            
+        // if(hCovNoScale[11]){
+        //     for (int i = 2; i < nCovs; ++i){
+        //         if(hCovNoScale[i]) hCovNoScale[11]->Add(hCovNoScale[i]);
+        //     }
+        // }
+    
         // std::cout <<  __FILE__ << ", "  << __LINE__ << std::endl;
- //     //andrew -- 16 jan 2019 -- problem with cov matrix settings
- //     if(hUnfDataStatCov[0]) {
- //         std::cout << "Cloning hUnfDataStatCov[0]" << std::endl;
- //         hCov[0] = (TH2D*) hUnfDataStatCov[0]->Clone("CovDataStat");
- //     }
- //     std::cout <<  __FILE__ << ", "  << __LINE__ << std::endl;
- //     if(hUnfMCStatCov[0]) {
- //         std::cout << "Cloning hUnfMCStatCov[0]" << std::endl;
- //         hCov[1] = (TH2D*) hUnfMCStatCov[0]->Clone("CovMCStat");
- //     }
- //     std::cout <<  __FILE__ << ", "  << __LINE__ << std::endl;
- //     if(hUnfData[1])  hCov[2] = makeCovFromUpAndDown(hUnfData[0], hUnfData[1], hUnfData[2], "CovJES");
- //     if(hUnfData[3])  hCov[3] = makeCovFromUpAndDown(hUnfData[0], hUnfData[3], hUnfData[4], "CovPU");
- //     if(hUnfData[5])  hCov[4] = makeCovFromUpAndDown(hUnfData[0], hUnfData[5], hUnfData[6], "CovJER");
- //     if(hUnfData[7])  hCov[5] = makeCovFromUpAndDown(hUnfData[0], hUnfData[7], hUnfData[8], "CovXSec");
- //     if(hUnfData[9])  hCov[6] = makeCovFromUpAndDown(hUnfData[0], hUnfData[9], hUnfData[10], "CovLES");
- //     if(hUnfData[11]) hCov[7] = makeCovFromUpAndDown(hUnfData[0], hUnfData[11], hUnfData[12], "CovLER");
- //     if(hUnfData[13]) hCov[8] = makeCovFromUpAndDown(hUnfData[0], hUnfData[13], hUnfData[14], "CovLumi");
- //     if(hUnfData[15]) hCov[9] = makeCovFromUpAndDown(hUnfData[0], hUnfData[15], hUnfData[16], "CovSF");
- //     if(hUnfData[17]) hCov[10] = makeCovFromUpAndDown(hUnfData[0], hUnfData[17], hUnfData[0], "CovSherpaUnf");
- //     if(hUnfMCStatCov[0]) hCov[11] = (TH2D*) hUnfMCStatCov[0]->Clone("CovTotSyst");
- //     
- //     std::cout <<  __FILE__ << ", "  << __LINE__ << std::endl;
- //    
- //     if(hCov[11]){
- //         for (int i = 2; i < nCovs; ++i){
- //             if(hCov[i]) hCov[11]->Add(hCov[i]);
- //         }
- //     }
- //       
- //       //andrew
- //       //Create covariance matrices not scaled for cross section
-        TH2D *hCovNoScale[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,};
- //      if(hUnfDataStatCovNoScale[0]) hCovNoScale[0] = (TH2D*) hUnfDataStatCovNoScale[0]->Clone("CovDataStat_NoScale");
- //      if(hUnfMCStatCovNoScale[0]) hCovNoScale[1] = (TH2D*) hUnfMCStatCovNoScale[0]->Clone("CovMCStat_NoScale");
- //      if(hUnfDataNoScale[1])  hCovNoScale[2] = makeCovFromUpAndDown(hUnfData[0], hUnfDataNoScale[1], hUnfDataNoScale[2], "CovJES_NoScale");
- //      if(hUnfDataNoScale[3])  hCovNoScale[3] = makeCovFromUpAndDown(hUnfData[0], hUnfDataNoScale[3], hUnfDataNoScale[4], "CovPU_NoScale");
- //      if(hUnfDataNoScale[5])  hCovNoScale[4] = makeCovFromUpAndDown(hUnfData[0], hUnfDataNoScale[5], hUnfDataNoScale[6], "CovJER_NoScale");
- //      if(hUnfDataNoScale[7])  hCovNoScale[5] = makeCovFromUpAndDown(hUnfData[0], hUnfDataNoScale[7], hUnfDataNoScale[8], "CovXSec_NoScale");
- //      if(hUnfDataNoScale[9])  hCovNoScale[6] = makeCovFromUpAndDown(hUnfData[0], hUnfDataNoScale[9], hUnfDataNoScale[10], "CovLES_NoScale");
- //      if(hUnfDataNoScale[11]) hCovNoScale[7] = makeCovFromUpAndDown(hUnfData[0], hUnfDataNoScale[11], hUnfDataNoScale[12], "CovLER_NoScale");
- //      if(hUnfDataNoScale[13]) hCovNoScale[8] = makeCovFromUpAndDown(hUnfData[0], hUnfDataNoScale[13], hUnfDataNoScale[14], "CovLumi_NoScale");
- //      if(hUnfDataNoScale[15]) hCovNoScale[9] = makeCovFromUpAndDown(hUnfData[0], hUnfDataNoScale[15], hUnfDataNoScale[16], "CovSF_NoScale");
- //      if(hUnfDataNoScale[17]) hCovNoScale[10] = makeCovFromUpAndDown(hUnfData[0], hUnfDataNoScale[17], hUnfDataNoScale[0], "CovSherpaUnf_NoScale");
- //      if(hUnfMCStatCovNoScale[0]) hCovNoScale[11] = (TH2D*) hUnfMCStatCovNoScale[0]->Clone("CovTotSyst_NoScale");
- //         
- //      if(hCovNoScale[11]){
- //          for (int i = 2; i < nCovs; ++i){
- //              if(hCovNoScale[i]) hCovNoScale[11]->Add(hCovNoScale[i]);
- //          }
- //      }
- //   
- //      std::cout <<  __FILE__ << ", "  << __LINE__ << std::endl;
 
- //     if (doNormalized) {
- //         double Madtot = hMadGenCrossSection->Integral("width");
- //         //double gen1tot = hGen1CrossSection->Integral("width");
- //         //double gen2tot = hGen2CrossSection->Integral("width");
- //         hMadGenCrossSection->Scale(1.0/Madtot);
- //         //hGen1CrossSection->Scale(1.0/gen1tot);    
- //         //hGen2CrossSection->Scale(1.0/gen2tot);
- //     }
+        // if (doNormalized) {
+        //     double Madtot = hMadGenCrossSection->Integral("width");
+        //     //double gen1tot = hGen1CrossSection->Integral("width");
+        //     //double gen2tot = hGen2CrossSection->Integral("width");
+        //     hMadGenCrossSection->Scale(1.0/Madtot);
+        //     //hGen1CrossSection->Scale(1.0/gen1tot);    
+        //     //hGen2CrossSection->Scale(1.0/gen2tot);
+        // }
 
- //     
- //     //TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, variable, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection, hGen1CrossSection, hGen2CrossSection);
- //       std::cout <<  __FILE__ << ", "  << __LINE__ << std::endl;
- //     //TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, variable, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection, hGen1CrossSection);  
- //       TCanvas *crossSectionPlot;
- //       if (variable == "FirstJetPt_Zinc1jet" || variable == "JetsHT_Zinc1jet" || variable == "FirstJetAbsRapidity_Zinc1jet" || variable == "dRptmin100LepCloseJetCo300dR04_Zinc1jet" || variable == "dPhiLepJet1_Zinc1jet"){
- //           crossSectionPlot = makeCrossSectionPlot(lepSel, variable, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection, hGen1CrossSection, hGen2CrossSection);
- //       }
- //       else {
- //           crossSectionPlot = makeCrossSectionPlot(lepSel, variable, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection, hGen1CrossSection);
- //       }  //add nnlo here
+     
+        // TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, variable, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection, hGen1CrossSection, hGen2CrossSection);
+        // TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, variable, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection, hGen1CrossSection);  
+        // TCanvas *crossSectionPlot;
+        // if (variable == "FirstJetPt_Zinc1jet" || variable == "JetsHT_Zinc1jet" || variable == "FirstJetAbsRapidity_Zinc1jet" || variable == "dRptmin100LepCloseJetCo300dR04_Zinc1jet" || variable == "dPhiLepJet1_Zinc1jet"){
+        //     crossSectionPlot = makeCrossSectionPlot(lepSel, variable, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection, hGen1CrossSection, hGen2CrossSection);
+        // }
+        // else {
+        //     crossSectionPlot = makeCrossSectionPlot(lepSel, variable, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection, hGen1CrossSection);
+        // }  //add nnlo here
 
- //       std::cout <<  __FILE__ << ", "  << __LINE__ << std::endl;
+        // TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, variable, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection); 
+        TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, variable, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection, hGen1CrossSection);
 
- //     //TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, variable, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection); 
- //     crossSectionPlot->Draw();
- //     crossSectionPlot->SaveAs(outputFileName + ".png");
- //     crossSectionPlot->SaveAs(outputFileName + ".pdf");
- //     crossSectionPlot->SaveAs(outputFileName + ".eps");
- //     crossSectionPlot->SaveAs(outputFileName + ".ps");
- //     crossSectionPlot->SaveAs(outputFileName + ".C");
- //     crossSectionPlot->SaveAs(outputFileName + "_canvas.root");
+        crossSectionPlot->Draw();
+        // crossSectionPlot->SaveAs(outputFileName + ".png");
+        crossSectionPlot->SaveAs(outputFileName + ".pdf");
+        // crossSectionPlot->SaveAs(outputFileName + ".eps");
+        // crossSectionPlot->SaveAs(outputFileName + ".ps");
+        // crossSectionPlot->SaveAs(outputFileName + ".C");
+        // crossSectionPlot->SaveAs(outputFileName + "_canvas.root");
 
         //Plot response matrix for central distribution
         plotRespMat(hResDYJets[0], variable, unfoldDir, 0, hGenDYJets[0]);
         //if #recobins = 2 * #genbins, then generate alternate plot of response matrix (done for TUnfold)
-        //if (variable.Contains("_2_Zinc")){
         if (variable.Contains("_TUnfold")){
             plotRespMat(hResDYJets[0], variable, unfoldDir, 1, hGenDYJets[0]);
         }
@@ -527,7 +473,7 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
 
         //--- Save other things --- 
         outputRootFile->cd();
-        std::cout <<  __FILE__ << ", "  << __LINE__ << std::endl;
+        // std::cout <<  __FILE__ << ", "  << __LINE__ << std::endl;
         hRecData[0]->Write("hRecDataCentral"); //reco data before BG subtraction and fakes removal
         hRecSumBg[0]->Write("hRecSumBgCentral"); //sum of all BGs to be subtracted from reco data
         hRecDYJets[0]->Write("hRecDYJetsCentral"); //reco MC for W+jets signal
@@ -536,14 +482,14 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
         hGen1CrossSection->Write("hGen1DYJetsCrossSection"); //gen MC for W+jets LO MLM signal
         //hGen2CrossSection->Write("hGen2DYJetsCrossSection");
         hResDYJets[0]->Write("hResDYJetsCentral"); //hResDYJets is the TH2 used to form response objects respDYJets
-        std::cout <<  __FILE__ << ", "  << __LINE__ << std::endl;
+        // std::cout <<  __FILE__ << ", "  << __LINE__ << std::endl;
       //write out unfolded histograms
-    //    for (unsigned short iSyst = 0; iSyst < nSysts; ++iSyst) {
+    //    for (int iSyst = 0; iSyst < nSysts; ++iSyst) {
     //        outputRootFile->cd();
     //        if(hUnfData[iSyst]) hUnfData[iSyst]->Write();
     //        if(hUnfDataNoScale[iSyst]) hUnfDataNoScale[iSyst]->Write();
     //    }
-        std::cout <<  __FILE__ << ", "  << __LINE__ << std::endl;       
+        // std::cout <<  __FILE__ << ", "  << __LINE__ << std::endl;       
     //      //write out covariance matrices (includes stat. for central (data and MC) and systematics from "up-down" dist.)
     //      for (int i = 0; i <= 11; ++i) {
     //          if(hCov[i]) hCov[i]->Write();
@@ -566,7 +512,7 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
     //      crossSectionPlot->Write();
     //      //----------------------------------------------------------------------------------------- 
     //
-        std::cout <<  __FILE__ << ", "  << __LINE__ << std::endl;
+        // std::cout <<  __FILE__ << ", "  << __LINE__ << std::endl;
         outputRootFile->Close();
       
       //if (end == start + 1) system("display " + outputFileName + ".png &");
@@ -583,7 +529,7 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
 
 }
 
-int TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRecDataMinusFakes, TH1D* &hUnfData, TH1D* &hUnfDataNoScale, 
+void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRecDataMinusFakes, TH1D* &hRecDataBinsMerged, TH1D* &hUnfData, TH1D* &hUnfDataNoScale, 
     TH2D* &hUnfDataStatCov, TH2D* &hUnfDataStatCovNoScale, TH2D* &hUnfMCStatCov, TH2D* &hUnfMCStatCovNoScale, TString name, double integratedLumi, 
     TH1D* hGenDYJets, bool logy, bool doRatioUnfold, int year){
 
@@ -683,9 +629,9 @@ int TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRec
     //This should be done in the unfolding (check on this), keeping for reference.
     /*
     for(int i=1;i<=recoData->GetNbinsX();i++){
-  printf("recoData->GetBinContent(%d)=%F -> recoData->GetBinContent(%d)=%F\n",i,
+    printf("recoData->GetBinContent(%d)=%F -> recoData->GetBinContent(%d)=%F\n",i,
          recoData->GetBinContent(i), i, recoData->GetBinContent(i)/dataEfficiency[i-1]);
-  recoData->SetBinContent(i,recoData->GetBinContent(i)/dataEfficiency[i-1]);
+    recoData->SetBinContent(i,recoData->GetBinContent(i)/dataEfficiency[i-1]);
     }
     */
     
@@ -704,15 +650,15 @@ int TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRec
     unfold.SetInput(recoData);
 
     //--- Manual unfolding ---
-    //Double_t tau=1.E-4;
-    Double_t tau=0.0;
-    // Double_t biasScale=0.0;
+    //Double_t tau = 1.E-4;
+    Double_t tau = 0.;
     //--- ---
 
-    int regParam_=-3;
-    //int regParam_=0;
-    //int regParam_=1;
-    int iBest=regParam_;
+    // Regularization schemes ---
+    int regParam_ = -1; // ScanLcurve
+    //int regParam_ = 1; // ScanTau
+    // int regParam_ = 0; // DoUnfold (using manually set value of tau above)
+    int iBest = regParam_;
 
     Int_t nScan=30;
     //Int_t nScan=100;
@@ -730,7 +676,7 @@ int TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRec
     }
     else if(regParam_ > 0){
         printf("\n-----> Doing ScanTau method\n");
-        iBest=unfold.ScanTau(50,0.0,0.0,&rhoLogTau,TUnfoldDensity::kEScanTauRhoAvg);
+        iBest = unfold.ScanTau(50,0.0,0.0,&rhoLogTau,TUnfoldDensity::kEScanTauRhoAvg);
     }
     else{
         printf("\n-----> Doing manual DoUnfold method\n");
@@ -758,7 +704,7 @@ int TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRec
     // ---------------------------------------------------------------------------
 
     // Get output from unfolding ---
-    hUnfData = (TH1D*)unfold.GetOutput("hUnfData")->Clone();
+    hUnfData = (TH1D*) unfold.GetOutput("hUnfData")->Clone();
     hUnfData->SetTitle(hRecDataMinusFakes->GetTitle());
     hUnfData->GetXaxis()->SetTitle(hRecDataMinusFakes->GetXaxis()->GetTitle());
     hUnfData->GetYaxis()->SetTitle("diff xsec.");
@@ -767,14 +713,14 @@ int TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRec
     double unfEventCounter = 0;
     for(int i = 1; i <= hUnfData->GetNbinsX(); i++){
         unfEventCounter += hUnfData->GetBinContent(i);
-        // printf("Bin %i, (%F, %F): %F\n", i, hUnfData->GetBinLowEdge(i), hUnfData->GetXaxis()->GetBinUpEdge(i), hUnfData->GetBinContent(i));
+        printf("Bin %i, (%F, %F): %F\n", i, hUnfData->GetBinLowEdge(i), hUnfData->GetXaxis()->GetBinUpEdge(i), hUnfData->GetBinContent(i));
     }
     printf("#Events in unfolded dist.: %F\n", unfEventCounter);
     hUnfDataNoScale = (TH1D*) hUnfData->Clone("hUnfDataNoScale");
     hUnfDataNoScale->Write();
 
     //Get covariance contribution from the input uncertainties (data statistical uncertainties) 
-    hUnfDataStatCov = (TH2D*)unfold.GetEmatrixInput("dataStatCov", "dataStatCov", 0, 0, kTRUE)->Clone(); //Last 3 inputs are default;
+    hUnfDataStatCov = (TH2D*) unfold.GetEmatrixInput("dataStatCov", "dataStatCov", 0, 0, kTRUE)->Clone(); //Last 3 inputs are default;
     hUnfDataStatCov->SetName("hUnfDataStatCov");
     hUnfDataStatCov->SetTitle(hRecDataMinusFakes->GetTitle());
     hUnfDataStatCovNoScale = (TH2D*) hUnfDataStatCov->Clone("hUnfDataStatCovNoScale");
@@ -782,7 +728,7 @@ int TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRec
     
     //Retreive covariance contribution from uncorrelated (statistical) uncertainties of the response matrix. 
     //Equivalent to RooUnfold::Ereco(RooUnfold::kCovariance) with IncludeSystematics(2). 
-    hUnfMCStatCov = (TH2D*)unfold.GetEmatrixSysUncorr("respStatCov", "respStatCov", 0, 0, kTRUE)->Clone(); //Last 3 inputs are default;
+    hUnfMCStatCov = (TH2D*) unfold.GetEmatrixSysUncorr("respStatCov", "respStatCov", 0, 0, kTRUE)->Clone(); //Last 3 inputs are default;
     hUnfMCStatCov->SetName("hUnfMCStatCov");
     hUnfMCStatCov->SetTitle(hRecDataMinusFakes->GetTitle());
     hUnfMCStatCovNoScale = (TH2D*) hUnfMCStatCov->Clone("hUnfMCStatCovNoScale");
@@ -866,12 +812,23 @@ int TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRec
     TH1D *recoData_binsMerged = new TH1D("recoData_binsMerged", "recoData_binsMerged", numBinsUnf, xBinsUnf);
     int newHistoCounter = 1;
     for (int i(1); i < numBinsXRecoNominal + 1; i += 2){
+
+        // bin contents
         double bincount1 = recoDataNominal->GetBinContent(i);
         double bincount2 = recoDataNominal->GetBinContent(i+1);
-        recoData_binsMerged->SetBinContent(newHistoCounter, (bincount1 + bincount2));
+        recoData_binsMerged->SetBinContent( newHistoCounter, (bincount1 + bincount2) );
+
+        // bin errors
+        // adding errors from split bins in quadrature
+        double errorcount1 = recoDataNominal->GetBinError(i);
+        double errorcount2 = recoDataNominal->GetBinError(i+1);
+        recoData_binsMerged->SetBinError( newHistoCounter, sqrt(pow(errorcount1, 2.)+pow(errorcount2, 2.)) );
+        
         newHistoCounter++;
     }
+    hRecDataBinsMerged = (TH1D*) recoData_binsMerged->Clone("hRecDataBinsMerged");
     recoData_binsMerged->Write();
+    
 
     // 2) Then take the ratio
     printf("\nRatio of Unfolded/Reco:"); 
@@ -905,62 +862,116 @@ int TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRec
     // ---------------------------------------------------------------------------
     
     //For single-diff. xsecs, need to scale unfolded event counts by int. lumi and bin widths to get xsec
-    if (!doRatioUnfold){
+    // if (!doRatioUnfold){
 
-        //--- divide by luminosity ---
-        double lumiUnc = cfg.getD("lumiUnc", 0.027);
-        printf("\nScaling data %s by L_int = %F... \n", hUnfData->GetName(), integratedLumi);
+    //--- divide by luminosity ---
+    double lumiUnc = cfg.getD("lumiUnc", 0.027);
+    printf("\nScaling data %s by L_int = %F... \n", hUnfData->GetName(), integratedLumi);
 
-        hUnfData->Scale(1./integratedLumi);
-        if(hUnfDataStatCov) hUnfDataStatCov->Scale(1./(integratedLumi*integratedLumi));
-        if(hUnfMCStatCov) hUnfMCStatCov->Scale(1./(integratedLumi*integratedLumi));
-        if (name == "LumiUp") {
-            printf("With lumiUnc = %F\n",lumiUnc);
-            hUnfData->Scale(1./(1+lumiUnc));
-            if(hUnfDataStatCov) hUnfDataStatCov->Scale(1./((1+lumiUnc)*(1+lumiUnc)));
-            if(hUnfMCStatCov) hUnfMCStatCov->Scale(1./((1+lumiUnc)*(1+lumiUnc)));
-        }
-        else if (name == "LumiDown") {
-            printf("With lumiUnc = %F\n",lumiUnc);
-            hUnfData->Scale(1./(1-lumiUnc));
-            if(hUnfDataStatCov) hUnfDataStatCov->Scale(1./((1-lumiUnc)*(1-lumiUnc)));
-            if(hUnfMCStatCov) hUnfMCStatCov->Scale(1./((1-lumiUnc)*(1-lumiUnc)));
-        }
-
-        //--- divide by bin width to get cross section ---
-        printf("Normalizing to bin widths to get cross section...\n");
-        int nBins = hUnfData->GetNbinsX();
-        for (int i = 1; i <= nBins; ++i) {
-
-            double binWidth = hUnfData->GetBinWidth(i);
-            hUnfData->SetBinContent(i, hUnfData->GetBinContent(i)*(1./binWidth));
-            hUnfData->SetBinError(i, hUnfData->GetBinError(i)*(1./binWidth));
-
-            for (int j = 1; j <= nBins; ++j) {
-                double binWidth2 = hUnfData->GetBinWidth(j);
-                if(hUnfDataStatCov){
-                    hUnfDataStatCov->SetBinContent(i, j, hUnfDataStatCov->GetBinContent(i, j)*(1./(binWidth*binWidth2)));
-                    hUnfDataStatCov->SetBinError(i, j, hUnfDataStatCov->GetBinError(i, j)*(1./(binWidth*binWidth2)));
-                }
-                if(hUnfMCStatCov){
-                    hUnfMCStatCov->SetBinContent(i, j, hUnfMCStatCov->GetBinContent(i, j)*(1./(binWidth*binWidth2)));
-                    hUnfMCStatCov->SetBinError(i, j, hUnfMCStatCov->GetBinError(i, j)*(1./(binWidth*binWidth2)));
-                }
-            }
-        }
-
+    hRecDataBinsMerged->Scale(1./integratedLumi);
+    hUnfData->Scale(1./integratedLumi);
+    if(hUnfDataStatCov) hUnfDataStatCov->Scale(1./(integratedLumi*integratedLumi));
+    if(hUnfMCStatCov) hUnfMCStatCov->Scale(1./(integratedLumi*integratedLumi));
+    if (name == "LumiUp"){
+        printf("With lumiUnc = %F\n",lumiUnc);
+        hRecDataBinsMerged->Scale(1./(1+lumiUnc));
+        hUnfData->Scale(1./(1+lumiUnc));
+        if(hUnfDataStatCov) hUnfDataStatCov->Scale(1./((1+lumiUnc)*(1+lumiUnc)));
+        if(hUnfMCStatCov) hUnfMCStatCov->Scale(1./((1+lumiUnc)*(1+lumiUnc)));
+    }
+    else if (name == "LumiDown"){
+        printf("With lumiUnc = %F\n",lumiUnc);
+        hRecDataBinsMerged->Scale(1./(1-lumiUnc));
+        hUnfData->Scale(1./(1-lumiUnc));
+        if(hUnfDataStatCov) hUnfDataStatCov->Scale(1./((1-lumiUnc)*(1-lumiUnc)));
+        if(hUnfMCStatCov) hUnfMCStatCov->Scale(1./((1-lumiUnc)*(1-lumiUnc)));
     }
 
+    //--- divide by bin width to get cross section ---
+    printf("Normalizing to bin widths to get cross section...\n");
+    int nBins = hUnfData->GetNbinsX();
+    for (int i = 1; i <= nBins; ++i){
+
+        double binWidth = hUnfData->GetBinWidth(i);
+        hRecDataBinsMerged->SetBinContent(i, hRecDataBinsMerged->GetBinContent(i)*(1./binWidth));
+        hRecDataBinsMerged->SetBinError(i, hRecDataBinsMerged->GetBinError(i)*(1./binWidth));
+        hUnfData->SetBinContent(i, hUnfData->GetBinContent(i)*(1./binWidth));
+        hUnfData->SetBinError(i, hUnfData->GetBinError(i)*(1./binWidth));
+
+        for (int j = 1; j <= nBins; ++j){
+            double binWidth2 = hUnfData->GetBinWidth(j);
+            if(hUnfDataStatCov){
+                hUnfDataStatCov->SetBinContent(i, j, hUnfDataStatCov->GetBinContent(i, j)*(1./(binWidth*binWidth2)));
+                hUnfDataStatCov->SetBinError(i, j, hUnfDataStatCov->GetBinError(i, j)*(1./(binWidth*binWidth2)));
+            }
+            if(hUnfMCStatCov){
+                hUnfMCStatCov->SetBinContent(i, j, hUnfMCStatCov->GetBinContent(i, j)*(1./(binWidth*binWidth2)));
+                hUnfMCStatCov->SetBinError(i, j, hUnfMCStatCov->GetBinError(i, j)*(1./(binWidth*binWidth2)));
+            }
+        }
+    }
+
+    // write to output file
+    hRecDataBinsMerged->Write();
     hUnfData->Write();
     hUnfDataStatCov->Write();
     hUnfMCStatCov->Write();
 
-    // ---------------------------------------------------------------------------
+    // make sure closing file below doesn't delete histograms
+    hRecDataBinsMerged->SetDirectory(0);
+    hUnfData->SetDirectory(0);
+    hUnfDataStatCov->SetDirectory(0);
+    hUnfMCStatCov->SetDirectory(0);
+    hUnfDataNoScale->SetDirectory(0);
+    hUnfDataStatCovNoScale->SetDirectory(0);
+    hUnfMCStatCovNoScale->SetDirectory(0);
 
+    // ---------------------------------------------------------------------------
     f->Close();
     printf("\nExiting TUnfoldData function...");
     printf("\n=========================================================================\n");
-    return 0;
+
+    return;
+}
+
+void unfoldingFileSelector(int iSyst, int &iData, int &iBg, int &iGen, int &iResp){
+
+    // --- This section selects the correct hRecData file and hRecSumBg files to use for background subtraction, and then unfolding
+    // For JES (iSyst=1,2), select correctly varied data file; otherwise, use Central
+    iData = (iSyst == 1 || iSyst == 2) ? iSyst : 0;
+    // Select correct BG sum for BG-based systematics
+    // for central, JES, JER, LER, Sherpa unf --> use central background distribution
+    if (iSyst == 0 || iSyst == 1 || iSyst == 2 || iSyst == 5 || iSyst == 6 || iSyst == 9 || iSyst == 10 || iSyst == 17) iBg = 0;
+    // for PU, use iBg=1,2
+    else if (iSyst == 3 || iSyst == 4) iBg = iSyst - 2;
+    // for XSEC, use iBg=3,4;
+    else if (iSyst == 7 || iSyst == 8) iBg = iSyst - 4;
+    // for BtagSF, use iBg=5,6; for Lumi, use iBg=7,8; for SF, use iBg=9,10
+    else if (iSyst == 11 || iSyst == 12 || iSyst == 13 || iSyst == 14 || iSyst == 15 || iSyst == 16) iBg = iSyst - 6;
+
+    // This section picks the correct hGenDYJets histogram for calculating efficiencies with respect to the response matrix (inside TUnfoldData)
+    // iResp is for picking correct response matrix from hResDYJets
+    // Central, JES, XSEC, SF, Alt. Unfolding
+    if (iSyst == 0 || iSyst == 1 || iSyst == 2 || iSyst == 7 || iSyst == 8 || iSyst == 15 || iSyst == 16 || iSyst == 17){
+        iGen = 0;
+        iResp = 0;
+        if (iSyst == 15) iResp = 11;
+        else if (iSyst == 16) iResp = 12;
+    }
+    // PU, JER
+    else if (iSyst == 3 || iSyst == 4 || iSyst == 5 || iSyst == 6){
+        iGen = iSyst - 2;
+        iResp = iSyst - 2;
+    }
+    // blank1, blank2, BtagSF, Lumi
+    else if (iSyst == 9 || iSyst == 10 || iSyst == 11 || iSyst == 12 || iSyst == 13 || iSyst == 14){
+        iGen = iSyst - 4;
+        iResp = iSyst - 4;
+    }
+
+    // std::cout << iData << " " << iBg << " " << iGen << " " << iResp << std::endl;
+
+    return;
 }
 
 void createSystPlots(TString outputFileName, TString variable, TString lepSel, TH1D *hUnfData[], bool logy){
@@ -1425,10 +1436,6 @@ void plotRespMat(TH2D *hResp, TString variable, TString unfoldDir, bool addSwitc
         hNormResp->GetXaxis()->SetTitleSize(0.04);
         hNormResp->GetXaxis()->SetTitleOffset(1.10);   
 
-
-
-
-
         TCanvas *canRespMatrix = new TCanvas("s", "s", 600, 600);
         canRespMatrix->cd();
 
@@ -1547,7 +1554,7 @@ void normalizeTH2D(TH2D *h){
             sum += h->GetBinContent(j,i);
         }
         for (int j(0); j <= xbin + 1; j++){
-            if (sum != 0) h->SetBinContent(j, i, h->GetBinContent(j, i)*100 / sum );
+            if (sum != 0) h->SetBinContent(j, i, (h->GetBinContent(j, i)*100.)/sum);
         }
     }
 }
