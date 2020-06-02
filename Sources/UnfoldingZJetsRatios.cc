@@ -122,19 +122,19 @@ void UnfoldingZJetsRatios(TString lepSel, int year, TString algo, TString histoD
     TH1D *hGenDYJetsNUM[11] = {NULL};
     //--- res DYJets histograms ---
     TH2D *hResDYJetsNUM[13] = {NULL};
+    //--- "fakes" DYJets histograms ---
+    TH1D *hFakDYJetsNUM[13] = {NULL};
+    //--- "misses" DYJets histograms" ---
+    TH1D *hMissDYJetsNUM[11] = {NULL};
     //--- rec Bg histograms ---
     TH1D *hRecBgNUM[NBGDYJETS][11] = {{NULL}};
     //--- rec Sum Bg histograms ---
     TH1D *hRecSumBgNUM[11] = {NULL};
-    //--- fake DYJets histograms ---
-    TH1D *hFakDYJetsNUM[18] = {NULL};
-    //--- purity "histograms" ---
-    TH1D *hPurityNUM[18] = {NULL};
     //--- Get all numerator histograms ---
     //note: andrew -- ttbar scaling done inside getAllHistos
     std::cout << "\nGrabbing all needed histograms from files opened above for... " << variableNUM << std::endl;
     getAllHistos(variableNUM, hRecDataNUM, fData, hRecDYJetsNUM, hGenDYJetsNUM, hResDYJetsNUM, fDYJets, 
-        hRecBgNUM, hRecSumBgNUM, fBg, NBGDYJETS, hFakDYJetsNUM, hPurityNUM);
+        hRecBgNUM, hRecSumBgNUM, fBg, NBGDYJETS, hFakDYJetsNUM, hMissDYJetsNUM);
 
     // Theory histograms for numerator
     TH1D *hGen1NUM = NULL;
@@ -150,19 +150,19 @@ void UnfoldingZJetsRatios(TString lepSel, int year, TString algo, TString histoD
     TH1D *hGenDYJetsDENOM[11] = {NULL};
     //--- res DYJets histograms ---
     TH2D *hResDYJetsDENOM[13] = {NULL};
+    //--- "fakes" DYJets histograms ---
+    TH1D *hFakDYJetsDENOM[13] = {NULL};
+    //--- "misses" DYJets histograms ---
+    TH1D *hMissDYJetsDENOM[11] = {NULL};
     //--- rec Bg histograms ---
     TH1D *hRecBgDENOM[NBGDYJETS][11] = {{NULL}};
     //--- rec Sum Bg histograms ---
     TH1D *hRecSumBgDENOM[11] = {NULL};
-    //--- fake DYJets histograms ---
-    TH1D *hFakDYJetsDENOM[18] = {NULL};
-    //--- purity "histograms" ---
-    TH1D *hPurityDENOM[18] = {NULL};
     //--- Get all denominator histograms ---
     //note: andrew -- ttbar scaling done inside getAllHistos
     std::cout << "\nGrabbing all needed histograms from files opened above for... " << variableDENOM << std::endl;
     getAllHistos(variableDENOM, hRecDataDENOM, fData, hRecDYJetsDENOM, hGenDYJetsDENOM, hResDYJetsDENOM, fDYJets, 
-        hRecBgDENOM, hRecSumBgDENOM, fBg, NBGDYJETS, hFakDYJetsDENOM, hPurityDENOM);
+        hRecBgDENOM, hRecSumBgDENOM, fBg, NBGDYJETS, hFakDYJetsDENOM, hMissDYJetsDENOM);
 
     // Theory histograms for denominator
     TH1D *hGen1DENOM = NULL;
@@ -226,10 +226,10 @@ void UnfoldingZJetsRatios(TString lepSel, int year, TString algo, TString histoD
         TH1D *hRecDataMinusFakesNUM = (TH1D*) hRecDataNUM[iData]->Clone();
         std::cout << "From reco data, subtracting MC BG histo hRecSumBgNUM[iBg], " << "iBg = " << iBg << std::endl;
         hRecDataMinusFakesNUM->Add(hRecSumBgNUM[iBg], -1);
-        std::cout << "Removing fakes using hFakDYJetsNUM[iSyst], hPurityNUM[iSyst]!" << std::endl;
-        RemoveFakes(hRecDataMinusFakesNUM, hFakDYJetsNUM[iSyst], hPurityNUM[iSyst]);
+        std::cout << "Removing fakes using hRecDYJetsNUM[iResp], hFakDYJetsNUM[iResp]!" << std::endl;
+        RemoveFakes(hRecDataMinusFakesNUM, hRecDYJetsNUM[iResp], hFakDYJetsNUM[iResp]);
         
-        std::cout << "Fetching gen signal histo hGenDYJetsNUM[iGen], " << "iGen = " << iGen << std::endl;
+        std::cout << "Fetching gen signal histo hGenDYJetsNUM[iGen] and misses histo hMissDYJetsNUM[iGen], " << "iGen = " << iGen << std::endl;
         std::cout << "Fetching response matrix histo hResDYJetsNUM[iResp], " << "iResp = " << iResp << std::endl;
 
         std::cout << "Starting unfolding of " << variableNUM << ", " << name[iSyst] << " for " << lepSel << " channel." << "\n";
@@ -241,7 +241,7 @@ void UnfoldingZJetsRatios(TString lepSel, int year, TString algo, TString histoD
         if (algo == "TUnfold"){
             TUnfoldData(lepSel, algo, hResDYJetsNUM[iResp], hRecDataMinusFakesNUM, hRecDataMergedNUM[iSyst], hUnfDataNUM[iSyst], hUnfDataNoScaleNUM[iSyst],
                 hUnfDataStatCovNUM[iSyst], hUnfDataStatCovNoScaleNUM[iSyst], hUnfMCStatCovNUM[iSyst], hUnfMCStatCovNoScaleNUM[iSyst], 
-                name[iSyst], integratedLumi, hGenDYJetsNUM[iGen], logy, true, year);
+                name[iSyst], integratedLumi, hGenDYJetsNUM[iGen], hMissDYJetsNUM[iGen], logy, true, year);
         }
     }
 
@@ -262,10 +262,10 @@ void UnfoldingZJetsRatios(TString lepSel, int year, TString algo, TString histoD
         TH1D *hRecDataMinusFakesDENOM = (TH1D*) hRecDataDENOM[iData]->Clone();
         std::cout << "From reco data, subtracting MC BG histo hRecSumBgDENOM[iBg], " << "iBg = " << iBg << std::endl;
         hRecDataMinusFakesDENOM->Add(hRecSumBgDENOM[iBg], -1);
-        std::cout << "Removing fakes using hFakDYJetsDENOM[iSyst], hPurityDENOM[iSyst]!" << std::endl;
-        RemoveFakes(hRecDataMinusFakesDENOM, hFakDYJetsDENOM[iSyst], hPurityDENOM[iSyst]);
+        std::cout << "Removing fakes using hRecDYJetsDENOM[iResp], hFakDYJetsDENOM[iResp]!" << std::endl;
+        RemoveFakes(hRecDataMinusFakesDENOM, hRecDYJetsDENOM[iResp], hFakDYJetsDENOM[iResp]);
         
-        std::cout << "Fetching gen signal histo hGenDYJetsDENOM[iGen], " << "iGen = " << iGen << std::endl;
+        std::cout << "Fetching gen signal histo hGenDYJetsDENOM[iGen] and misses histo hMissDYJetsDENOM[iGen], " << "iGen = " << iGen << std::endl;
         std::cout << "Fetching response matrix histo hResDYJetsDENOM[iResp], " << "iResp = " << iResp << std::endl;
 
         std::cout << "Starting unfolding of " << variableDENOM << ", " << name[iSyst] << " for " << lepSel << " channel." << "\n";
@@ -277,7 +277,7 @@ void UnfoldingZJetsRatios(TString lepSel, int year, TString algo, TString histoD
         if (algo == "TUnfold"){
             TUnfoldData(lepSel, algo, hResDYJetsDENOM[iResp], hRecDataMinusFakesDENOM, hRecDataMergedDENOM[iSyst], hUnfDataDENOM[iSyst], hUnfDataNoScaleDENOM[iSyst],
                 hUnfDataStatCovDENOM[iSyst], hUnfDataStatCovNoScaleDENOM[iSyst], hUnfMCStatCovDENOM[iSyst], hUnfMCStatCovNoScaleDENOM[iSyst], 
-                name[iSyst], integratedLumi, hGenDYJetsDENOM[iGen], logy, true, year);
+                name[iSyst], integratedLumi, hGenDYJetsDENOM[iGen], hMissDYJetsDENOM[iGen], logy, true, year);
         }
         
     }

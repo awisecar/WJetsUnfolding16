@@ -190,29 +190,27 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
 
         // 2) signal
         //--- rec DYJets histograms ---
-        TH1D *hRecDYJets[13] = {NULL};
+        TH1D *hRecDYJets[13]  = {NULL};
         //--- gen DYJets histograms ---
-        TH1D *hGenDYJets[11] = {NULL};
+        TH1D *hGenDYJets[11]  = {NULL};
         //--- res DYJets histograms ---
-        TH2D *hResDYJets[13] = {NULL};
+        TH2D *hResDYJets[13]  = {NULL};
+        //--- "fakes" DYJets histograms ---
+        TH1D *hFakDYJets[13]  = {NULL};
+        //--- "misses" DYJets histograms ---
+        TH1D *hMissDYJets[11] = {NULL};
 
         // 3) BG
         //--- rec Bg histograms ---
         TH1D *hRecBg[NBGDYJETS][11] = {{NULL}};
         //--- rec Sum Bg histograms ---
         TH1D *hRecSumBg[11] = {NULL};
-
-        // 4) other
-        //--- fake DYJets histograms ---
-        TH1D *hFakDYJets[18] = {NULL};
-        //--- purity "histograms" ---
-        TH1D *hPurity[18] = {NULL};
         
         //--- Get all histograms needed for unfolding! ---
         // Note: andrew -- ttbar scaling done inside getAllHistos
         std::cout << "\nGrabbing all needed histograms from files opened above..." << std::endl;
         getAllHistos(variable, hRecData, fData, hRecDYJets, hGenDYJets, hResDYJets, fDYJets, 
-            hRecBg, hRecSumBg, fBg, NBGDYJETS, hFakDYJets, hPurity);
+            hRecBg, hRecSumBg, fBg, NBGDYJETS, hFakDYJets, hMissDYJets);
         
         //--- Get histos from theory files (if files opened above)
         TH1D *hGen1 = NULL;
@@ -305,11 +303,11 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
             std::cout << "From reco data, subtracting MC BG histo hRecSumBg[iBg], " << "iBg = " << iBg << std::endl;
             hRecDataMinusFakes->Add(hRecSumBg[iBg], -1);
             //Subtract fakes for background-subtracted data
-            std::cout << "Removing fakes using hFakDYJets[iSyst], hPurity[iSyst]!" << std::endl;
-            RemoveFakes(hRecDataMinusFakes, hFakDYJets[iSyst], hPurity[iSyst]);
+            std::cout << "Removing fakes using hRecDYJets[iResp], hFakDYJets[iResp]!" << std::endl;
+            RemoveFakes(hRecDataMinusFakes, hRecDYJets[iResp], hFakDYJets[iResp]);
 
             //Output indices for correct response and gen signal histos
-            std::cout << "Fetching gen signal histo hGenDYJets[iGen], " << "iGen = " << iGen << std::endl;
+            std::cout << "Fetching gen signal histo hGenDYJets[iGen] and misses histo hMissDYJets[iGen], " << "iGen = " << iGen << std::endl;
             std::cout << "Fetching response matrix histo hResDYJets[iResp], " << "iResp = " << iResp << std::endl;
 
             // Now unfold
@@ -322,35 +320,12 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
             if (algo == "TUnfold"){
                 //use the original hResDYJets histograms as the response matrix
                 TUnfoldData(lepSel, algo, hResDYJets[iResp], hRecDataMinusFakes, hRecDataBinsMerged[iSyst], hUnfData[iSyst], hUnfDataNoScale[iSyst], hUnfDataStatCov[iSyst], hUnfDataStatCovNoScale[iSyst], 
-                    hUnfMCStatCov[iSyst], hUnfMCStatCovNoScale[iSyst], name[iSyst], integratedLumi, hGenDYJets[iGen], logy, false, year);
+                    hUnfMCStatCov[iSyst], hUnfMCStatCovNoScale[iSyst], name[iSyst], integratedLumi, hGenDYJets[iGen], hMissDYJets[iGen], logy, false, year);
             }
 
         } // END loop over all systematic variations
 
         //-----------------------------------------------------------------------------------------
-        
-        // ALW -- do I need to keep this section???
-        if (doNormalized) {
-            std::cout << "doNormalized = " << doNormalized << std::endl;
-            for(int i = 0; i < nSysts; i++) {
-                if(!hUnfData[i]) continue;
-                double totUnfData = hUnfData[i]->Integral("width"); // normalize to central or itself? 
-                hUnfData[i]->Scale(1.0/totUnfData);
-                if (i == 0) {
-                    hUnfDataStatCov[0]->Scale(1.0/pow(totUnfData, 2));
-                    hUnfMCStatCov[0]->Scale(1.0/pow(totUnfData, 2));
-                }
-                //the "NoScale" here refers to not scaling by lumi and bin width for xsec
-                //we normalize the dist. the same here as with the original ones, however
-                //original reson for NoScale dist. is to do ratio calculations, and we need integral number of counts in bins
-                double totUnfDataNoScale = hUnfDataNoScale[i]->Integral("width");
-                hUnfDataNoScale[i]->Scale(1.0/totUnfDataNoScale);
-                if (i == 0) {
-                    hUnfDataStatCovNoScale[0]->Scale(1.0/pow(totUnfDataNoScale, 2));
-                    hUnfMCStatCovNoScale[0]->Scale(1.0/pow(totUnfDataNoScale, 2));
-                }
-            }
-        }
 
         std::cout << "\n<=========================================================================================>\n" << std::endl;
         
@@ -444,30 +419,30 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
             plotRespMat(hResDYJets[0], variable, unfoldDir, 1, hGenDYJets[0]);
         }
         
-    //      if(whichSyst < 0){
-    //          createSystPlots(outputFileName, variable, lepSel, hUnfData, logy);
-    //          //--- print out break down of errors ---
-    //          for (int i = 2; i <= nCovs; ++i) {
-    //              cout << hUnfData[0]->GetBinContent(i);
-    //              for (int j = 0; j <= 11; ++j) {
-    //                  if(hCov[j]){
-    //                  cout << " +/- " << sqrt(hCov[j]->GetBinContent(i,i))*100./hUnfData[0]->GetBinContent(i) << "%";
-    //                  }
-    //               }
-    //               cout << endl;
-    //           }
-    //           createTable(outputFileName, lepSel, variable, doNormalized, hUnfData[0], hCov);
-    //      }
-    //      
-    //      
-    //      if (variable.Index("ZNGoodJets_Zexc") >= 0 || variable.Index("ZNGoodJetsFull_Zexc") >= 0) {
-    //      //createInclusivePlots(doNormalized, outputFileName, lepSel, hUnfData[0], hCov, hMadGenCrossSection, hGen1CrossSection, hGen2CrossSection);
-    //        createInclusivePlots(doNormalized, outputFileName, lepSel, hUnfData[0], hCov, hMadGenCrossSection, hGen1CrossSection);
-    //      //createInclusivePlots(doNormalized, outputFileName, lepSel, hUnfData[0], hCov, hMadGenCrossSection);
-    //      }
-    //
-    //      //--------------------------------------
-    //
+        //      if(whichSyst < 0){
+        //          createSystPlots(outputFileName, variable, lepSel, hUnfData, logy);
+        //          //--- print out break down of errors ---
+        //          for (int i = 2; i <= nCovs; ++i) {
+        //              cout << hUnfData[0]->GetBinContent(i);
+        //              for (int j = 0; j <= 11; ++j) {
+        //                  if(hCov[j]){
+        //                  cout << " +/- " << sqrt(hCov[j]->GetBinContent(i,i))*100./hUnfData[0]->GetBinContent(i) << "%";
+        //                  }
+        //               }
+        //               cout << endl;
+        //           }
+        //           createTable(outputFileName, lepSel, variable, doNormalized, hUnfData[0], hCov);
+        //      }
+        //      
+        //      
+        //      if (variable.Index("ZNGoodJets_Zexc") >= 0 || variable.Index("ZNGoodJetsFull_Zexc") >= 0) {
+        //      //createInclusivePlots(doNormalized, outputFileName, lepSel, hUnfData[0], hCov, hMadGenCrossSection, hGen1CrossSection, hGen2CrossSection);
+        //        createInclusivePlots(doNormalized, outputFileName, lepSel, hUnfData[0], hCov, hMadGenCrossSection, hGen1CrossSection);
+        //      //createInclusivePlots(doNormalized, outputFileName, lepSel, hUnfData[0], hCov, hMadGenCrossSection);
+        //      }
+        //
+        //      //--------------------------------------
+        //
 
         std::cout << "\n<=========================================================================================>" << std::endl;
 
@@ -484,34 +459,34 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
         hResDYJets[0]->Write("hResDYJetsCentral"); //hResDYJets is the TH2 used to form response objects respDYJets
         // std::cout <<  __FILE__ << ", "  << __LINE__ << std::endl;
       //write out unfolded histograms
-    //    for (int iSyst = 0; iSyst < nSysts; ++iSyst) {
-    //        outputRootFile->cd();
-    //        if(hUnfData[iSyst]) hUnfData[iSyst]->Write();
-    //        if(hUnfDataNoScale[iSyst]) hUnfDataNoScale[iSyst]->Write();
-    //    }
-        // std::cout <<  __FILE__ << ", "  << __LINE__ << std::endl;       
-    //      //write out covariance matrices (includes stat. for central (data and MC) and systematics from "up-down" dist.)
-    //      for (int i = 0; i <= 11; ++i) {
-    //          if(hCov[i]) hCov[i]->Write();
-    //          if(hCovNoScale[i]) hCovNoScale[i]->Write();
-    //      }
-    //        
-    //      TH1D *h_TotalUncer = (TH1D*) hUnfData[0]->Clone();
-    //      for (int i = 1; i <= hUnfData[0]->GetNbinsX(); ++i) {
-    //          h_TotalUncer->SetBinContent(i, sqrt(hCov[0]->GetBinContent(i,i) + hCov[11]->GetBinContent(i,i)));
-    //          h_TotalUncer->SetBinError(i, 0.);
-    //      }
-    //      h_TotalUncer->Write("totalUncertainty");
-    //        
-    //      TParameter<double> pIntegratedLumi("integratedLumi", integratedLumi);
-    //      pIntegratedLumi.Write();
-    //      TParameter<int> pNIter("nIter", nIter[0]);
-    //      pNIter.Write();
-    //
-    //      //crossSectionPlot is the canvas showing the main/central unfolded dist. (hUnfData[0])
-    //      crossSectionPlot->Write();
-    //      //----------------------------------------------------------------------------------------- 
-    //
+        //    for (int iSyst = 0; iSyst < nSysts; ++iSyst) {
+        //        outputRootFile->cd();
+        //        if(hUnfData[iSyst]) hUnfData[iSyst]->Write();
+        //        if(hUnfDataNoScale[iSyst]) hUnfDataNoScale[iSyst]->Write();
+        //    }
+            // std::cout <<  __FILE__ << ", "  << __LINE__ << std::endl;       
+        //      //write out covariance matrices (includes stat. for central (data and MC) and systematics from "up-down" dist.)
+        //      for (int i = 0; i <= 11; ++i) {
+        //          if(hCov[i]) hCov[i]->Write();
+        //          if(hCovNoScale[i]) hCovNoScale[i]->Write();
+        //      }
+        //        
+        //      TH1D *h_TotalUncer = (TH1D*) hUnfData[0]->Clone();
+        //      for (int i = 1; i <= hUnfData[0]->GetNbinsX(); ++i) {
+        //          h_TotalUncer->SetBinContent(i, sqrt(hCov[0]->GetBinContent(i,i) + hCov[11]->GetBinContent(i,i)));
+        //          h_TotalUncer->SetBinError(i, 0.);
+        //      }
+        //      h_TotalUncer->Write("totalUncertainty");
+        //        
+        //      TParameter<double> pIntegratedLumi("integratedLumi", integratedLumi);
+        //      pIntegratedLumi.Write();
+        //      TParameter<int> pNIter("nIter", nIter[0]);
+        //      pNIter.Write();
+        //
+        //      //crossSectionPlot is the canvas showing the main/central unfolded dist. (hUnfData[0])
+        //      crossSectionPlot->Write();
+        //      //----------------------------------------------------------------------------------------- 
+        //
         // std::cout <<  __FILE__ << ", "  << __LINE__ << std::endl;
         outputRootFile->Close();
       
@@ -531,7 +506,7 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
 
 void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRecDataMinusFakes, TH1D* &hRecDataBinsMerged, TH1D* &hUnfData, TH1D* &hUnfDataNoScale, 
     TH2D* &hUnfDataStatCov, TH2D* &hUnfDataStatCovNoScale, TH2D* &hUnfMCStatCov, TH2D* &hUnfMCStatCovNoScale, TString name, double integratedLumi, 
-    TH1D* hGenDYJets, bool logy, bool doRatioUnfold, int year){
+    TH1D* hGenDYJets, TH1D* hMissDYJets, bool logy, bool doRatioUnfold, int year){
 
     printf("=========================================================================\n");
     printf("Beginning TUnfoldData function...\n");
@@ -554,6 +529,7 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
     // BG subtracted, fakes removed from reco data distribution
     TH1D* recoData = (TH1D*) hRecDataMinusFakes->Clone("recoData"); 
     TH1D* genDY = (TH1D*) hGenDYJets->Clone("genDY");
+    TH1D* missesDY = (TH1D*) hMissDYJets->Clone("missesDY");
     TH2D* responseMatrix = (TH2D*) resp->Clone("responseMatrix");
 
     // ----- RECO DISTRIBUTION ----- 
@@ -578,65 +554,53 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
     int nBinsRespX = responseMatrix->GetNbinsX();
     int nBinsRespY = responseMatrix->GetNbinsY();
     printf("\n >>>>> responseMatrix->GetNbinsX=%d, responseMatrix->GetNbinsY=%d\n", nBinsRespX, nBinsRespY);
+
     // Add non-reconstructed fiducial events (of gen origin) in underflow reco bins
-    // (b/c response matrix is filled with events that pass gen and reco cuts)
-    // this is necessary for proper normalization of response matrix within TUnfold
-    // printf(" --- Normalizing response matrix taking non-reconstructed gen events into account...\n");
-    std::vector<double> dataEfficiency;
-    for(int i = 1; i <= nBinsRespY; i++) { // GEN
-        double genBin = genDY->GetBinContent(i);
-        double recBin = 0;
-        for(int j = 1; j <= nBinsRespX+1; j++) { // RECO (include overflow)
-            recBin += responseMatrix->GetBinContent(j,i);
+    std::vector<double> missRate;
+    for(int i = 1; i <= nBinsRespY; i++) {
+
+        double missFraction = missesDY->GetBinContent(i)/genDY->GetBinContent(i);
+        missRate.push_back(missFraction);
+        printf("\nMiss rate gen bin #%d: %F\n", i, missRate[i-1]);
+
+        // For a single gen row, integrated over all of the reco bins
+        // These events are a fraction of (1 - Miss Rate) of the total events that come from this gen bin
+        double recIntegral = 0.;
+        for(int j = 1; j <= nBinsRespX; j++) {
+            recIntegral += responseMatrix->GetBinContent(j,i);
         }
-        //printf("Gen bin content = %F, Reco bin content (integrated over gen row) = %F, Efficiency = %F\n", genBin, recBin, recBin/genBin);
-        dataEfficiency.push_back(recBin/genBin);
-        //if(genBin-recBin <= 0) printf("Bin %d totally efficient (%f/%f/%f)\n",i,genBin,recBin,genBin-recBin);
-        //if(i==1) printf("Bin %d totally efficient (%f/%f/%f)\n",i,genBin,recBin,genBin-recBin);
-        printf("   Efficiency of reconstruction for gen bin #%d: %F\n", i, dataEfficiency[i-1]);
-        //printf(" - Before: %F  \n - After: %F\n", responseMatrix->GetBinContent(0,i), TMath::Max(genBin-recBin, 0.0));
 
+        double missedEvents = recIntegral * (missFraction/(1-missFraction));
+        double totalEvents = missedEvents + recIntegral;
 
-        // ------------------------------------------------------------------
-        //
-        // NOTE: ALW 31 JAN 20, NOT SURE THIS IS CORRECT, TURNING OFF FOR NOW
-        //       ALW  4 FEB 20, TURNING THIS BACK ON TO COMPARE WITH OLD TUNFOLD CODE
-        responseMatrix->SetBinContent(0, i, TMath::Max(genBin-recBin, 0.));
-        //
-        // ------------------------------------------------------------------
+        printf("Gen row %d, recIntegral = %F, missedEvents = %F, hit fraction = %F, miss fraction = %F\n", i, recIntegral, missedEvents, recIntegral/totalEvents, missedEvents/totalEvents);
 
-
-
+        responseMatrix->SetBinContent(0, i, missedEvents);
     }
-    //Set some gen overflow bins to 0 in response matrix:
+
+    // Set some gen overflow bins to 0 in response matrix
     for(int i = 1; i <= responseMatrix->GetNbinsX(); i++) {
         responseMatrix->SetBinContent(i, responseMatrix->GetNbinsY()+1, 0.);
     }
-    //and the reco overflow bins to 0 as well
+
+    // ...and the reco overflow bins to 0 as well
     for(int i = 1; i <= responseMatrix->GetNbinsY(); i++) {
         responseMatrix->SetBinContent(responseMatrix->GetNbinsX()+1, i, 0);
     }
 
-    //print overflow and underflow bins
+    // Print bin contents for response matrix (incl. overflow and underflow)
     // std::cout << "\n >>>>> Printing response matrix bin content: " << std::endl;
     // printf("responseMatrix->GetNbinsX=%d, responseMatrix->GetNbinsY=%d\n", nBinsRespX, nBinsRespY);
-    // for(int i = 0; i < nBinsRespX+2; i++){
-    //     for(int j = 0; j < nBinsRespY+2; j++){
-    //         printf("Value in Bin(%i,%i): %f\n", i, j, responseMatrix->GetBinContent(i,j));
+    // for(int j = 0; j < nBinsRespY+2; j++){
+    //     for(int i = 0; i < nBinsRespX+2; i++){
+    //         std::cout << responseMatrix->GetBinContent(i, j) << "  ";
     //     }
+    //     std::cout << std::endl;
     // }
-    
-    //This should be done in the unfolding (check on this), keeping for reference.
-    /*
-    for(int i=1;i<=recoData->GetNbinsX();i++){
-    printf("recoData->GetBinContent(%d)=%F -> recoData->GetBinContent(%d)=%F\n",i,
-         recoData->GetBinContent(i), i, recoData->GetBinContent(i)/dataEfficiency[i-1]);
-    recoData->SetBinContent(i,recoData->GetBinContent(i)/dataEfficiency[i-1]);
-    }
-    */
     
     recoData->Write();
     genDY->Write();
+    missesDY->Write();
     responseMatrix->Write();
 
     // ---------------------------------------------------------------------------
@@ -650,17 +614,16 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
     unfold.SetInput(recoData);
 
     //--- Manual unfolding ---
-    //Double_t tau = 1.E-4;
     Double_t tau = 0.;
     //--- ---
 
     // Regularization schemes ---
-    int regParam_ = -1; // ScanLcurve
-    //int regParam_ = 1; // ScanTau
+    // int regParam_ = -1; // ScanLcurve
+    int regParam_ = 1; // ScanTau
     // int regParam_ = 0; // DoUnfold (using manually set value of tau above)
     int iBest = regParam_;
 
-    Int_t nScan=30;
+    Int_t nScan=50;
     //Int_t nScan=100;
     TSpline *logTauX,*logTauY;
     TSpline *rhoLogTau=0;
@@ -676,7 +639,7 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
     }
     else if(regParam_ > 0){
         printf("\n-----> Doing ScanTau method\n");
-        iBest = unfold.ScanTau(50,0.0,0.0,&rhoLogTau,TUnfoldDensity::kEScanTauRhoAvg);
+        iBest = unfold.ScanTau(50, 0., 0., &rhoLogTau, TUnfoldDensity::kEScanTauRhoAvg);
     }
     else{
         printf("\n-----> Doing manual DoUnfold method\n");
@@ -1314,33 +1277,33 @@ TH1D* makeCrossSectionHist(TH1D* hGenDYJets, double integratedLumi){
     return hGenCrossSection;
 }
 
-void RemoveFakes(TH1* hRecData, TH1* hFakes, TH1* hPurity){
-    int fakeMethod = cfg.getI("fakeMethod");
-    static bool emitMess = true;
-    if(emitMess){
-        std::cout << "Fake subtraction method id: " << fakeMethod << std::endl;;
-        emitMess = false;
+void RemoveFakes(TH1D* &hRecData, TH1D* hRecDYJets, TH1D* hFakDYJets){
+
+    // First get fake rate from signal MC
+    TH1D *hFakes = (TH1D*) hFakDYJets->Clone();
+    hFakes->Divide(hFakDYJets, hRecDYJets, 1, 1, "B");
+
+    std::cout << "\nFake rate: " << std::endl;
+    for(int i = 1; i <= hFakes->GetNbinsX(); i++){
+        std::cout << hFakes->GetBinContent(i) << std::endl;
     }
-    switch(fakeMethod){
-    case 0: //global rescale to data
-            std::cout << "fakeMethod = " << fakeMethod << " --> Just subtracting the hFakes histo from the hRecData histo" << std::endl;
-            hRecData->Add(hFakes, -1);
-        return;
-    case 1: //bin-by-bin purity method
-        std::cout << "fakeMethod = " << fakeMethod << " --> Doing bin-by-bin purity method " << std::endl;
-        for(int ibin = 0; ibin <= hRecData->GetNbinsX(); ++ibin){
-            double c = hRecData->GetBinContent(ibin);
-            double e = hRecData->GetBinError(ibin);
-            double p = hPurity->GetBinContent(ibin);
-            hRecData->SetBinContent(ibin, c * p);
-            hRecData->SetBinError(ibin, e * p);
-        }
-        return;
-    default:
-        std::cerr << __FILE__ <<  ":" << __LINE__ << ". Value " << fakeMethod
-              << " for parameter fakeMethod " << " is not supported. Exists.\n";
-        exit(1);
+
+    // Then multiply this fake rate by total #events in data to get fake histogram for subtracting
+    std::cout << "#reco events before fake subtraction: " << hRecData->Integral() << std::endl;
+    // double recoIntegral(0.);
+    // for(int i = 1; i <= hRecData->GetNbinsX(); i++){
+    //     recoIntegral += hRecData->GetBinContent(i);
+    // }
+    // std::cout << "#reco events before fake subtraction: " << recoIntegral << std::endl;
+
+    for(int i = 1; i <= hFakes->GetNbinsX(); i++){
+        hFakes->SetBinContent(i, hFakes->GetBinContent(i) * hRecData->GetBinContent(i));
     }
+    std::cout << "#fake events to subtract: " << hFakes->Integral() << std::endl;
+
+    // Now subtract fakes
+    hRecData->Add(hFakes, -1);
+    std::cout << "#reco events after fake subtraction: " << hRecData->Integral() << "\n" << std::endl;
 }
 
 void plotRespMat(TH2D *hResp, TString variable, TString unfoldDir, bool addSwitch, TH1D *hGenDYJets){
