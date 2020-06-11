@@ -83,7 +83,7 @@ RooUnfold/libRooUnfold.so:
 
 # ===========================================================================
 clean:
-	rm -f *.o Sources/*.o
+	rm *.o *.d Sources/*.o Sources/*.d
 	$(MAKE) -C RooUnfold clean
 
 clean-dep:

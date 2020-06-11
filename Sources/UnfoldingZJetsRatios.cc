@@ -227,7 +227,7 @@ void UnfoldingZJetsRatios(TString lepSel, int year, TString algo, TString histoD
         std::cout << "From reco data, subtracting MC BG histo hRecSumBgNUM[iBg], " << "iBg = " << iBg << std::endl;
         hRecDataMinusFakesNUM->Add(hRecSumBgNUM[iBg], -1);
         std::cout << "Removing fakes using hRecDYJetsNUM[iResp], hFakDYJetsNUM[iResp]!" << std::endl;
-        RemoveFakes(hRecDataMinusFakesNUM, hRecDYJetsNUM[iResp], hFakDYJetsNUM[iResp]);
+        // RemoveFakes(hRecDataMinusFakesNUM, hRecDYJetsNUM[iResp], hFakDYJetsNUM[iResp]); // ALW 3 JUNE 20 -- TEMPMORARILY COMMENTING OUT
         
         std::cout << "Fetching gen signal histo hGenDYJetsNUM[iGen] and misses histo hMissDYJetsNUM[iGen], " << "iGen = " << iGen << std::endl;
         std::cout << "Fetching response matrix histo hResDYJetsNUM[iResp], " << "iResp = " << iResp << std::endl;
@@ -263,7 +263,7 @@ void UnfoldingZJetsRatios(TString lepSel, int year, TString algo, TString histoD
         std::cout << "From reco data, subtracting MC BG histo hRecSumBgDENOM[iBg], " << "iBg = " << iBg << std::endl;
         hRecDataMinusFakesDENOM->Add(hRecSumBgDENOM[iBg], -1);
         std::cout << "Removing fakes using hRecDYJetsDENOM[iResp], hFakDYJetsDENOM[iResp]!" << std::endl;
-        RemoveFakes(hRecDataMinusFakesDENOM, hRecDYJetsDENOM[iResp], hFakDYJetsDENOM[iResp]);
+        // RemoveFakes(hRecDataMinusFakesDENOM, hRecDYJetsDENOM[iResp], hFakDYJetsDENOM[iResp]); // ALW 3 JUNE 20 -- TEMPMORARILY COMMENTING OUT
         
         std::cout << "Fetching gen signal histo hGenDYJetsDENOM[iGen] and misses histo hMissDYJetsDENOM[iGen], " << "iGen = " << iGen << std::endl;
         std::cout << "Fetching response matrix histo hResDYJetsDENOM[iResp], " << "iResp = " << iResp << std::endl;

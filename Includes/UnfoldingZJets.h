@@ -13,7 +13,10 @@ TH2D* makeCovFromUpAndDown(const TH1D* hUnfDataCentral, const TH1D* hUnfDataUp, 
 TH1D* makeCrossSectionHist(TH1D* hGenDYJets, double integratedLumi);
 void createTable(TString outputFileName, TString lepSel, TString variable, bool doNormalized, TH1D *hUnfData, TH2D *hCov[]);
 void createSystPlots(TString outputFileName, TString lepSel, TString variable, TH1D* hUnf[], bool logy = false);
-void RemoveFakes(TH1D* &hRecData, TH1D* hRecDYJets, TH1D* hFakDYJets);
+
+// void RemoveFakes(TH1D* &hRecData, TH1D* hRecDYJets, TH1D* hFakDYJets);
+void RemoveFakes(TH1D* &hRecData, TH1D* hFakes);
+
 void normalizeTH2D(TH2D *h);
 void createInclusivePlots(bool doNormalized, TString outputFileName, TString lepSel, TH1D *hUnfData, TH2D *hCov[], TH1D *hMadGenCrossSection, TH1D *hSheGenCrossSection);
 void plotRespMat(TH2D *hResp, TString variable, TString unfoldDir, bool addSwitch, TH1D *hGenDYJets);

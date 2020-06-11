@@ -226,6 +226,10 @@ const variableStruct VAROFINTERESTZJETS[] = {
     {"LepPtPlusLeadingJetAK8Pt_Zexc1jet_TUnfold",      1,      1,          1,              4,             1,            1 ,               1    },
     {"LepPtPlusLeadingJetAK8Pt_Zexc2jet_TUnfold",      1,      1,          1,              4,             1,            1 ,               1    },
     {"LepPtPlusLeadingJetAK8Pt_Zexc3jet_TUnfold",      1,      1,          1,              4,             1,            1 ,               1    },
+    // for closure test using W+jets reco MC
+    {"FirstJetPt_Zinc1jet_TUnfold_NOEFFWEIGHTS",      1,      1,          1,              4,             1,            1 ,               1    },
+    {"FirstJetAbsRapidity_Zinc1jet_TUnfold_NOEFFWEIGHTS",      1,      1,          1,              4,             1,            1 ,               1    },
+    {"dPhiLepJet1_Zinc1jet_TUnfold_NOEFFWEIGHTS",      1,      1,          1,              4,             1,            1 ,               1    },
 }; 
 
 const unsigned int NVAROFINTERESTZJETS = sizeof(VAROFINTERESTZJETS)/sizeof(VAROFINTERESTZJETS[0]);
