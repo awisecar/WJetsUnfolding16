@@ -653,52 +653,65 @@ void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hR
 
 }
 
-TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJets){
+TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJets, bool isVerbose){
 
-    //   printf("\n-----> Getting statistics concerning fakes:\n");
+    // NOTE:
+    // "fakes" means the #events seen at reco-level that do not originate in the fiducially-accepted region at gen-level
+    // i.e. the migrate from outside the fiducial region at gen level into the fiducial region at reco-level, but they do not
+    // correspond to the "true" prediction, which is why they must be subtracted
+
+    // Fakes distribution has reco binning
     TH1D *hFakDYJets = (TH1D*) hRecDYJets->Clone();
 
-    //int sm= hRecDYJets->GetSumw2N();
-    //int s = hResDYJets->GetSumw2N();
-    int nm = hResDYJets->GetNbinsX() + 2; //number of RECO bins in response matrix (plus over- and underflow)
-    int nt = hResDYJets->GetNbinsY() + 2; //number of GEN bins in response matrix (plus over- and underflow)
-    //   printf("hResDYJets->GetNbinsX() + 2 = %d, hResDYJets->GetNbinsY() + 2 = %d\n", nm, nt);
+    // Calculate difference in normalization of signal between data and MC
+    double factor(1.);
+    double dataIntegral = hRecData->Integral(1, hRecData->GetNbinsX());
+    double dyIntegral = hRecDYJets->Integral(1, hRecDYJets->GetNbinsX());
+    double bgIntegral = hRecSumBg->Integral(1, hRecSumBg->GetNbinsX());
 
-    double dataIntegral = hRecData->Integral(0, hRecData->GetNbinsX()+1);
-    double dyIntegral = hRecDYJets->Integral(0, hRecDYJets->GetNbinsX()+1);
-    double bgIntegral = hRecSumBg->Integral(0, hRecSumBg->GetNbinsX()+1);
+    // --------------
+    //
+    // ALW 11 JUNE 20
+    // Should comment this out if doing closure test w/ reco MC but leave in if unfolding data
+    // if (dyIntegral != 0) factor = (dataIntegral - bgIntegral) / dyIntegral; 
+    //
+    // --------------
+    
+    // printf("hRecData Integral: %F, hRecDYJets Integral: %F, hRecSumBg Integral: %F\n", dataIntegral, dyIntegral, bgIntegral);
+    // printf("Scaling fake counts (estimated with signal MC) by following factor for data histo: %F\n", factor);
 
-    double factor = dyIntegral;
-    if (factor != 0) factor = (dataIntegral - bgIntegral) / factor;
+    // For each reco bin, compare #reco events that pass reco selection (filled in reco-level dist.) 
+    // to #reco events that pass reco and gen selection (that are filled in response matrix)
+    int nm = hResDYJets->GetNbinsX(); // #RECO bins in response matrix
+    int nt = hResDYJets->GetNbinsY(); // #GEN bins in response matrix (plus overflow)
 
-    //    printf("hRecData Integral: %F, hRecDYJets Integral: %F, hRecSumBg Integral: %F\n", dataIntegral, dyIntegral, bgIntegral);
-    //    printf("hRecData - (hRecDYJets+hRecSumBg): %F\n", (dataIntegral - (dyIntegral+bgIntegral)));
-    //    printf("Scaling fake counts (estimated with signal MC) by following factor for data histo: %F\n", factor);
-    // std::cout << std::endl;
+    if (isVerbose) std::cout << std::endl;
+    for (int i = 1; i <= nm; i++) { // count over RECO bins
 
-    for (int i = 0; i < nm; i++) { //count over RECO bins
-        double nmes = 0.0, wmes = 0.0;
-        for (int j = 0; j < nt; j++) { //count over GEN bins
+        double nmes(0.), wmes(0.);
+        for (int j = 1; j <= nt + 1; j++) { // count over GEN bins (include overflow)
             nmes += hResDYJets->GetBinContent(i, j);
-            wmes += pow(hResDYJets->GetBinError(i, j), 2);
-            //if (s) wmes += pow(hResDYJets->GetBinError(i, j), 2);
+            wmes += pow(hResDYJets->GetBinError(i, j), 2.);
         }
-        // nmes is all of the entries summed up in one reco x-column over all gen y-rows
-        // this would be all of the reco events that had a corresponding gen event, such that the hresponse histo was filled
-        // fakes would be the number of entries in the 1D reco histogram that don't have a corresponding gen-partner in the hresponse histo
-        double fake = hRecDYJets->GetBinContent(i) - nmes;
-        //       printf("Integral of reco column %d in hResDYJets: %F, Corresponding bin count in hRecDYJets: %F, Estimated fakes: %F\n", i, nmes, (hRecDYJets->GetBinContent(i)), fake);
-        // and now the fakes histogram is the number of fakes scaled to makeup for the discrepancy between signal and BG-subtracted data
-        hFakDYJets->SetBinContent(i, factor*fake);
 
-        //Error calculation comes from simple error propagation
-	    //double err2 = pow(hRecDYJets->GetBinError(i),2) - wmes; //should be a plus here for regular error propagation
-        double err2 = pow(hRecDYJets->GetBinError(i), 2) + wmes;
-        if(err2 < 0) err2 = 0;
-        
-        hFakDYJets->SetBinError(i, sqrt (err2)); //neglecting uncertainty introduced by the scale factor
-        //hFakDYJets->SetBinError   (i, sqrt (wmes + (sm ? pow(hRecDYJets->GetBinError(i),2) : hRecDYJets->GetBinContent(i))));
+        // #fakes in reco bin i is the number of total reco events minus the reco events pass also GEN selection ("matched" events)
+        // #fakes is scaled by factor to account for the difference in normalizations between the signal MC and the (BG-subtracted) data spectra
+        // so the shape of the fakes distribution is taken from signal MC, but scaled to have the normalization of data
+        double fakes = hRecDYJets->GetBinContent(i) - nmes;
+        if (fakes < 0.) fakes = 0.;
+        hFakDYJets->SetBinContent(i, factor*fakes);
+
+        if (isVerbose) {
+            std::cout << "Fake rate calculated for reco bin " << i << ": " << hFakDYJets->GetBinContent(i)/hRecData->GetBinContent(i) << std::endl; // data fake rate
+        }
+
+        // Error calculation comes from simple error propagation, but treating "factor"
+        // as a constant, i.e. neglecting uncertainty from scale factor derivation
+        double err2 = pow(hRecDYJets->GetBinError(i), 2.) + wmes;
+        if (err2 < 0.) err2 = 0.;
+        hFakDYJets->SetBinError(i, factor*sqrt(err2)); 
     }
+
     hFakDYJets->SetEntries(hFakDYJets->GetEffectiveEntries());  // 0 entries if 0 fakes
 
     return hFakDYJets;
@@ -706,24 +719,24 @@ TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJe
 
 void getFakes(TH1D *hFakDYJets[18], TH1D *hRecData[3], TH1D *hRecSumBg[11], TH1D *hRecDYJets[13], TH2D *hResDYJets[13]){
 
-    hFakDYJets[0] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[0], hResDYJets[0]);
-    hFakDYJets[1] = getFakes(hRecDYJets[0], hRecData[1], hRecSumBg[0], hResDYJets[0]);
-    hFakDYJets[2] = getFakes(hRecDYJets[0], hRecData[2], hRecSumBg[0], hResDYJets[0]);
-    hFakDYJets[3] = getFakes(hRecDYJets[1], hRecData[0], hRecSumBg[1], hResDYJets[1]);
-    hFakDYJets[4] = getFakes(hRecDYJets[2], hRecData[0], hRecSumBg[2], hResDYJets[2]);
-    hFakDYJets[5] = getFakes(hRecDYJets[3], hRecData[0], hRecSumBg[0], hResDYJets[3]);
-    hFakDYJets[6] = getFakes(hRecDYJets[4], hRecData[0], hRecSumBg[0], hResDYJets[4]);
-    hFakDYJets[7] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[3], hResDYJets[0]);
-    hFakDYJets[8] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[4], hResDYJets[0]);
-    hFakDYJets[9] = getFakes(hRecDYJets[5], hRecData[0], hRecSumBg[0], hResDYJets[5]);
-    hFakDYJets[10] = getFakes(hRecDYJets[6], hRecData[0], hRecSumBg[0], hResDYJets[6]);
-    hFakDYJets[11] = getFakes(hRecDYJets[7], hRecData[0], hRecSumBg[5], hResDYJets[7]);
-    hFakDYJets[12] = getFakes(hRecDYJets[8], hRecData[0], hRecSumBg[6], hResDYJets[8]);
-    hFakDYJets[13] = getFakes(hRecDYJets[9], hRecData[0], hRecSumBg[7], hResDYJets[9]);
-    hFakDYJets[14] = getFakes(hRecDYJets[10], hRecData[0], hRecSumBg[8], hResDYJets[10]);
-    hFakDYJets[15] = getFakes(hRecDYJets[11], hRecData[0], hRecSumBg[9], hResDYJets[11]);
-    hFakDYJets[16] = getFakes(hRecDYJets[12], hRecData[0], hRecSumBg[10], hResDYJets[12]);
-    hFakDYJets[17] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[0], hResDYJets[0]);
+    hFakDYJets[0] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[0], hResDYJets[0], true);
+    hFakDYJets[1] = getFakes(hRecDYJets[0], hRecData[1], hRecSumBg[0], hResDYJets[0], false);
+    hFakDYJets[2] = getFakes(hRecDYJets[0], hRecData[2], hRecSumBg[0], hResDYJets[0], false);
+    hFakDYJets[3] = getFakes(hRecDYJets[1], hRecData[0], hRecSumBg[1], hResDYJets[1], false);
+    hFakDYJets[4] = getFakes(hRecDYJets[2], hRecData[0], hRecSumBg[2], hResDYJets[2], false);
+    hFakDYJets[5] = getFakes(hRecDYJets[3], hRecData[0], hRecSumBg[0], hResDYJets[3], false);
+    hFakDYJets[6] = getFakes(hRecDYJets[4], hRecData[0], hRecSumBg[0], hResDYJets[4], false);
+    hFakDYJets[7] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[3], hResDYJets[0], false);
+    hFakDYJets[8] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[4], hResDYJets[0], false);
+    hFakDYJets[9] = getFakes(hRecDYJets[5], hRecData[0], hRecSumBg[0], hResDYJets[5], false);
+    hFakDYJets[10] = getFakes(hRecDYJets[6], hRecData[0], hRecSumBg[0], hResDYJets[6], false);
+    hFakDYJets[11] = getFakes(hRecDYJets[7], hRecData[0], hRecSumBg[5], hResDYJets[7], false);
+    hFakDYJets[12] = getFakes(hRecDYJets[8], hRecData[0], hRecSumBg[6], hResDYJets[8], false);
+    hFakDYJets[13] = getFakes(hRecDYJets[9], hRecData[0], hRecSumBg[7], hResDYJets[9], false);
+    hFakDYJets[14] = getFakes(hRecDYJets[10], hRecData[0], hRecSumBg[8], hResDYJets[10], false);
+    hFakDYJets[15] = getFakes(hRecDYJets[11], hRecData[0], hRecSumBg[9], hResDYJets[11], false);
+    hFakDYJets[16] = getFakes(hRecDYJets[12], hRecData[0], hRecSumBg[10], hResDYJets[12], false);
+    hFakDYJets[17] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[0], hResDYJets[0], false);
 
 }
 
