@@ -583,7 +583,7 @@ void getHistos(TH2D *histograms[], TFile *Files[], TString variable){
 }
 
 // void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hRecDYJets[13], TH1D *hGenDYJets[11], TH2D *hResDYJets[13], TFile *fDYJets[9], TH1D *hRecBg[][11], TH1D *hRecSumBg[11], TFile *fBg[][7], int nBg, TH1D* hFakDYJets[13], TH1D *hMissDYJets[11]){
-void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hRecDYJets[13], TH1D *hGenDYJets[11], TH2D *hResDYJets[13], TFile *fDYJets[9], TH1D *hRecBg[][11], TH1D *hRecSumBg[11], TFile *fBg[][7], int nBg, TH1D* hFakDYJets[18], TH1D *hMissDYJets[11]){
+void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hRecDYJets[13], TH1D *hGenDYJets[11], TH2D *hResDYJets[13], TFile *fDYJets[9], TH1D *hRecBg[][11], TH1D *hRecSumBg[11], TFile *fBg[][7], int nBg, TH1D* hFakDYJets[18], TH1D *hMissDYJets[11], bool isClosureTest){
 
 
 
@@ -643,7 +643,7 @@ void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hR
     //there are 13 hFakDYJets objects, for new method (18 for old method)
     std::cout << "\n-----> Grabbing fakes objects hFakDYJets!" << std::endl;
     // getHistos(hFakDYJets, fDYJets, "fakes" + variable); // "new" method
-    getFakes(hFakDYJets, hRecData, hRecSumBg, hRecDYJets, hResDYJets); // "old" method
+    getFakes(hFakDYJets, hRecData, hRecSumBg, hRecDYJets, hResDYJets, isClosureTest); // "old" method
 
     //--- get misses DYJets histograms ---
     //there are 11 hMissDYJets objects
@@ -653,7 +653,7 @@ void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hR
 
 }
 
-TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJets, bool isVerbose){
+TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJets, bool isVerbose, bool isClosureTest){
 
     // NOTE:
     // "fakes" means the #events seen at reco-level that do not originate in the fiducially-accepted region at gen-level
@@ -669,14 +669,12 @@ TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJe
     double dyIntegral = hRecDYJets->Integral(1, hRecDYJets->GetNbinsX());
     double bgIntegral = hRecSumBg->Integral(1, hRecSumBg->GetNbinsX());
 
-    // --------------
-    //
-    // ALW 11 JUNE 20
-    // Should comment this out if doing closure test w/ reco MC but leave in if unfolding data
-    // if (dyIntegral != 0) factor = (dataIntegral - bgIntegral) / dyIntegral; 
-    //
-    // --------------
-    
+    // If doing closure test w/ reco MC, do not scale fakes distribution by "factor"
+    if (!isClosureTest){
+        if (dyIntegral != 0) factor = (dataIntegral - bgIntegral) / dyIntegral; 
+        if (isVerbose) std::cout << "\nScaling fakes distribution by factor = " << factor << std::endl;
+    }
+
     // printf("hRecData Integral: %F, hRecDYJets Integral: %F, hRecSumBg Integral: %F\n", dataIntegral, dyIntegral, bgIntegral);
     // printf("Scaling fake counts (estimated with signal MC) by following factor for data histo: %F\n", factor);
 
@@ -702,7 +700,8 @@ TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJe
         hFakDYJets->SetBinContent(i, factor*fakes);
 
         if (isVerbose) {
-            std::cout << "Fake rate calculated for reco bin " << i << ": " << hFakDYJets->GetBinContent(i)/hRecData->GetBinContent(i) << std::endl; // data fake rate
+            if (!isClosureTest) std::cout << "Fake rate calculated for reco bin " << i << ": " << hFakDYJets->GetBinContent(i)/hRecData->GetBinContent(i) << std::endl; // data fake rate
+            else std::cout << "Fake rate calculated for reco bin " << i << ": " << hFakDYJets->GetBinContent(i)/hRecDYJets->GetBinContent(i) << std::endl; // signal reco MC fake rate
         }
 
         // Error calculation comes from simple error propagation, but treating "factor"
@@ -717,26 +716,26 @@ TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJe
     return hFakDYJets;
 }
 
-void getFakes(TH1D *hFakDYJets[18], TH1D *hRecData[3], TH1D *hRecSumBg[11], TH1D *hRecDYJets[13], TH2D *hResDYJets[13]){
+void getFakes(TH1D *hFakDYJets[18], TH1D *hRecData[3], TH1D *hRecSumBg[11], TH1D *hRecDYJets[13], TH2D *hResDYJets[13], bool isClosureTest){
 
-    hFakDYJets[0] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[0], hResDYJets[0], true);
-    hFakDYJets[1] = getFakes(hRecDYJets[0], hRecData[1], hRecSumBg[0], hResDYJets[0], false);
-    hFakDYJets[2] = getFakes(hRecDYJets[0], hRecData[2], hRecSumBg[0], hResDYJets[0], false);
-    hFakDYJets[3] = getFakes(hRecDYJets[1], hRecData[0], hRecSumBg[1], hResDYJets[1], false);
-    hFakDYJets[4] = getFakes(hRecDYJets[2], hRecData[0], hRecSumBg[2], hResDYJets[2], false);
-    hFakDYJets[5] = getFakes(hRecDYJets[3], hRecData[0], hRecSumBg[0], hResDYJets[3], false);
-    hFakDYJets[6] = getFakes(hRecDYJets[4], hRecData[0], hRecSumBg[0], hResDYJets[4], false);
-    hFakDYJets[7] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[3], hResDYJets[0], false);
-    hFakDYJets[8] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[4], hResDYJets[0], false);
-    hFakDYJets[9] = getFakes(hRecDYJets[5], hRecData[0], hRecSumBg[0], hResDYJets[5], false);
-    hFakDYJets[10] = getFakes(hRecDYJets[6], hRecData[0], hRecSumBg[0], hResDYJets[6], false);
-    hFakDYJets[11] = getFakes(hRecDYJets[7], hRecData[0], hRecSumBg[5], hResDYJets[7], false);
-    hFakDYJets[12] = getFakes(hRecDYJets[8], hRecData[0], hRecSumBg[6], hResDYJets[8], false);
-    hFakDYJets[13] = getFakes(hRecDYJets[9], hRecData[0], hRecSumBg[7], hResDYJets[9], false);
-    hFakDYJets[14] = getFakes(hRecDYJets[10], hRecData[0], hRecSumBg[8], hResDYJets[10], false);
-    hFakDYJets[15] = getFakes(hRecDYJets[11], hRecData[0], hRecSumBg[9], hResDYJets[11], false);
-    hFakDYJets[16] = getFakes(hRecDYJets[12], hRecData[0], hRecSumBg[10], hResDYJets[12], false);
-    hFakDYJets[17] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[0], hResDYJets[0], false);
+    hFakDYJets[0] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[0], hResDYJets[0], true, isClosureTest);
+    hFakDYJets[1] = getFakes(hRecDYJets[0], hRecData[1], hRecSumBg[0], hResDYJets[0], false, isClosureTest);
+    hFakDYJets[2] = getFakes(hRecDYJets[0], hRecData[2], hRecSumBg[0], hResDYJets[0], false, isClosureTest);
+    hFakDYJets[3] = getFakes(hRecDYJets[1], hRecData[0], hRecSumBg[1], hResDYJets[1], false, isClosureTest);
+    hFakDYJets[4] = getFakes(hRecDYJets[2], hRecData[0], hRecSumBg[2], hResDYJets[2], false, isClosureTest);
+    hFakDYJets[5] = getFakes(hRecDYJets[3], hRecData[0], hRecSumBg[0], hResDYJets[3], false, isClosureTest);
+    hFakDYJets[6] = getFakes(hRecDYJets[4], hRecData[0], hRecSumBg[0], hResDYJets[4], false, isClosureTest);
+    hFakDYJets[7] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[3], hResDYJets[0], false, isClosureTest);
+    hFakDYJets[8] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[4], hResDYJets[0], false, isClosureTest);
+    hFakDYJets[9] = getFakes(hRecDYJets[5], hRecData[0], hRecSumBg[0], hResDYJets[5], false, isClosureTest);
+    hFakDYJets[10] = getFakes(hRecDYJets[6], hRecData[0], hRecSumBg[0], hResDYJets[6], false, isClosureTest);
+    hFakDYJets[11] = getFakes(hRecDYJets[7], hRecData[0], hRecSumBg[5], hResDYJets[7], false, isClosureTest);
+    hFakDYJets[12] = getFakes(hRecDYJets[8], hRecData[0], hRecSumBg[6], hResDYJets[8], false, isClosureTest);
+    hFakDYJets[13] = getFakes(hRecDYJets[9], hRecData[0], hRecSumBg[7], hResDYJets[9], false, isClosureTest);
+    hFakDYJets[14] = getFakes(hRecDYJets[10], hRecData[0], hRecSumBg[8], hResDYJets[10], false, isClosureTest);
+    hFakDYJets[15] = getFakes(hRecDYJets[11], hRecData[0], hRecSumBg[9], hResDYJets[11], false, isClosureTest);
+    hFakDYJets[16] = getFakes(hRecDYJets[12], hRecData[0], hRecSumBg[10], hResDYJets[12], false, isClosureTest);
+    hFakDYJets[17] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[0], hResDYJets[0], false, isClosureTest);
 
 }
 

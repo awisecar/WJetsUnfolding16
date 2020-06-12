@@ -7,11 +7,10 @@
 ConfigVJets cfg;
 
 int main(int argc, char **argv){
-    //--- Loads configuration -----------------------------------------------------
 
-    //andrew -- 5 march 2019 -- current defaults for these options commented to the right
+    //--- Loads configuration -----------------------------------------------------
     TString lepSel     = cfg.getS("lepSel");    // SMu
-    int year           = cfg.getI("year");      // ...
+    int year           = cfg.getI("year");      // 
     TString algo       = cfg.getS("algo");      // TUnfold (can switch to Bayes if want to use RooUnfold Bayes)
     TString histoDir   = cfg.getS("histoDir");  // HistoFiles
     TString unfoldDir  = cfg.getS("unfoldDir"); // UnfoldedFiles
@@ -21,6 +20,7 @@ int main(int argc, char **argv){
 
     TString variable = "";
     bool doNormalized(false);
+    bool isClosureTest(false); // if false, unfold data; if true, unfold W+jets signal reco MC for closure test
 
     //--- Parse the arguments -----------------------------------------------------
     if (argc > 1) {
@@ -64,6 +64,10 @@ int main(int argc, char **argv){
                 getArg(currentArg, doNormalized);
 		        cfg.set("doNormalized", doNormalized);
             }
+            else if (currentArg.BeginsWith("isClosureTest=")) {
+                getArg(currentArg, isClosureTest);
+		        cfg.set("isClosureTest", isClosureTest);
+            }
 	        else if (currentArg.BeginsWith("whichSyst=")) {
                 getArg(currentArg, whichSyst);
 		        cfg.set("whichSyst", whichSyst);
@@ -79,10 +83,10 @@ int main(int argc, char **argv){
     // if (!histoDir.EndsWith("/")) histoDir += "/";
     // if (!unfoldDir.EndsWith("/")) unfoldDir += "/";
     
-    std::cout << "\n >>>>> Executing UnfoldingZJets(\"" << lepSel << "\", \"" <<  year << "\", \"" <<  algo << "\", \"" << histoDir << "\", \"" << unfoldDir << "\", " << jetPtMin << ", " << jetEtaMax << ", " << variable << ", " << doNormalized << ", " << whichSyst << ");" << std::endl;
-    std::cout << " >>>>> Where UnfoldingZJets(lepSel, year, algo, histoDir, unfoldDir, jetPtMin, jetEtaMax, variable, doNormalized, whichSyst)" << std::endl;
+    std::cout << "\n >>>>> Executing UnfoldingZJets(\"" << lepSel << "\", \"" <<  year << "\", \"" <<  algo << "\", \"" << histoDir << "\", \"" << unfoldDir << "\", " << jetPtMin << ", " << jetEtaMax << ", " << variable << ", " << doNormalized << ", " << whichSyst << ", " << isClosureTest << ");" << std::endl;
+    std::cout << " >>>>> Where UnfoldingZJets(lepSel, year, algo, histoDir, unfoldDir, jetPtMin, jetEtaMax, variable, doNormalized, whichSyst, isClosureTest)" << std::endl;
 
-    UnfoldingZJets(lepSel, year, algo, histoDir, unfoldDir, jetPtMin, jetEtaMax, variable, doNormalized, whichSyst);
+    UnfoldingZJets(lepSel, year, algo, histoDir, unfoldDir, jetPtMin, jetEtaMax, variable, doNormalized, whichSyst, isClosureTest);
 
     return 0;
 }
