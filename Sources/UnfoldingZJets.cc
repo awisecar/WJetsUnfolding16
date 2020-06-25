@@ -38,13 +38,10 @@
 #include "TUnfoldSys.h"
 
 extern ConfigVJets cfg;
-const static bool isdatabug = false;
-static int verbosity = 1;
-
 using namespace std;
 
 void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TString unfoldDir, int jetPtMin, int jetEtaMax, TString variable, bool doNormalized, int whichSyst, bool isClosureTest){
-    
+
     gStyle->SetOptStat(0);
 
     //--- Get input histogram directory for specific year ---
@@ -485,15 +482,11 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
         hMadGenCrossSection->Write("hMadGenCrossSection"); //gen MC for W+jets NLO FxFx signal (also)
         hGen1CrossSection->Write("hGen1CrossSection"); //gen MC for W+jets LO MLM signal
         // hGen2CrossSection->Write("hGen2CrossSection");
-
-        // Write out unfolded distributions
-        for (int iSyst = 0; iSyst < nSysts; ++iSyst) if (hUnfData[iSyst]) hUnfData[iSyst]->Write();
-     
-        // Write out covariance matrices
+        // Write out unfolded distributions ---
+        for (int iSyst = 0; iSyst < nSysts; ++iSyst) if (hUnfData[iSyst]) hUnfData[iSyst]->Write();     
+        // Write out covariance matrices ---
         for (int i = 0; i <= 11; ++i) if (hCov[i]) hCov[i]->Write();
 
-        
-        
         // TH1D *h_TotalUncer = (TH1D*) hUnfData[0]->Clone();
         // for (int i = 1; i <= hUnfData[0]->GetNbinsX(); ++i) {
         //     h_TotalUncer->SetBinContent(i, sqrt(hCov[0]->GetBinContent(i,i) + hCov[11]->GetBinContent(i,i)));
@@ -509,7 +502,6 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
         // //crossSectionPlot is the canvas showing the main/central unfolded dist. (hUnfData[0])
         // crossSectionPlot->Write();
         // //----------------------------------------------------------------------------------------- 
-
 
         outputRootFile->Close();
       
@@ -662,50 +654,59 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
     // ---------------------------------------------------------------------------
     
     printf("\n-----> Doing the unfolding \n");
-    // Set input options ---
 
-    // 1) Regularization scheme
-    TUnfold::ERegMode regMode = TUnfold::kRegModeCurvature;
-
-    // 2) Area constraint
-    // TUnfold::EConstraint constraintMode = TUnfold::kEConstraintNone;  // use no extra constraint
-    TUnfold::EConstraint constraintMode = TUnfold::kEConstraintArea; // enforce preservation of the area
-
-    // 3) ???
-    TUnfoldDensity::EDensityMode densityFlags = TUnfoldDensity::kDensityModeBinWidth;
-    // TUnfoldDensity::kDensityModeNone // try this instead?
+    // Set input options:
+    // 1) Regularization scheme -----
+    // TUnfold::ERegMode regMode = TUnfold::kRegModeDerivative; // "regularize the 1st derivative of the output distribution"
+    TUnfold::ERegMode regMode = TUnfold::kRegModeCurvature; // "regularize the 2nd derivative of the output distribution"
+    // 2) Area constraint -----
+    // TUnfold::EConstraint constraintMode = TUnfold::kEConstraintNone;  // "use no extra constraint"
+    TUnfold::EConstraint constraintMode = TUnfold::kEConstraintArea; // "enforce preservation of the area"
+    // 3) "Choice of regularisation scale factors to construct the matrix L" -----
+    // TUnfoldDensity::EDensityMode densityMode = TUnfoldDensity::kDensityModeNone; // "no scale factors, matrix L is similar to unity matrix" (this does not work and I don't know why...)
+    TUnfoldDensity::EDensityMode densityMode = TUnfoldDensity::kDensityModeBinWidth; // "scale factors from multidimensional bin width"
 
     //Define constructor and use SetInput to input the measurement that is to be unfolded ---
-    TUnfoldDensity unfold(responseMatrix, TUnfold::kHistMapOutputVert, regMode, constraintMode, densityFlags);
+    TUnfoldDensity unfold(responseMatrix, TUnfold::kHistMapOutputVert, regMode, constraintMode, densityMode);
     unfold.SetInput(recoData);
 
-    //--- Manual unfolding ---
-    Double_t tau = 0.;
-    //--- ---
+    // Regularization strength determination ---
+    // int regSwitch = -1; // ScanLcurve
+    int regSwitch = 1; // ScanTau
+    // int regSwitch = 0; // DoUnfold (using manually set value of tau above)
+    Double_t tau = 0.0; // Value of tau given if using DoUnfold
 
-    // Regularization schemes ---
-    // int regParam_ = -1; // ScanLcurve
-    int regParam_ = 1; // ScanTau
-    // int regParam_ = 0; // DoUnfold (using manually set value of tau above)
-    int iBest = regParam_;
+    // Number of points for ScanLcurve or ScanTau methods
+    // Int_t nPointsTauScan = 50;
+    Int_t nPointsTauScan = 100;
+    // Int_t nPointsTauScan = 200;
 
-    Int_t nScan = 50;
-    //Int_t nScan = 100;
+    // Min and max values of tau for scan
+    // Automatic values
+    // Double_t tauMin = 0.0;
+    // Double_t tauMax = 0.0;
+    // Large range
+    Double_t tauMin = 0.00000000001;
+    Double_t tauMax = 0.00001;
+    // FirstJetPt_Zinc1jet_TUnfold, kRegModeCurvature, ScanLcurve
+    // Double_t tauMin = 0.0000000001;
+    // Double_t tauMax = 0.00000001;
+    // FirstJetPt_Zinc1jet_TUnfold, kRegModeCurvature, ScanTau
+    // Double_t tauMin = 0.000000001;
+    // Double_t tauMax = 0.0000001;
+
+    int iBest(0);
     TSpline *logTauX, *logTauY;
     TSpline *rhoLogTau = 0;
     TGraph *lCurve = 0;
-    
-    if (regParam_ < 0){
+
+    if (regSwitch < 0){
         printf("\n-----> Doing ScanLcurve method\n");
-        // this method scans the parameter tau and finds the kink in the L curve
-        //   // finally, the unfolding is done for the best choice of tau
-        iBest = unfold.ScanLcurve(nScan, 0., 0., &lCurve, &logTauX, &logTauY);
-        //iBest=unfold.ScanTau(nScan,0.,0.,&rhoLogTau,
-        //           TUnfoldDensity::kEScanTauRhoMax);
+        iBest = unfold.ScanLcurve(nPointsTauScan, tauMin, tauMax, &lCurve, &logTauX, &logTauY);
     }
-    else if(regParam_ > 0){
+    else if(regSwitch > 0){
         printf("\n-----> Doing ScanTau method\n");
-        iBest = unfold.ScanTau(50, 0., 0., &rhoLogTau, TUnfoldDensity::kEScanTauRhoAvg);
+        iBest = unfold.ScanTau(nPointsTauScan, tauMin, tauMax, &rhoLogTau, TUnfoldDensity::kEScanTauRhoAvg);
     }
     else{
         printf("\n-----> Doing manual DoUnfold method\n");
@@ -713,23 +714,75 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
         unfold.DoUnfold(tau);
     }
     
-    if(lCurve){
-        Double_t t[1],x[1],y[1];
+    // Results for determination of regularization strength tau ---
+
+    // Final value of tau
+    Double_t tauFinal = unfold.GetTau();
+    printf("Final value of tau: %.12f\n", tauFinal);
+    char tauFinal_string[20];
+    // sprintf(tauFinal_string, "%.12f", tauFinal);
+    sprintf(tauFinal_string, "%.5g", tauFinal);
+
+    // L-curve scan
+    if (regSwitch < 0){
+        // Grab output, draw on plot
+        Double_t t[1], x[1], y[1];
         TGraph *bestLcurve;
-        logTauX->GetKnot(iBest,t[0],x[0]);
-        logTauY->GetKnot(iBest,t[0],y[0]);
-        bestLcurve = new TGraph(1,x,y);
-        printf("Writing out L-curve plot...\n");
+        logTauX->GetKnot(iBest, t[0], x[0]);
+        logTauY->GetKnot(iBest, t[0], y[0]);
+        bestLcurve = new TGraph(1, x, y);
+        
         TCanvas *canLCurve = new TCanvas("canLCurve", "canLCurve", 500, 500);
         canLCurve->cd();
         lCurve->Draw("AL");
         bestLcurve->SetMarkerColor(kRed);
         bestLcurve->Draw("*");
+
+        // Draw final value of tau on plot
+        TLatex *latexLabel = new TLatex(); 
+        latexLabel->SetNDC();
+        latexLabel->SetTextSize(0.035);
+        latexLabel->SetLineWidth(2);
+        latexLabel->SetTextFont(42);
+        latexLabel->DrawLatex(0.550, 0.65, "#tau_{reg.} = ");
+        latexLabel->DrawLatex(0.635, 0.65, tauFinal_string);
+        
+        if (name == "Central") canLCurve->SaveAs(unfoldOutputDir + "LCurveScan_" + variable + "_" + name + ".pdf");
         canLCurve->Write();
     }
-    Double_t tauFinal = unfold.GetTau();
-    printf("Final value of tau*10^4: %f\n", tauFinal * 10000.);
-    
+    // ScanTau method
+    if(regSwitch > 0){
+        // Grab output, draw on plot
+        Double_t t[1], rho[1];
+        rhoLogTau->GetKnot(iBest, t[0], rho[0]);
+        TGraph *bestRhoLogTau = new TGraph(1, t, rho);
+        Double_t *tAll = new Double_t[nPointsTauScan], *rhoAll = new Double_t[nPointsTauScan];
+        for (Int_t i = 0; i < nPointsTauScan; i++){
+            rhoLogTau->GetKnot(i, tAll[i], rhoAll[i]);
+        }
+        TGraph *knots = new TGraph(nPointsTauScan, tAll, rhoAll);
+
+        // scan of correlation vs tau
+        TCanvas *canCorrScan = new TCanvas("canCorrScan", "canCorrScan", 500, 500);
+        canCorrScan->cd();
+        rhoLogTau->Draw();
+        knots->Draw("*");
+        bestRhoLogTau->SetMarkerColor(kRed);
+        bestRhoLogTau->Draw("*");
+
+        // Draw final value of tau on plot
+        TLatex *latexLabel = new TLatex(); 
+        latexLabel->SetNDC();
+        latexLabel->SetTextSize(0.035);
+        latexLabel->SetLineWidth(2);
+        latexLabel->SetTextFont(42);
+        latexLabel->DrawLatex(0.200, 0.75, "#tau_{reg.} = ");
+        latexLabel->DrawLatex(0.285, 0.75, tauFinal_string);
+
+        if (name == "Central") canCorrScan->SaveAs(unfoldOutputDir + "CorrCoeffScan_" + variable + "_" + name + ".pdf");
+        canCorrScan->Write();
+    }
+
     // ---------------------------------------------------------------------------
 
     // Get output from unfolding ---
@@ -1304,7 +1357,7 @@ void createTable(TString outputFileName, TString lepSel, TString variable, bool 
     ofstream out(outputFileName + ".tex");
     out << table;
     out.close();
-    if(verbosity > 0) cout << table << endl;
+    cout << table << endl;
 }
 
 TH2D* makeCovFromUpAndDown(const TH1D* hUnfDataCentral, const TH1D* hUnfDataUp, const TH1D* hUnfDataDown, TString name){

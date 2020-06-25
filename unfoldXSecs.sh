@@ -2,7 +2,6 @@
 
 
 # 12 June 20 --
-
 # unfolding data
 ./runUnfoldingZJets year=2016 variable=FirstJetPt_Zinc1jet_TUnfold
 ./runUnfoldingZJets year=2016 variable=FirstJetAbsRapidity_Zinc1jet_TUnfold
@@ -13,7 +12,6 @@
 ./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetPt_Zexc1jet_TUnfold
 ./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold
 ./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold
-
 # closure test (using W+jets reco MC)
 # ./runUnfoldingZJets year=2016 isClosureTest=true variable=FirstJetPt_Zinc1jet_TUnfold
 # ./runUnfoldingZJets year=2016 isClosureTest=true variable=FirstJetAbsRapidity_Zinc1jet_TUnfold

@@ -486,7 +486,6 @@ void configYaxis(TH1D *grCentralSyst, TH1D *gen1, TH1D *gen2, TH1D *gen3){
     //}
 }
 
-//void configXaxis(TGraphAsymmErrors *grCentralSyst, TH1D *gen1)
 void configXaxis(TH1D *grCentralSyst, TH1D *gen1, TString variable){
     //--- Configure X axis of the plot ---
     //double minX, tmp;
@@ -499,39 +498,34 @@ void configXaxis(TH1D *grCentralSyst, TH1D *gen1, TString variable){
     if (variable.Index("ZNGoodJets_Zexc") >= 0) {
 	std::cout << __FILE__ << ":" << __LINE__ 
 		  << ". Range of ZNGoodJets_Zexc x-axis is being modified.!\n";
-	//grCentralSyst->GetXaxis()->Set(maxX-minX, minX, maxX);
-	//	grCentralSyst->GetXaxis()->SetRangeUser(-0.5, 4.5);
         grCentralSyst->GetXaxis()->SetBinLabel(2, "= 1");
         grCentralSyst->GetXaxis()->SetBinLabel(3, "= 2");
         grCentralSyst->GetXaxis()->SetBinLabel(4, "= 3");
         grCentralSyst->GetXaxis()->SetBinLabel(5, "= 4");
         grCentralSyst->GetXaxis()->SetBinLabel(6, "= 5");
-	grCentralSyst->GetXaxis()->SetBinLabel(7, "= 6");
-        //grCentralSyst->GetXaxis()->SetBinLabel(8, "= 7");
-	//     grCentralSyst->GetXaxis()->SetBinLabel(9, "= 8");
+	    grCentralSyst->GetXaxis()->SetBinLabel(7, "= 6");
+        grCentralSyst->GetXaxis()->SetBinLabel(8, "= 7");
+	    grCentralSyst->GetXaxis()->SetBinLabel(9, "= 8");
         grCentralSyst->GetXaxis()->SetLabelSize(0.15);
         grCentralSyst->GetXaxis()->SetLabelOffset(0.01);
     }
     else if (variable.Index("ZNGoodJets_Zinc") >= 0) {
 	std::cout << __FILE__ << ":" << __LINE__ 
 		  << ". Range of ZNGoodJets_Zinc x-axis is being modified.!\n";
-	//	grCentralSyst->GetXaxis()->SetRangeUser(-0.5, 4.5);
-        //grCentralSyst->GetXaxis()->Set(maxX-minX, minX, maxX);
         grCentralSyst->GetXaxis()->SetBinLabel(2, "#geq 1");
         grCentralSyst->GetXaxis()->SetBinLabel(3, "#geq 2");
         grCentralSyst->GetXaxis()->SetBinLabel(4, "#geq 3");
-	grCentralSyst->GetXaxis()->SetBinLabel(5, "#geq 4");
+	    grCentralSyst->GetXaxis()->SetBinLabel(5, "#geq 4");
         grCentralSyst->GetXaxis()->SetBinLabel(6, "#geq 5");
-	grCentralSyst->GetXaxis()->SetBinLabel(7, "#geq 6");
-	//        grCentralSyst->GetXaxis()->SetBinLabel(8, "#geq 7");
+	    grCentralSyst->GetXaxis()->SetBinLabel(7, "#geq 6");
+        grCentralSyst->GetXaxis()->SetBinLabel(8, "#geq 7");
+        grCentralSyst->GetXaxis()->SetBinLabel(9, "#geq 8");
         grCentralSyst->GetXaxis()->SetLabelSize(0.15);
         grCentralSyst->GetXaxis()->SetLabelOffset(0.01);
     }
     if (variable.Index("ZNGoodJetsFull_Zexc") >= 0) {
 	std::cout << __FILE__ << ":" << __LINE__ 
 		  << ". Range of ZNGoodJetsFull_Zexc x-axis is being modified.!\n";
-	//grCentralSyst->GetXaxis()->Set(maxX-minX, minX, maxX);
-	//	grCentralSyst->GetXaxis()->SetRangeUser(-0.5, 4.5);
         grCentralSyst->GetXaxis()->SetBinLabel(2, "= 1");
         grCentralSyst->GetXaxis()->SetBinLabel(3, "= 2");
         grCentralSyst->GetXaxis()->SetBinLabel(4, "= 3");
@@ -546,14 +540,12 @@ void configXaxis(TH1D *grCentralSyst, TH1D *gen1, TString variable){
     else if (variable.Index("ZNGoodJetsFull_Zinc") >= 0) {
 	std::cout << __FILE__ << ":" << __LINE__ 
 		  << ". Range of ZNGoodJetsFull_Zinc x-axis is being modified.!\n";
-	//	grCentralSyst->GetXaxis()->SetRangeUser(-0.5, 4.5);
-        //grCentralSyst->GetXaxis()->Set(maxX-minX, minX, maxX);
         grCentralSyst->GetXaxis()->SetBinLabel(2, "#geq 1");
         grCentralSyst->GetXaxis()->SetBinLabel(3, "#geq 2");
         grCentralSyst->GetXaxis()->SetBinLabel(4, "#geq 3");
-	grCentralSyst->GetXaxis()->SetBinLabel(5, "#geq 4");
+	    grCentralSyst->GetXaxis()->SetBinLabel(5, "#geq 4");
         grCentralSyst->GetXaxis()->SetBinLabel(6, "#geq 5");
-	grCentralSyst->GetXaxis()->SetBinLabel(7, "#geq 6");
+	    grCentralSyst->GetXaxis()->SetBinLabel(7, "#geq 6");
 	//        grCentralSyst->GetXaxis()->SetBinLabel(8, "#geq 7");
         grCentralSyst->GetXaxis()->SetLabelSize(0.15);
         grCentralSyst->GetXaxis()->SetLabelOffset(0.01);
@@ -584,26 +576,22 @@ void configXaxis(TH1D *grCentralSyst, TH1D *gen1, TString variable){
             xtitle = "H_{T,2}/2, N_{jets} #geq " + njets + " [GeV]";
         }
         else if (xtitle.Index("H_{T}/3") >= 0 || xtitle.Index("H_{T,3}/3") >= 0){ 
-             xtitle = "H_{T,3}/3, N_{jets} #geq " + njets + " [GeV]";
+            xtitle = "H_{T,3}/3, N_{jets} #geq " + njets + " [GeV]";
         }
         else if (xtitle.Index("p_{T}(#mu)+H_{T}") >= 0){
-              xtitle = "p_{T}(#mu)+H_{T}, N_{jets} #geq " + njets + " [GeV]";
+            xtitle = "p_{T}(#mu)+H_{T}, N_{jets} #geq " + njets + " [GeV]";
         }
         else if (xtitle.Index("p_{T}(#mu)+H_{T}/2") >= 0 || xtitle.Index("p_{T}(#mu)+H_{T,2}/2") >= 0){
-              xtitle = "p_{T}(#mu)+H_{T,2}/2, N_{jets} #geq " + njets + " [GeV]";
+            xtitle = "p_{T}(#mu)+H_{T,2}/2, N_{jets} #geq " + njets + " [GeV]";
         }
         else if (xtitle.Index("p_{T}(#mu)+H_{T}/3") >= 0 || xtitle.Index("p_{T}(#mu)+H_{T,3}/3") >= 0){
-              xtitle = "p_{T}(#mu)+H_{T,3}/3, N_{jets} #geq " + njets + " [GeV]";
+            xtitle = "p_{T}(#mu)+H_{T,3}/3, N_{jets} #geq " + njets + " [GeV]";
         }
-        else {
-            xtitle = "H_{T}, N_{jets} #geq " + njets + " [GeV]";
-        }
+        else xtitle = "H_{T}, N_{jets} #geq " + njets + " [GeV]";
     }
-
 
     grCentralSyst->GetXaxis()->SetTitle(xtitle);
     grCentralSyst->GetXaxis()->SetTitleSize(0.14);
-    //-----------------------------------------
 
 }
 
@@ -639,78 +627,21 @@ std::string getYaxisTitle(bool doNormalized, const TH1D *gen1){
 
 TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalized, TH1D *hStat, TH2D *hCovSyst, TH1D *hGen1, TH1D *hGen2, TH1D* hGen3, double integratedLumi){
 
-  //gStyle->SetOptStat(0);
-    //--- Determine how many comparison we have ---
+    // Determine how many comparisons we have ---
     int numbOfGenerator = 1;
     if (hGen2) numbOfGenerator = 2;
     if (hGen3) numbOfGenerator = 3;
-    //---------------------------------------------
 
     TH1D *hPDFUp = (TH1D*) hStat->Clone("hPDFUp");
     hPDFUp->Scale(1.10);
     TH1D *hPDFDown = (TH1D*) hStat->Clone("hPDFDown");
     hPDFDown->Scale(0.75);
 
-
     TH1D *hSyst = (TH1D*) hStat->Clone("hSyst");
     int nBins = hSyst->GetNbinsX();
     for (int i = 1; i <= nBins; ++i) {
         hSyst->SetBinError(i, sqrt(pow(hStat->GetBinError(i), 2) + hCovSyst->GetBinContent(i, i)));
     }
-
-    /*
-    //Aaron's inclusion of theoretical uncertainties
-    int nBinsGen1 = hGen1->GetNbinsX();
-    double numScale = -1;
-    double theoScale;
-    std::cout << "testing contains" << std::endl;
-    std::cout << variable.Contains("ex") << std::endl;
-    if (variable.Contains("Zinc1")){
-        numScale = TheoScaleInclusive[1];}
-    if (variable.Contains("Zinc2")){
-        numScale = TheoScaleInclusive[2];}
-    if (variable.Contains("Zinc3")){
-        numScale = TheoScaleInclusive[3];}
-    if (variable.Contains("Zinc4")){
-        numScale = TheoScaleInclusive[4];}
-    if (variable.Contains("Zinc5")){
-        numScale = TheoScaleInclusive[5];}
-    if (variable.Contains("Zexc1")){
-        numScale = TheoScaleExclusive[1];}
-    if (variable.Contains("Zexc2")){
-        numScale = TheoScaleExclusive[2];}
-    if (variable.Contains("Zexc3")){
-        numScale = TheoScaleExclusive[3];}
-    if (variable.Contains("Zexc4")){
-        numScale = TheoScaleExclusive[4];}
-    if (variable.Contains("Zexc5")){
-        numScale = TheoScaleExclusive[5];}
-
-
-    for (int i = 1; i <= nBinsGen1; ++i){
-        std::cout << "error before theo scale: " << hGen1->GetBinError(i) << std::endl;
-        
-	if (numScale > 0){
-            theoScale = numScale;}
-        else{
-            if(variable.Contains("ZNGoodJetsFull_Zexc")){
-               theoScale = TheoScaleExclusive[i-1];}
-            if(variable.Contains("ZNGoodJetsFull_Zinc")){
-               theoScale = TheoScaleInclusive[i-1];}
-
-            if(variable.Contains("ZNGoodJets_Zexc")){
-               theoScale = TheoScaleExclusive[i-1];}
-            if(variable.Contains("ZNGoodJets_Zinc")){
-               theoScale = TheoScaleInclusive[i-1];}
-        }
-        std::cout << "variable: " << variable << std::endl;
-	std::cout << "Theo Scale factor: " << theoScale << std::endl;
-        std::cout << "Bin Content: " << hGen1->GetBinContent(i) << std::endl;
-        hGen1->SetBinError(i, sqrt(pow(hGen1->GetBinError(i),2) + pow(hGen1->GetBinContent(i)*theoScale,2)));
-	std::cout << "error after theo scale: " << hGen1->GetBinError(i) << std::endl;
-    }
-    //End of inclusion of theoretical uncertainties
-    */
 
     //--- Declare all additional TGraphs ---
     TGraphAsymmErrors *grCentralStat = createGrFromHist(hStat);
@@ -742,7 +673,6 @@ TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalize
     //---------------------------------------------
 
     //--- Main Canvas ---
-    //andrew -- "maximum" and "minimum" are used as y-axis constraints on the main plots
     double maximum = hGen1->GetMaximum();
     double minimum = hGen1->GetMinimum();
     if (! minimum > 0) minimum = 1e-06;
@@ -765,88 +695,82 @@ TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalize
     customizeCentral(grCentralStat, false);
     customizeCentral(grCentralSystRatio, true);
     customizeCentral(grCentralStatRatio, true);
+
     hSyst->SetLineColor(kWhite);
     hSyst->SetMarkerColor(kWhite);
     hSyst->SetTitle("");
-
-    //andrew -- here begins the axis ranges
     hSyst->GetXaxis()->SetLabelSize(0);
     hSyst->GetYaxis()->SetTitle("");
-    if (canvasName.Contains("FirstJetPt_Zinc1jet")||canvasName.Contains("JetsHT_Zinc1jet")||canvasName.Contains("FirstJetAbsRapidity_Zinc1jet")||canvasName.Contains("dPhiLepJet1_Zinc1jet")||canvasName.Contains("dRptmin100LepCloseJetCo300dR04_Zinc1jet")){
-    hSyst->GetYaxis()->SetLabelSize(0.065);
+    if (canvasName.Contains("FirstJetPt_Zinc1jet") || canvasName.Contains("JetsHT_Zinc1jet") || canvasName.Contains("FirstJetAbsRapidity_Zinc1jet") || canvasName.Contains("dPhiLepJet1_Zinc1jet") || canvasName.Contains("dRptmin100LepCloseJetCo300dR04_Zinc1jet")){
+        hSyst->GetYaxis()->SetLabelSize(0.065);
     }
-    else{
-    hSyst->GetYaxis()->SetLabelSize(0.055);
-    }
-    //hSyst->GetYaxis()->SetLabelSize(0.065);
+    else hSyst->GetYaxis()->SetLabelSize(0.055);
+
     configXaxis(hSyst, hGen1, variable);
     configYaxis(hSyst, hGen1, hGen2, hGen3);
+
+    // Here begins the axis ranges ---
+    // Set a default x-axis range first
+    hSyst->GetXaxis()->SetRangeUser(hSyst->GetXaxis()->GetXmin(), hSyst->GetXaxis()->GetXmax());
+    // Now can change specifically for each distribution
     if (canvasName.Contains("ZNGoodJets")) {
         //hSyst->GetXaxis()->SetRangeUser(0.5, hSyst->GetXaxis()->GetXmax());
-        hSyst->GetXaxis()->SetRangeUser(0.5, 6.5);
+        hSyst->GetXaxis()->SetRangeUser(0.5, 8.5);
         hSyst->GetYaxis()->SetRangeUser(0.011, 5.0*maximum);
     }
-  //  if (canvasName.Contains("JetPt_Zinc")) {
-  //      hSyst->GetXaxis()->SetRangeUser(30, hSyst->GetXaxis()->GetXmax());
-  //  }
-  //  if (canvasName.Contains("JetPt_Zinc1jet")) {
-  //      hSyst->GetXaxis()->SetRangeUser(30, 900);
-  //      hSyst->GetYaxis()->SetRangeUser(0.15*minimum, 1.0*maximum);
-  if (canvasName.Contains("LeadingJetPt_Zinc")){
-        hSyst->GetXaxis()->SetRangeUser(30,900);
-        hSyst->GetYaxis()->SetRangeUser(minimum, maximum*100.);   
-    }
-  //  if (canvasName.Contains("JetPt_Zinc2jet")) {
-  //      hSyst->GetXaxis()->SetRangeUser(30, 400);   ///??problematic to set upper range???
-  //     // hSyst->GetXaxis()->SetRangeUser(30, hSyst->GetXaxis()->GetXmax());
-  //      hSyst->GetYaxis()->SetRangeUser(0.15*minimum, 1.0*maximum);
-    //   if (canvasName.Contains("LeadingJetPt_Zinc2jet")){
-    //        hSyst->GetXaxis()->SetRangeUser(30,900);
-    //        hSyst->GetYaxis()->SetRangeUser(minimum, maximum*100.);
-    //    }
-    //  //  if (canvasName.Contains("JetPt_Zinc3jet")) {
-    //  //      hSyst->GetXaxis()->SetRangeUser(30, 300);
-    //  //      //hSyst->GetYaxis()->SetRangeUser(0.002, 10);
-    //  //      hSyst->GetYaxis()->SetRangeUser(0.15*minimum, 1.0*maximum);
-    //  if (canvasName.Contains("LeadingJetPt_Zinc3jet")){
-    //        hSyst->GetXaxis()->SetRangeUser(30,900);
-    //        hSyst->GetYaxis()->SetRangeUser(minimum, maximum*100.);
-    //    }
-    //  //  if (canvasName.Contains("JetPt_Zinc4jet")) {
-    //  //      hSyst->GetXaxis()->SetRangeUser(30, 180);
-    //  //      hSyst->GetYaxis()->SetRangeUser(0.15*minimum, 1.0);
-    //  if (canvasName.Contains("LeadingJetPt_Zinc4jet")){
-    //        hSyst->GetXaxis()->SetRangeUser(30,900);
-    //        hSyst->GetYaxis()->SetRangeUser(minimum, maximum*100.);
-    //    }
-  if (canvasName.Contains("LepPtPlusHT_Zinc")){
-         hSyst->GetXaxis()->SetRangeUser(30,900);
-         hSyst->GetYaxis()->SetRangeUser(minimum, maximum*100.);
-     }
-  if (canvasName.Contains("LepPtPlusHTover2_Zinc")){
-          hSyst->GetXaxis()->SetRangeUser(30,900);
-          hSyst->GetYaxis()->SetRangeUser(minimum, maximum*100.);
-      }
-  if (canvasName.Contains("LepPtPlusHTover3_Zinc")){
-            hSyst->GetXaxis()->SetRangeUser(30,900);
-           hSyst->GetYaxis()->SetRangeUser(minimum, maximum*100.);
-       }
-  if (canvasName.Contains("LepPtPlusLeadingJetPt_Zinc")){
-           hSyst->GetXaxis()->SetRangeUser(30,900);
-           hSyst->GetYaxis()->SetRangeUser(minimum, maximum*100.);
-       }
-    if (canvasName.Contains("JetAbsRapidity_Zinc1jet")) {
-        hSyst->GetYaxis()->SetRangeUser(0.2, 1.5*maximum);
-    }
-    if (canvasName.Contains("JetAbsRapidity_Zinc2jet")) {
-        hSyst->GetYaxis()->SetRangeUser(0.2, 1.5*maximum);
-    }
-    if (canvasName.Contains("JetAbsRapidity_Zinc3jet")) {
-        hSyst->GetYaxis()->SetRangeUser(0.2, 1.5*maximum);
-    }
-    if (canvasName.Contains("JetAbsRapidity_Zinc4jet")) {
-        hSyst->GetYaxis()->SetRangeUser(0.1, 1.8*maximum);
-    }
+    // if (canvasName.Contains("JetPt_Zinc")) {
+    //     hSyst->GetXaxis()->SetRangeUser(30, hSyst->GetXaxis()->GetXmax());
+    // }
+    // if (canvasName.Contains("JetPt_Zinc1jet")) {
+    //     hSyst->GetXaxis()->SetRangeUser(30, 900);
+    //     hSyst->GetYaxis()->SetRangeUser(0.15*minimum, 1.0*maximum);
+    // if (canvasName.Contains("LeadingJetPt_Zinc")){
+    //     hSyst->GetXaxis()->SetRangeUser(30,900);
+    //     hSyst->GetYaxis()->SetRangeUser(minimum, maximum*100.);   
+    // }
+    // if (canvasName.Contains("JetPt_Zinc2jet")) {
+    //     hSyst->GetXaxis()->SetRangeUser(30, 400);   ///??problematic to set upper range???
+    // // hSyst->GetXaxis()->SetRangeUser(30, hSyst->GetXaxis()->GetXmax());
+    //     hSyst->GetYaxis()->SetRangeUser(0.15*minimum, 1.0*maximum);
+    // if (canvasName.Contains("LeadingJetPt_Zinc2jet")){
+    //     hSyst->GetXaxis()->SetRangeUser(30,900);
+    //     hSyst->GetYaxis()->SetRangeUser(minimum, maximum*100.);
+    // }
+    // //  if (canvasName.Contains("JetPt_Zinc3jet")) {
+    // //      hSyst->GetXaxis()->SetRangeUser(30, 300);
+    // //      //hSyst->GetYaxis()->SetRangeUser(0.002, 10);
+    // //      hSyst->GetYaxis()->SetRangeUser(0.15*minimum, 1.0*maximum);
+    // if (canvasName.Contains("LeadingJetPt_Zinc3jet")){
+    //     hSyst->GetXaxis()->SetRangeUser(30,900);
+    //     hSyst->GetYaxis()->SetRangeUser(minimum, maximum*100.);
+    // }
+    // //  if (canvasName.Contains("JetPt_Zinc4jet")) {
+    // //      hSyst->GetXaxis()->SetRangeUser(30, 180);
+    // //      hSyst->GetYaxis()->SetRangeUser(0.15*minimum, 1.0);
+    // if (canvasName.Contains("LeadingJetPt_Zinc4jet")){
+    //     hSyst->GetXaxis()->SetRangeUser(30,900);
+    //     hSyst->GetYaxis()->SetRangeUser(minimum, maximum*100.);
+    // }
+    // if (canvasName.Contains("LepPtPlusHT_Zinc")){
+    //     hSyst->GetXaxis()->SetRangeUser(30,900);
+    //     hSyst->GetYaxis()->SetRangeUser(minimum, maximum*100.);
+    // }
+    // if (canvasName.Contains("LepPtPlusHTover2_Zinc")){
+    //     hSyst->GetXaxis()->SetRangeUser(30,900);
+    //     hSyst->GetYaxis()->SetRangeUser(minimum, maximum*100.);
+    // }
+    // if (canvasName.Contains("LepPtPlusHTover3_Zinc")){
+    //     hSyst->GetXaxis()->SetRangeUser(30,900);
+    //     hSyst->GetYaxis()->SetRangeUser(minimum, maximum*100.);
+    // }
+    // if (canvasName.Contains("LepPtPlusLeadingJetPt_Zinc")){
+    //     hSyst->GetXaxis()->SetRangeUser(30,900);
+    //     hSyst->GetYaxis()->SetRangeUser(minimum, maximum*100.);
+    // }
+    if (canvasName.Contains("JetAbsRapidity_Zinc1jet")) hSyst->GetYaxis()->SetRangeUser(0.2, 1.5*maximum);
+    if (canvasName.Contains("JetAbsRapidity_Zinc2jet")) hSyst->GetYaxis()->SetRangeUser(0.2, 1.5*maximum);
+    if (canvasName.Contains("JetAbsRapidity_Zinc3jet")) hSyst->GetYaxis()->SetRangeUser(0.2, 1.5*maximum);
+    if (canvasName.Contains("JetAbsRapidity_Zinc4jet")) hSyst->GetYaxis()->SetRangeUser(0.1, 1.8*maximum);
     //   if (canvasName.Contains("HT_Zinc1jet")) {
     //       //hSyst->GetXaxis()->SetRangeUser(hSyst->GetXaxis()->GetXmin(), 1000);
     //       hSyst->GetXaxis()->SetRangeUser(30, 1500);
@@ -865,146 +789,86 @@ TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalize
     //       hSyst->GetXaxis()->SetRangeUser(203, 910);
     //       hSyst->GetYaxis()->SetRangeUser(0.28*minimum, 3.4*maximum);
     //   }
-    if (canvasName.Contains("DPhi")) {
-        hSyst->GetYaxis()->SetRangeUser(0.2*minimum, 1.5*maximum);
-    }
-    if (canvasName.Contains("dPhiLepJet1")) {
-        hSyst->GetYaxis()->SetRangeUser(0.15*minimum, 4.0*maximum);
-    }
-    if (canvasName.Contains("dPhiLepJet2")) {
-        hSyst->GetYaxis()->SetRangeUser(0.15*minimum, 5.0*maximum);
-    }
-    if (canvasName.Contains("dPhiLepJet3")) {
-        hSyst->GetYaxis()->SetRangeUser(0.2*minimum, 5.0*maximum);
-    }
-    if (canvasName.Contains("dPhiLepJet4")) {
-        hSyst->GetYaxis()->SetRangeUser(0.2*minimum, 5.0*maximum);
-    }
+    if (canvasName.Contains("DPhi")) hSyst->GetYaxis()->SetRangeUser(0.2*minimum, 1.5*maximum);
+    if (canvasName.Contains("dPhiLepJet1")) hSyst->GetYaxis()->SetRangeUser(0.15*minimum, 4.0*maximum);
+    if (canvasName.Contains("dPhiLepJet2")) hSyst->GetYaxis()->SetRangeUser(0.15*minimum, 5.0*maximum);
+    if (canvasName.Contains("dPhiLepJet3")) hSyst->GetYaxis()->SetRangeUser(0.2*minimum, 5.0*maximum);
+    if (canvasName.Contains("dPhiLepJet4")) hSyst->GetYaxis()->SetRangeUser(0.2*minimum, 5.0*maximum);
+
+    // Now draw histograms, graphs
     hSyst->DrawCopy("e");
     grCentralSyst->SetName("grCentralSyst");
     grCentralSyst->Draw("2");
     customizeGenHist(hGen1, 1, legend, hGen1->GetZaxis()->GetTitle());
     hGen1->SetName("hGen1");
     hGen1->DrawCopy("ESAME");
-
-    if (hGen2) {
+    if (hGen2){
         customizeGenHist(hGen2, 2, legend, hGen2->GetZaxis()->GetTitle());
         hGen2->SetName("hGen2");
         hGen2->DrawCopy("ESAME");
     }
-    if (hGen3) {
+    if (hGen3){
         customizeGenHist(hGen3, 3, legend, hGen3->GetZaxis()->GetTitle());
         hGen3->SetName("hGen3");
         hGen3->DrawCopy("ESAME");
     }
-
     grCentralStat->SetName("grCentralStat");
     grCentralStat->Draw("p");
-
     legend->Draw("same");
 
     //--- TLatex stuff ---
     TLatex *latexLabel = new TLatex(); 
     latexLabel->SetNDC();
-    latexLabel->SetTextSize(0.035);
-    if (hGen2) latexLabel->SetTextSize(0.035);
-    if (hGen3) latexLabel->SetTextSize(0.05);
-    
-    //latexLabel->SetTextSize(0.05);
     latexLabel->SetTextSize(0.04);
+    if (hGen2) latexLabel->SetTextSize(0.04);
+    if (hGen3) latexLabel->SetTextSize(0.04);
     latexLabel->SetLineWidth(2);
     latexLabel->SetTextFont(61);
-    if (canvasName.Contains("dPhiLepJet1")){
-    latexLabel->DrawLatex(0.18,0.23,"CMS Work in Progress");
-    }
-    else{
-    latexLabel->DrawLatex(0.18,0.25,"CMS Work in Progress");
-    }
 
-    //latexLabel->SetTextSize(0.036);
-    //latexLabel->SetLineWidth(1);
-    //latexLabel->SetTextFont(52);
-    if (canvasName.Contains("dPhiLepJet1")){
-    //latexLabel->DrawLatex(0.26,0.20,"Preliminary");  //comment out later
-    }
-    else{
-    //latexLabel->DrawLatex(0.26,0.25,"Preliminary"); //comment out later
-    }
-
-    
+    if (canvasName.Contains("dPhiLepJet1")) latexLabel->DrawLatex(0.18, 0.23, "CMS Work in Progress");
+    else latexLabel->DrawLatex(0.18, 0.25, "CMS Work in Progress");
 
     latexLabel->SetTextSize(0.044);
     latexLabel->SetLineWidth(2);
     latexLabel->SetTextFont(42);
-    //if(integratedLumi > 0) latexLabel->DrawLatex(0.15,0.90, TString("%.3g fb^{-1} (13 TeV)", integratedLumi));
-    
-    //andrew -- 2016 13 TeV data
-    latexLabel->DrawLatex(0.13,0.90,"35.9 fb^{-1} (13 TeV)");
-    //latexLabel->DrawLatex(0.13,0.90,"2.2 fb^{-1} (13 TeV)");
 
-    latexLabel->DrawLatex(0.18,0.21-0.03,"anti-k_{T} (R = 0.4) Jets");
+    latexLabel->DrawLatex(0.13, 0.90, "35.9 fb^{-1} (13 TeV)");
+    latexLabel->DrawLatex(0.18, 0.21-0.03, "anti-k_{T} (R = 0.4) Jets");
 
-    if (canvasName.Contains("FirstJetPt50")){
-        latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{jet} > 50 GeV, |#eta^{jet}| < 2.4 ");
-    }
-
-    else if (canvasName.Contains("FirstJetPt80")){
-        latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{jet} > 80 GeV, |#eta^{jet}| < 2.4 ");
-    }
-
-    else if (canvasName.Contains("ZPt150")){
-        latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{Z} > 150 GeV, p_{T}^{jet} > 30 GeV, |#eta^{jet}| < 2.4 ");
-    }
-
-    else if (canvasName.Contains("ZPt300")){
-        latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{Z} > 300 GeV, p_{T}^{jet} > 30 GeV, |#eta^{jet}| < 2.4 ");
-    }
-
-    else if (canvasName.Contains("DifJetRapidityl2")){
-        latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{jet} > 30 GeV, |#eta^{jet}| < 2.4, |y_{jet1}-y_{jet2}| > 2 ");
-    }
-
-    else if (canvasName.Contains("DifJetRapiditys2")){
-        latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{jet} > 30 GeV, |#eta^{jet}| < 2.4, |y_{jet1}-y_{jet2}| < 2 ");
-    }
-
-    else if (canvasName.Contains("ZPt150_HT300")){
-        latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{Z} > 150 GeV, p_{T}^{jet} > 30 GeV, |#eta^{jet}| < 2.4, H_{T}^{jet} > 300 GeV ");
-    }
-
-    else if (canvasName.Contains("dRptmin100LepCloseJetCo300dR04_Zinc1jet")){
-        latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{jet} > 100 GeV, p_{T}^{lead jet} > 300 GeV, |y^{jet}| < 2.4 ");
-    }
-
-    else{
-        //latexLabel->DrawLatex(0.18,0.21-0.11,"p_{T}^{jet} > 30 GeV, |#eta^{jet}| < 2.4 ");
-        latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{jet} > 30 GeV, |y^{jet}| < 2.4 ");
-    }
+    if (canvasName.Contains("FirstJetPt50")) latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{jet} > 50 GeV, |#eta^{jet}| < 2.4 ");
+    else if (canvasName.Contains("FirstJetPt80")) latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{jet} > 80 GeV, |#eta^{jet}| < 2.4 ");
+    else if (canvasName.Contains("ZPt150")) latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{Z} > 150 GeV, p_{T}^{jet} > 30 GeV, |#eta^{jet}| < 2.4 ");
+    else if (canvasName.Contains("ZPt300")) latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{Z} > 300 GeV, p_{T}^{jet} > 30 GeV, |#eta^{jet}| < 2.4 ");
+    else if (canvasName.Contains("DifJetRapidityl2")) latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{jet} > 30 GeV, |#eta^{jet}| < 2.4, |y_{jet1}-y_{jet2}| > 2 ");
+    else if (canvasName.Contains("DifJetRapiditys2")) latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{jet} > 30 GeV, |#eta^{jet}| < 2.4, |y_{jet1}-y_{jet2}| < 2 ");
+    else if (canvasName.Contains("ZPt150_HT300")) latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{Z} > 150 GeV, p_{T}^{jet} > 30 GeV, |#eta^{jet}| < 2.4, H_{T}^{jet} > 300 GeV ");
+    else if (canvasName.Contains("dRptmin100LepCloseJetCo300dR04_Zinc1jet")) latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{jet} > 100 GeV, p_{T}^{lead jet} > 300 GeV, |y^{jet}| < 2.4 ");
+    else latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{jet} > 30 GeV, |y^{jet}| < 2.4 ");
 
     if (canvasName.Contains("FirstJetPt_Zinc1jet")||canvasName.Contains("JetsHT_Zinc1jet")||canvasName.Contains("FirstJetAbsRapidity_Zinc1jet")||canvasName.Contains("dPhiLepJet1_Zinc1jet")||canvasName.Contains("dRptmin100LepCloseJetCo300dR04_Zinc1jet")){
-    if (lepSel == "SMu") latexLabel->DrawLatex(0.18,0.21-0.15,"W(#mu#nu) + #geq 1-jet");
-    else if (lepSel == "DMu") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
-    else if (lepSel == "DE") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
+        if (lepSel == "SMu") latexLabel->DrawLatex(0.18,0.21-0.15,"W(#mu#nu) + #geq 1-jet");
+        else if (lepSel == "DMu") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
+        else if (lepSel == "DE") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
     }
     else if (canvasName.Contains("SecondJetPt_Zinc2jet")||canvasName.Contains("JetsHT_Zinc2jet")||canvasName.Contains("SecondJetAbsRapidity_Zinc2jet")||canvasName.Contains("dPhiLepJet2_Zinc2jet")){
-    if (lepSel == "SMu") latexLabel->DrawLatex(0.18,0.21-0.15,"W(#mu#nu) + #geq 2-jets");
-    else if (lepSel == "DMu") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
-    else if (lepSel == "DE") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
+        if (lepSel == "SMu") latexLabel->DrawLatex(0.18,0.21-0.15,"W(#mu#nu) + #geq 2-jets");
+        else if (lepSel == "DMu") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
+        else if (lepSel == "DE") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
     }
     else if (canvasName.Contains("ThirdJetPt_Zinc3jet")||canvasName.Contains("JetsHT_Zinc3jet")||canvasName.Contains("ThirdJetAbsRapidity_Zinc3jet")||canvasName.Contains("dPhiLepJet3_Zinc3jet")){
-    if (lepSel == "SMu") latexLabel->DrawLatex(0.18,0.21-0.15,"W(#mu#nu) + #geq 3-jets");
-    else if (lepSel == "DMu") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
-    else if (lepSel == "DE") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
+        if (lepSel == "SMu") latexLabel->DrawLatex(0.18,0.21-0.15,"W(#mu#nu) + #geq 3-jets");
+        else if (lepSel == "DMu") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
+        else if (lepSel == "DE") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
     }
     else if (canvasName.Contains("FourthJetPt_Zinc4jet")||canvasName.Contains("JetsHT_Zinc4jet")||canvasName.Contains("FourthJetAbsRapidity_Zinc4jet")||canvasName.Contains("dPhiLepJet4_Zinc4jet")){
-    if (lepSel == "SMu") latexLabel->DrawLatex(0.18,0.21-0.15,"W(#mu#nu) + #geq 4-jets");
-    else if (lepSel == "DMu") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
-    else if (lepSel == "DE") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
+        if (lepSel == "SMu") latexLabel->DrawLatex(0.18,0.21-0.15,"W(#mu#nu) + #geq 4-jets");
+        else if (lepSel == "DMu") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
+        else if (lepSel == "DE") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
     }
     else{
-    if (lepSel == "SMu") latexLabel->DrawLatex(0.18,0.21-0.15,"W(#mu#nu) + jets");
-    else if (lepSel == "DMu") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
-    else if (lepSel == "DE") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
+        if (lepSel == "SMu") latexLabel->DrawLatex(0.18,0.21-0.15,"W(#mu#nu) + jets");
+        else if (lepSel == "DMu") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
+        else if (lepSel == "DE") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
     }
     latexLabel->SetName("latexLabel");
     latexLabel->Draw("same");
@@ -1040,14 +904,12 @@ TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalize
     TPad *plot2 = new TPad("plot2", "plot2", 0., 0., 0., 0.);
     setAndDrawTPad(canvasName, plot2, 2, numbOfGenerator);
 
-
     //--- TLegend ---
     TLegend *legend2 = new TLegend(0.16, 0.05, 0.42, 0.20);
     customizeLegend(legend2, 1, numbOfGenerator);
     TString generator1 = hGen1->GetZaxis()->GetTitle();
     generator1 = generator1(0, generator1.Index(" "));
     customizeGenGraph(hSyst, grGen1ToCentral, grGen1PDFSyst, 1, "MG_aMC FxFx/Data", numbOfGenerator, legend2);
-    //customizeGenGraph(grGen1ToCentral, grGen1PDFSyst, 1, generator1 + "/Data", numbOfGenerator, legend2);
     configXaxis(hSyst, hGen1, variable);
     grGen1PDFSyst->SetFillStyle(1001);
     grGen1PDFSyst->SetFillColor(kBlue-6);
