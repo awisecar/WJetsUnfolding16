@@ -1,5 +1,15 @@
 #!/bin/sh
 
+# 3 July 20 --
+# ./runUnfoldingZJets year=2017 variable=FirstJetPt_Zinc1jet_TUnfold
+# ./runUnfoldingZJets year=2017 variable=FirstJetAbsRapidity_Zinc1jet_TUnfold
+# ./runUnfoldingZJets year=2017 variable=dPhiLepJet1_Zinc1jet_TUnfold
+# ./runUnfoldingZJets year=2017 variable=LepPtPlusLeadingJetPt_Zinc1jet_TUnfold
+# ./runUnfoldingZJets year=2017 variable=LepPtPlusLeadingJetPt_Zinc2jet_TUnfold
+# ./runUnfoldingZJets year=2017 variable=LepPtPlusLeadingJetPt_Zinc3jet_TUnfold
+# ./runUnfoldingZJets year=2017 variable=LepPtPlusLeadingJetPt_Zexc1jet_TUnfold
+# ./runUnfoldingZJets year=2017 variable=LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold
+# ./runUnfoldingZJets year=2017 variable=LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold
 
 # 12 June 20 --
 # unfolding data
@@ -8,7 +18,7 @@
 ./runUnfoldingZJets year=2016 variable=dPhiLepJet1_Zinc1jet_TUnfold
 ./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetPt_Zinc1jet_TUnfold
 ./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetPt_Zinc2jet_TUnfold
-./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetPt_Zinc3jet_TUnfold
+# ./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetPt_Zinc3jet_TUnfold
 ./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetPt_Zexc1jet_TUnfold
 ./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold
 ./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold

@@ -293,7 +293,7 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
             if(iSyst != 0 && whichSyst >= 0 && iSyst != whichSyst) continue;
 
 
-            // ALW 27 Jan 20
+            // ALW 27 JAN 20
             // temporary, while working on code...
             // if (iSyst != 0) continue;
 
@@ -597,25 +597,24 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
 
         // responseMatrix->SetBinContent(0, i, missedEvents); // filling non-reco'd fiducial events into reco underflow bin
 
+        // ---
 
         // ATTEMPT 2 ("old" way) --
-        double genBin = genDY->GetBinContent(i);
-        double recBin = 0.;
-        for (int j = 1; j <= nBinsRespX; j++){
-            recBin += responseMatrix->GetBinContent(j, i);
-        }
-        responseMatrix->SetBinContent(0, i, TMath::Max(genBin-recBin, 0.));
+        // double genBin = genDY->GetBinContent(i);
+        // double recBin = 0.;
+        // for (int j = 1; j <= nBinsRespX; j++){
+        //     recBin += responseMatrix->GetBinContent(j, i);
+        // }
+        // responseMatrix->SetBinContent(0, i, TMath::Max(genBin-recBin, 0.));
 
+        // ---
+
+        // ALW 5 JUNE 20
+        // Set reco underflow bins to 0 in response matrix!!!
+        // We will do the acceptance correction below after distribution has been unfolded!
+        responseMatrix->SetBinContent(0, i, 0.);
 
     }
-
-
-    // // ALW 5 JUNE 20
-    // // Set reco underflow bins to 0 in response matrix!!!
-    // // We will do the acceptance correction below after distribution has been unfolded!
-    // for (int i = 1; i <= responseMatrix->GetNbinsY(); i++){
-    //     responseMatrix->SetBinContent(0, i, 0.);
-    // }
 
     // ---
 
@@ -657,14 +656,14 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
 
     // Set input options:
     // 1) Regularization scheme -----
-    // TUnfold::ERegMode regMode = TUnfold::kRegModeDerivative; // "regularize the 1st derivative of the output distribution"
-    TUnfold::ERegMode regMode = TUnfold::kRegModeCurvature; // "regularize the 2nd derivative of the output distribution"
+    TUnfold::ERegMode regMode = TUnfold::kRegModeDerivative; // "regularize the 1st derivative of the output distribution"
+    // TUnfold::ERegMode regMode = TUnfold::kRegModeCurvature; // "regularize the 2nd derivative of the output distribution"
     // 2) Area constraint -----
     // TUnfold::EConstraint constraintMode = TUnfold::kEConstraintNone;  // "use no extra constraint"
     TUnfold::EConstraint constraintMode = TUnfold::kEConstraintArea; // "enforce preservation of the area"
     // 3) "Choice of regularisation scale factors to construct the matrix L" -----
-    // TUnfoldDensity::EDensityMode densityMode = TUnfoldDensity::kDensityModeNone; // "no scale factors, matrix L is similar to unity matrix" (this does not work and I don't know why...)
-    TUnfoldDensity::EDensityMode densityMode = TUnfoldDensity::kDensityModeBinWidth; // "scale factors from multidimensional bin width"
+    TUnfoldDensity::EDensityMode densityMode = TUnfoldDensity::kDensityModeeNone; // "no scale factors, matrix L is similar to unity matrix" (typo of "kDensityModeNone" in TUnfold v17.1)
+    // TUnfoldDensity::EDensityMode densityMode = TUnfoldDensity::kDensityModeBinWidth; // "scale factors from multidimensional bin width"
 
     //Define constructor and use SetInput to input the measurement that is to be unfolded ---
     TUnfoldDensity unfold(responseMatrix, TUnfold::kHistMapOutputVert, regMode, constraintMode, densityMode);
@@ -678,22 +677,16 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
 
     // Number of points for ScanLcurve or ScanTau methods
     // Int_t nPointsTauScan = 50;
-    Int_t nPointsTauScan = 100;
-    // Int_t nPointsTauScan = 200;
+    // Int_t nPointsTauScan = 100;
+    Int_t nPointsTauScan = 200;
 
     // Min and max values of tau for scan
     // Automatic values
     // Double_t tauMin = 0.0;
     // Double_t tauMax = 0.0;
     // Large range
-    Double_t tauMin = 0.00000000001;
-    Double_t tauMax = 0.00001;
-    // FirstJetPt_Zinc1jet_TUnfold, kRegModeCurvature, ScanLcurve
-    // Double_t tauMin = 0.0000000001;
-    // Double_t tauMax = 0.00000001;
-    // FirstJetPt_Zinc1jet_TUnfold, kRegModeCurvature, ScanTau
-    // Double_t tauMin = 0.000000001;
-    // Double_t tauMax = 0.0000001;
+    Double_t tauMin = 0.000000001;
+    Double_t tauMax = 0.001;
 
     int iBest(0);
     TSpline *logTauX, *logTauY;
@@ -794,19 +787,19 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
 
     // ---
 
-    // // ALW 5 JUNE 20
-    // // Now do fiducial acceptance (ie reconstruction efficiency) correction to unfolded distribution before scaling by lumi, bin widths to get diff. xsec
-    // std::cout << "\nFiducial acceptance efficiency:" << std::endl;
-    // for (int i = 1; i <= hUnfData->GetNbinsX(); i++){
+    // ALW 5 JUNE 20
+    // Now do fiducial acceptance (ie reconstruction efficiency) correction to unfolded distribution before scaling by lumi, bin widths to get diff. xsec
+    std::cout << "\nFiducial acceptance efficiency:" << std::endl;
+    for (int i = 1; i <= hUnfData->GetNbinsX(); i++){
 
-    //     // reconstruction efficiency/acceptance is 1 minus the miss fraction
-    //     double acceptance = 1. - (missesDY->GetBinContent(i)/genDY->GetBinContent(i));
-    //     std::cout << "Bin #" << i << ": " << acceptance << std::endl;
+        // reconstruction efficiency/acceptance is 1 minus the miss fraction
+        double acceptance = 1. - (missesDY->GetBinContent(i)/genDY->GetBinContent(i));
+        std::cout << "Bin #" << i << ": " << acceptance << std::endl;
 
-    //     // now correct particle-level distribution for acceptance on bin-wise level
-    //     hUnfData->SetBinContent(i, hUnfData->GetBinContent(i)/acceptance);
+        // now correct particle-level distribution for acceptance on bin-wise level
+        hUnfData->SetBinContent(i, hUnfData->GetBinContent(i)/acceptance);
 
-    // }
+    }
 
     // ---
 
