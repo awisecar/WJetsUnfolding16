@@ -613,7 +613,8 @@ void getHistos(TH2D *histograms[], TFile *Files[], TString variable){
 }
 
 // void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hRecDYJets[13], TH1D *hGenDYJets[11], TH2D *hResDYJets[13], TFile *fDYJets[9], TH1D *hRecBg[][11], TH1D *hRecSumBg[11], TFile *fBg[][7], int nBg, TH1D* hFakDYJets[13], TH1D *hMissDYJets[11]){
-void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hRecDYJets[13], TH1D *hGenDYJets[11], TH2D *hResDYJets[13], TFile *fDYJets[9], TH1D *hRecBg[][11], TH1D *hRecSumBg[11], TFile *fBg[][7], int nBg, TH1D* hFakDYJets[18], TH1D *hMissDYJets[11], bool isClosureTest){
+// void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hRecDYJets[13], TH1D *hGenDYJets[11], TH2D *hResDYJets[13], TFile *fDYJets[9], TH1D *hRecBg[][11], TH1D *hRecSumBg[11], TFile *fBg[][7], int nBg, TH1D* hFakDYJets[18], TH1D *hMissDYJets[11], bool isClosureTest){
+void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hRecDYJets[13], TH1D *hGenDYJets[11], TH2D *hResDYJets[13], TFile *fDYJets[9], TH1D *hRecBg[][11], TH1D *hRecSumBg[11], TFile *fBg[][7], int nBg, TH1D* hFakDYJets[18], TH2D *hAccepDYJets[13], bool isClosureTest){
 
 
 
@@ -677,9 +678,12 @@ void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hR
 
     //--- get misses DYJets histograms ---
     //there are 11 hMissDYJets objects
-    std::cout << "\n-----> Grabbing misses objects hMissDYJets!" << std::endl;
+    // std::cout << "\n-----> Grabbing misses objects hMissDYJets!" << std::endl;
+    std::cout << "\n-----> Grabbing acceptance objects hAccepDYJets!" << std::endl;
     // getPurities(hPurityDYJets, hRecData, hRecSumBg, hRecDYJets, hResDYJets);
-    getHistos(hMissDYJets, fDYJets, "misses" + variable);
+    // getHistos(hMissDYJets, fDYJets, "misses" + variable);
+    getHistos(hAccepDYJets, fDYJets, "hresponse" + variable + "_NOEFFWEIGHTS");
+
 
 }
 

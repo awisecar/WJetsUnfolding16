@@ -207,7 +207,8 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
         TH1D *hFakDYJets[18]  = {NULL}; // "old" method
 
         //--- "misses" DYJets histograms ---
-        TH1D *hMissDYJets[11] = {NULL};
+        // TH1D *hMissDYJets[11] = {NULL};
+        TH2D *hAccepDYJets[13] = {NULL};
 
         // 3) BG
         //--- rec Bg histograms ---
@@ -218,8 +219,11 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
         //--- Get all histograms needed for unfolding! ---
         // Note: andrew -- ttbar scaling done inside getAllHistos
         std::cout << "\nGrabbing all needed histograms from files opened above..." << std::endl;
+        // getAllHistos(variable, hRecData, fData, hRecDYJets, hGenDYJets, hResDYJets, fDYJets, 
+        //     hRecBg, hRecSumBg, fBg, NBGDYJETS, hFakDYJets, hMissDYJets, isClosureTest);
         getAllHistos(variable, hRecData, fData, hRecDYJets, hGenDYJets, hResDYJets, fDYJets, 
-            hRecBg, hRecSumBg, fBg, NBGDYJETS, hFakDYJets, hMissDYJets, isClosureTest);
+            hRecBg, hRecSumBg, fBg, NBGDYJETS, hFakDYJets, hAccepDYJets, isClosureTest);
+   
         
         //--- Get histos from theory files (if files opened above)
         TH1D *hGen1 = NULL;
@@ -338,7 +342,8 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
             ////////////////////////////////////////////////////////////////////////////////
 
             //Output indices for correct response and gen signal histos
-            std::cout << "Fetching gen signal histo hGenDYJets[iGen] and misses histo hMissDYJets[iGen], " << "iGen = " << iGen << std::endl;
+            // std::cout << "Fetching gen signal histo hGenDYJets[iGen] and misses histo hMissDYJets[iGen], " << "iGen = " << iGen << std::endl;
+            std::cout << "Fetching gen signal histo hGenDYJets[iGen] and acceptance histo hAccepDYJets[iGen], " << "iGen = " << iGen << std::endl;
             std::cout << "Fetching response matrix histo hResDYJets[iResp], " << "iResp = " << iResp << std::endl;
 
             // Now unfold
@@ -349,8 +354,13 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
             }
 
             if (algo == "TUnfold"){
+
+                // TUnfoldData(lepSel, algo, hResDYJets[iResp], hRecDataMinusFakes, hRecDataBinsMerged[iSyst], hUnfData[iSyst], hUnfDataNoScale[iSyst], hUnfDataStatCov[iSyst], hUnfDataStatCovNoScale[iSyst], 
+                //     hUnfMCStatCov[iSyst], hUnfMCStatCovNoScale[iSyst], name[iSyst], integratedLumi, hGenDYJets[iGen], hMissDYJets[iGen], logy, false, year);
+
                 TUnfoldData(lepSel, algo, hResDYJets[iResp], hRecDataMinusFakes, hRecDataBinsMerged[iSyst], hUnfData[iSyst], hUnfDataNoScale[iSyst], hUnfDataStatCov[iSyst], hUnfDataStatCovNoScale[iSyst], 
-                    hUnfMCStatCov[iSyst], hUnfMCStatCovNoScale[iSyst], name[iSyst], integratedLumi, hGenDYJets[iGen], hMissDYJets[iGen], logy, false, year);
+                    hUnfMCStatCov[iSyst], hUnfMCStatCovNoScale[iSyst], name[iSyst], integratedLumi, hGenDYJets[iGen], hAccepDYJets[iGen], logy, false, year);
+
             }
 
         } // END loop over all systematic variations
@@ -519,9 +529,12 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
 
 }
 
+// void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRecDataMinusFakes, TH1D* &hRecDataBinsMerged, TH1D* &hUnfData, TH1D* &hUnfDataNoScale, 
+//     TH2D* &hUnfDataStatCov, TH2D* &hUnfDataStatCovNoScale, TH2D* &hUnfMCStatCov, TH2D* &hUnfMCStatCovNoScale, TString name, double integratedLumi, 
+//     TH1D* hGenDYJets, TH1D* hMissDYJets, bool logy, bool doRatioUnfold, int year){
 void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRecDataMinusFakes, TH1D* &hRecDataBinsMerged, TH1D* &hUnfData, TH1D* &hUnfDataNoScale, 
     TH2D* &hUnfDataStatCov, TH2D* &hUnfDataStatCovNoScale, TH2D* &hUnfMCStatCov, TH2D* &hUnfMCStatCovNoScale, TString name, double integratedLumi, 
-    TH1D* hGenDYJets, TH1D* hMissDYJets, bool logy, bool doRatioUnfold, int year){
+    TH1D* hGenDYJets, TH2D* hAccepDYJets, bool logy, bool doRatioUnfold, int year){
 
     printf("=========================================================================\n");
     printf("Beginning TUnfoldData function for varation: %s \n", name.Data());
@@ -543,7 +556,8 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
     // BG and fakes subtracted from reco data distribution already
     TH1D* recoData = (TH1D*) hRecDataMinusFakes->Clone("recoData"); 
     TH1D* genDY = (TH1D*) hGenDYJets->Clone("genDY");
-    TH1D* missesDY = (TH1D*) hMissDYJets->Clone("missesDY");
+    // TH1D* missesDY = (TH1D*) hMissDYJets->Clone("missesDY");
+    TH2D* acceptDY = (TH2D*) hAccepDYJets->Clone("acceptDY");
     TH2D* responseMatrix = (TH2D*) resp->Clone("responseMatrix");
 
     // ----- RECO DISTRIBUTION ----- 
@@ -585,7 +599,7 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
 
         // // For a single gen row, integrate over all of the reco bins
         // // These events are the fraction of (1 - Miss Rate) of the total event count that originates from this gen bin
-        // double recIntegral = 0.;
+        // double recIntegral(0.);
         // for(int j = 1; j <= nBinsRespX; j++){
         //     recIntegral += responseMatrix->GetBinContent(j,i);
         // }
@@ -613,6 +627,7 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
         // Set reco underflow bins to 0 in response matrix!!!
         // We will do the acceptance correction below after distribution has been unfolded!
         responseMatrix->SetBinContent(0, i, 0.);
+        acceptDY->SetBinContent(0, i, 0.);
 
     }
 
@@ -647,7 +662,8 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
     
     recoData->Write();
     genDY->Write();
-    missesDY->Write();
+    // missesDY->Write();
+    acceptDY->Write();
     responseMatrix->Write();
 
     // ---------------------------------------------------------------------------
@@ -666,7 +682,8 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
     // TUnfoldDensity::EDensityMode densityMode = TUnfoldDensity::kDensityModeBinWidth; // "scale factors from multidimensional bin width"
 
     //Define constructor and use SetInput to input the measurement that is to be unfolded ---
-    TUnfoldDensity unfold(responseMatrix, TUnfold::kHistMapOutputVert, regMode, constraintMode, densityMode);
+    // TUnfoldDensity unfold(responseMatrix, TUnfold::kHistMapOutputVert, regMode, constraintMode, densityMode); // NOTE: "responseMatrix" is our current default migration matrix
+    TUnfoldDensity unfold(acceptDY, TUnfold::kHistMapOutputVert, regMode, constraintMode, densityMode); // for testing
     unfold.SetInput(recoData);
 
     // Regularization strength determination ---
@@ -785,23 +802,42 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
     hUnfData->GetYaxis()->SetTitle("diff xsec.");
 
 
+    // ---------
+
+    // // ATTEMPT 1 (using "misses" distribution) --
+    // // ALW 5 JUNE 20
+    // // Now do fiducial acceptance (ie reconstruction efficiency) correction to unfolded distribution before scaling by lumi, bin widths to get diff. xsec
+    // std::cout << "\nFiducial acceptance efficiency:" << std::endl;
+    // for (int i = 1; i <= hUnfData->GetNbinsX(); i++){
+
+    //     // reconstruction efficiency/acceptance is 1 minus the miss fraction
+    //     double acceptance = 1. - (missesDY->GetBinContent(i)/genDY->GetBinContent(i));
+    //     std::cout << "Bin #" << i << ": " << acceptance << std::endl;
+
+    //     // now correct particle-level distribution for acceptance on bin-wise level
+    //     hUnfData->SetBinContent(i, hUnfData->GetBinContent(i)/acceptance);
+
+    // }
+
     // ---
 
-    // ALW 5 JUNE 20
-    // Now do fiducial acceptance (ie reconstruction efficiency) correction to unfolded distribution before scaling by lumi, bin widths to get diff. xsec
-    std::cout << "\nFiducial acceptance efficiency:" << std::endl;
+    // ATTEMPT 2 (using response matrix filled w/ no eff SFs in weights) --
+    std::cout << "\nReconstruction efficiency/acceptance rate -- " << std::endl;
     for (int i = 1; i <= hUnfData->GetNbinsX(); i++){
 
-        // reconstruction efficiency/acceptance is 1 minus the miss fraction
-        double acceptance = 1. - (missesDY->GetBinContent(i)/genDY->GetBinContent(i));
+        double acceptedEvents(0.);
+        for (int j = 1; j <= acceptDY->GetNbinsX()+1; j++){
+            acceptedEvents += acceptDY->GetBinContent(j,i);
+        }
+
+        double acceptance = acceptedEvents/genDY->GetBinContent(i);
         std::cout << "Bin #" << i << ": " << acceptance << std::endl;
 
-        // now correct particle-level distribution for acceptance on bin-wise level
         hUnfData->SetBinContent(i, hUnfData->GetBinContent(i)/acceptance);
-
     }
 
-    // ---
+
+    // ---------
 
 
     printf("\nUnfolded data:");
