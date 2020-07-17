@@ -690,59 +690,37 @@ void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hR
 TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJets, bool isVerbose, bool isClosureTest){
 
     // NOTE:
-    // "fakes" means the #events seen at reco-level that do not originate in the fiducially-accepted region at gen-level
-    // i.e. the migrate from outside the fiducial region at gen level into the fiducial region at reco-level, but they do not
-    // correspond to the "true" prediction, which is why they must be subtracted
+    // "Fakes" are the events seen at reco-level that do not originate within the fiducially-accepted region at particle-level
+    // i.e. they migrate from outside the fiducial region at gen level into the fiducial region at reco-level, but they do not
+    // correspond to the "true" counts, so they must be subtracted
 
     // Fakes distribution has reco binning
     TH1D *hFakDYJets = (TH1D*) hRecDYJets->Clone();
 
-    // Calculate difference in normalization of signal between data and MC
-    double factor(1.);
-    double dataIntegral = hRecData->Integral(1, hRecData->GetNbinsX());
-    double dyIntegral = hRecDYJets->Integral(1, hRecDYJets->GetNbinsX());
-    double bgIntegral = hRecSumBg->Integral(1, hRecSumBg->GetNbinsX());
-
-    // If doing closure test w/ reco MC, do not scale fakes distribution by "factor"
-    if (!isClosureTest){
-        if (dyIntegral != 0) factor = (dataIntegral - bgIntegral) / dyIntegral; 
-        if (isVerbose) std::cout << "\nScaling fakes distribution by factor = " << factor << std::endl;
-    }
-
-    // printf("hRecData Integral: %F, hRecDYJets Integral: %F, hRecSumBg Integral: %F\n", dataIntegral, dyIntegral, bgIntegral);
-    // printf("Scaling fake counts (estimated with signal MC) by following factor for data histo: %F\n", factor);
-
-    // For each reco bin, compare #reco events that pass reco selection (filled in reco-level dist.) 
-    // to #reco events that pass reco and gen selection (that are filled in response matrix)
-    int nm = hResDYJets->GetNbinsX(); // #RECO bins in response matrix
-    int nt = hResDYJets->GetNbinsY(); // #GEN bins in response matrix (plus overflow)
-
+    // Count the #events that pass both gen and reco cuts, then compare this to the #events that pass just reco cuts
     if (isVerbose) std::cout << std::endl;
-    for (int i = 1; i <= nm; i++) { // count over RECO bins
+    for (int i = 1; i <= hResDYJets->GetNbinsX(); i++){ // count over RECO bins
 
-        double nmes(0.), wmes(0.);
-        for (int j = 1; j <= nt + 1; j++) { // count over GEN bins (include overflow)
+        double nmes(0.);
+        for (int j = 1; j <= hResDYJets->GetNbinsY() + 1; j++){ // count over GEN bins (include overflow)
             nmes += hResDYJets->GetBinContent(i, j);
-            wmes += pow(hResDYJets->GetBinError(i, j), 2.);
         }
 
-        // #fakes in reco bin i is the number of total reco events minus the reco events pass also GEN selection ("matched" events)
-        // #fakes is scaled by factor to account for the difference in normalizations between the signal MC and the (BG-subtracted) data spectra
-        // so the shape of the fakes distribution is taken from signal MC, but scaled to have the normalization of data
-        double fakes = hRecDYJets->GetBinContent(i) - nmes;
-        if (fakes < 0.) fakes = 0.;
-        hFakDYJets->SetBinContent(i, factor*fakes);
+        // Fake rate is calculated using signal MC
+        double fakeRate = 1. - (nmes/hRecDYJets->GetBinContent(i));
+        if (isVerbose) std::cout << "Fake rate calculated for bin #" << i << ": " << fakeRate << std::endl;
 
-        if (isVerbose) {
-            if (!isClosureTest) std::cout << "Fake rate calculated for reco bin " << i << ": " << hFakDYJets->GetBinContent(i)/hRecData->GetBinContent(i) << std::endl; // data fake rate
-            else std::cout << "Fake rate calculated for reco bin " << i << ": " << hFakDYJets->GetBinContent(i)/hRecDYJets->GetBinContent(i) << std::endl; // signal reco MC fake rate
-        }
+        // Now get fakes distribution
+        // For data, #fakes is (fake rate from signal MC) * (#events in data we estimate to be signal events)
+        if (!isClosureTest) hFakDYJets->SetBinContent( i, fakeRate * (hRecData->GetBinContent(i) - hRecSumBg->GetBinContent(i)) );
+        else hFakDYJets->SetBinContent( i, fakeRate * hRecDYJets->GetBinContent(i) );
 
-        // Error calculation comes from simple error propagation, but treating "factor"
-        // as a constant, i.e. neglecting uncertainty from scale factor derivation
-        double err2 = pow(hRecDYJets->GetBinError(i), 2.) + wmes;
-        if (err2 < 0.) err2 = 0.;
-        hFakDYJets->SetBinError(i, factor*sqrt(err2)); 
+        // Derive the error using standard error propagation
+        // We take the fake rate here as a constant without error
+        double err(0.);
+        if (!isClosureTest) err = sqrt( pow(hRecData->GetBinError(i), 2.) +  pow(hRecSumBg->GetBinError(i), 2.) );
+        else err = hRecDYJets->GetBinError(i);
+        hFakDYJets->SetBinError(i, fakeRate * err); 
     }
 
     hFakDYJets->SetEntries(hFakDYJets->GetEffectiveEntries());  // 0 entries if 0 fakes
