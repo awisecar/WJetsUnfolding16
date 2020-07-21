@@ -24,7 +24,7 @@ void createSystPlots(TString outputFileName, TString lepSel, TString variable, T
 void RemoveFakes(TH1D* &hRecData, TH1D* hFakes);
 
 void normalizeTH2D(TH2D *h);
-void createInclusivePlots(bool doNormalized, TString outputFileName, TString lepSel, TH1D *hUnfData, TH2D *hCov[], TH1D *hMadGenCrossSection, TH1D *hSheGenCrossSection);
+void createInclusivePlots(bool doNormalized, TString outputFileName, TString lepSel, int year, TH1D *hUnfData, TH2D *hCov[], TH1D *hMadGenCrossSection, TH1D *hSheGenCrossSection);
 void plotRespMat(TH2D *hResp, TString variable, TString unfoldDir, bool addSwitch, TH1D *hGenDYJets);
 
 

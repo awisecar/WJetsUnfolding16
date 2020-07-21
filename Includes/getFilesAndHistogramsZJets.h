@@ -67,28 +67,23 @@ void getFiles(TString histoDir, TFile *Files[], TString lepSel, TString energy, 
  *                    number in which case only the first nBg samples listed in Samples
  *                    will be considered.
  */
-void getAllFiles(TString histoDir, TString lepSel, TString energy, int jetPtMin, int jetEtaMax, TFile *fData[3], TFile *fDYJets[9], TFile *fBg[][7], int nBg);
+void getAllFiles(TString histoDir, TString lepSel, TString energy, int jetPtMin, int jetEtaMax, TFile *fData[3], TFile *fDYJets[11], TFile *fBg[][11], int nBg);
 
 void closeFile(TFile*);
 void closeFiles(TFile *Files[]);
 void closeFiles(TFile *Files[], int nFiles);
-void closeAllFiles(TFile *fData[3], TFile *fDYJets[9], TFile *fBg[][7], int nBg);
+void closeAllFiles(TFile *fData[3], TFile *fDYJets[11], TFile *fBg[][11], int nBg);
 
 void setNegBinZero(TH2D *histograms2D);
 
 TH1D* getHisto(TFile*, TString);
-void getHistos(TH1D *histograms[], TFile *Files[], TString);
-void getHistos(TH2D *histograms[], TFile *Files[], TString);
+void getHistos(TH1D *histograms[], TFile *Files[], TString variable, int year);
+void getHistos(TH2D *histograms[], TFile *Files[], TString variable, int year);
 
-void getFakes(TH1D *hFakDYJets[18], TH1D *hRecData[3], TH1D *hRecSumBg[11], TH1D *hRecDYJets[13], TH2D *hResDYJets[13], bool isClosureTest);
+void getAllFakes(TH1D *hFakDYJets[18], TH1D *hRecData[3], TH1D *hRecSumBg[13], TH1D *hRecDYJets[13], TH2D *hResDYJets[13], bool isClosureTest);
 TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJets, bool isVerbose, bool isClosureTest);
 
-// void getPurities(TH1D *hPurityDYJets[18], TH1D *hRecData[3], TH1D *hRecSumBg[11], TH1D *hRecDYJets[13], TH2D *hResDYJets[13]);
-// TH1D* getPurities(TH1D *hRecDYJets, TH2D *hResDYJets);
-
-// void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hRecDYJets[13], TH1D *hGenDYJets[11], TH2D *hResDYJets[13], TFile *fDYJets[9], TH1D *hRecBg[][11], TH1D *hRecSumBg[11], TFile *fBg[][7], int nBg, TH1D* hFakDYJets[13], TH1D *hMissDYJets[11]);
-// void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hRecDYJets[13], TH1D *hGenDYJets[11], TH2D *hResDYJets[13], TFile *fDYJets[9], TH1D *hRecBg[][11], TH1D *hRecSumBg[11], TFile *fBg[][7], int nBg, TH1D* hFakDYJets[18], TH1D *hMissDYJets[11], bool isClosureTest);
-void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hRecDYJets[13], TH1D *hGenDYJets[11], TH2D *hResDYJets[13], TFile *fDYJets[9], TH1D *hRecBg[][11], TH1D *hRecSumBg[11], TFile *fBg[][7], int nBg, TH1D* hFakDYJets[18], TH2D *hAccepDYJets[13], bool isClosureTest);
+void getAllHistos(TString variable, int year, TH1D *hRecData[3], TFile *fData[3], TH1D *hRecDYJets[13], TH1D *hGenDYJets[13], TH2D *hResDYJets[13], TFile *fDYJets[11], TH1D *hRecBg[][13], TH1D *hRecSumBg[13], TFile *fBg[][11], int nBg, TH1D* hFakDYJets[18], TH2D *hAccepDYJets[13], bool isClosureTest);
 
 
 #endif

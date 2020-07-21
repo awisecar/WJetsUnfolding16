@@ -69,158 +69,87 @@ void getFiles(TString histoDir, TFile *Files[], TString lepSel, TString energy, 
 
     // ==============================================================
     
-    // Full systematics
-    // if (Name.Index("Data") >= 0 ) { // for data we have:
-    //     Syst.push_back("0");                 //   0: central
-    //     Syst.push_back("2_Up");              //   2 up: JES up
-    //     Syst.push_back("2_Down");            //   2 down: JES down
-    // }
-    // else if (Name.Index("UNFOLDING") >= 0 && /*Name.Index("DYJets") >= 0 &&*/ Name.Index("Tau") < 0) {
-    //     // for DYJets in case of Z+Jets or for WJets in case of W+Jets analysis we have:
-    //     Syst.push_back("0");         // 0: central
-    //     Syst.push_back("1_Up");      // 1 up: PU up
-    //     Syst.push_back("1_Down");    // 1 down: PU down
-    //     Syst.push_back("4_Up");      // 4 up: JER up
-    //     Syst.push_back("4_Down");    // 4 down: JER down
-    //     Syst.push_back("5_Up");      // 5 up: LepSF up
-    //     Syst.push_back("5_Down");    // 5 down: LepSF down
-    //     Syst.push_back("6_Up");      // 6 up: BtagSF up
-    //     Syst.push_back("6_Down");    // 6 down: BtagSF down
-    // }
-    // else { // for background we have
-    //     Syst.push_back("0");         // 0: central
-    //     Syst.push_back("1_Up");      // 1 up: PU up
-    //     Syst.push_back("1_Down");    // 1 down: PU down
-    //     Syst.push_back("3_Up");      // 3 up: XSec up
-    //     Syst.push_back("3_Down");    // 3 down: Xsec down
-    //     Syst.push_back("6_Up");      // 6 up: BtagSF up
-    //     Syst.push_back("6_Down");    // 6 down: BtagSF down
-    // };
-
-    // ==============================================================
-
-    // 1=PU, 2=JES, 3=XSEC, 4=JER, 5=LepSF
-    if (Name.Index("Data") >= 0 ) { // for data we have:
-        Syst.push_back("0");                 //   0: central
-        Syst.push_back("2_Up");              //   2 up: JES up
-        Syst.push_back("2_Down");            //   2 down: JES down
+    // Full systematics ---
+    // Data
+    if (Name.Index("Data") >= 0 ){
+        Syst.push_back("0");         // 0:      Central
+        Syst.push_back("2_Up");      // 2 up:   JES up
+        Syst.push_back("2_Down");    // 2 down: JES down
     }
-    else if (Name.Index("UNFOLDING") >= 0 && /*Name.Index("DYJets") >= 0 &&*/ Name.Index("Tau") < 0) {
-        // for DYJets in case of Z+Jets or for WJets in case of W+Jets analysis we have:
-        Syst.push_back("0");         // 0: central
-        Syst.push_back("1_Up");      // 1 up: PU up
-        Syst.push_back("1_Down");    // 1 down: PU down
-        Syst.push_back("4_Up");      // 4 up: JER up
-        Syst.push_back("4_Down");    // 4 down: JER down
-        Syst.push_back("5_Up");      // 5 up: LepSF up
-        Syst.push_back("5_Down");    // 5 down: LepSF down
-        Syst.push_back("0");      // 6 up: BtagSF up
-        Syst.push_back("0");    // 6 down: BtagSF down
+    // Signal (W+jets)
+    else if (Name.Index("UNFOLDING") >= 0){
+        Syst.push_back("0");         // 0:       Central
+        Syst.push_back("1_Up");      // 1 up:    PU up
+        Syst.push_back("1_Down");    // 1 down:  PU down
+        Syst.push_back("4_Up");      // 4 up:    JER up
+        Syst.push_back("4_Down");    // 4 down:  JER down
+        Syst.push_back("5_Up");      // 5 up:    LepSF up
+        Syst.push_back("5_Down");    // 5 down:  LepSF down
+        // Syst.push_back("6_Up");      // 6 up:    BtagSF up
+        // Syst.push_back("6_Down");    // 6 down:  BtagSF down
+        Syst.push_back("0");      // 6 up:    BtagSF up
+        Syst.push_back("0");    // 6 down:  BtagSF down
+        Syst.push_back("11_Up");     // 11 up:   L1Prefire up
+        Syst.push_back("11_Down");   // 11 down: L1Prefire down
     }
-    else { // for background we have
-        Syst.push_back("0");         // 0: central
-        Syst.push_back("1_Up");      // 1 up: PU up
-        Syst.push_back("1_Down");    // 1 down: PU down
-        Syst.push_back("3_Up");      // 3 up: XSec up
-        Syst.push_back("3_Down");    // 3 down: Xsec down
-        Syst.push_back("0");      // 6 up: BtagSF up
-        Syst.push_back("0");    // 6 down: BtagSF down
+    // Background
+    else{
+        Syst.push_back("0");         // 0:       Central
+        Syst.push_back("1_Up");      // 1 up:    PU up
+        Syst.push_back("1_Down");    // 1 down:  PU down
+        Syst.push_back("3_Up");      // 3 up:    XSEC up
+        Syst.push_back("3_Down");    // 3 down:  XSEC down
+        Syst.push_back("5_Up");      // 5 up:    LepSF up
+        Syst.push_back("5_Down");    // 5 down:  LepSF down
+        // Syst.push_back("6_Up");      // 6 up:    BtagSF up
+        // Syst.push_back("6_Down");    // 6 down:  BtagSF down
+        Syst.push_back("0");      // 6 up:    BtagSF up
+        Syst.push_back("0");    // 6 down:  BtagSF down
+        Syst.push_back("11_Up");     // 11 up:   L1Prefire up
+        Syst.push_back("11_Down");   // 11 down: L1Prefire down
     };
 
     // ==============================================================
 
-    // 1=PU, 2=JES, 3=XSEC, 4=JER, 6=BtagSF
-    // if (Name.Index("Data") >= 0 ) { // for data we have:
-    //     Syst.push_back("0");                 //   0: central
-    //     Syst.push_back("2_Up");              //   2 up: JES up
-    //     Syst.push_back("2_Down");            //   2 down: JES down
+    // // No systematics ---
+    // // Data
+    // if (Name.Index("Data") >= 0 ){
+    //     Syst.push_back("0");   // 0:      Central
+    //     Syst.push_back("0");   // 2 up:   JES up
+    //     Syst.push_back("0");   // 2 down: JES down
     // }
-    // else if (Name.Index("UNFOLDING") >= 0 && /*Name.Index("DYJets") >= 0 &&*/ Name.Index("Tau") < 0) {
-    //     // for DYJets in case of Z+Jets or for WJets in case of W+Jets analysis we have:
-    //     Syst.push_back("0");         // 0: central
-    //     Syst.push_back("1_Up");      // 1 up: PU up
-    //     Syst.push_back("1_Down");    // 1 down: PU down
-    //     Syst.push_back("4_Up");      // 4 up: JER up
-    //     Syst.push_back("4_Down");    // 4 down: JER down
-    //     Syst.push_back("0");      // 5 up: LepSF up
-    //     Syst.push_back("0");    // 5 down: LepSF down
-    //     Syst.push_back("6_Up");      // 6 up: BtagSF up
-    //     Syst.push_back("6_Down");    // 6 down: BtagSF down
+    // // Signal (W+jets)
+    // else if (Name.Index("UNFOLDING") >= 0){
+    //     Syst.push_back("0");   // 0:       Central
+    //     Syst.push_back("0");   // 1 up:    PU up
+    //     Syst.push_back("0");   // 1 down:  PU down
+    //     Syst.push_back("0");   // 4 up:    JER up
+    //     Syst.push_back("0");   // 4 down:  JER down
+    //     Syst.push_back("0");   // 5 up:    LepSF up
+    //     Syst.push_back("0");   // 5 down:  LepSF down
+    //     Syst.push_back("0");   // 6 up:    BtagSF up
+    //     Syst.push_back("0");   // 6 down:  BtagSF down
+    //     Syst.push_back("0");   // 11 up:   L1Prefire up
+    //     Syst.push_back("0");   // 11 down: L1Prefire down
     // }
-    // else { // for background we have
-    //     Syst.push_back("0");         // 0: central
-    //     Syst.push_back("1_Up");      // 1 up: PU up
-    //     Syst.push_back("1_Down");    // 1 down: PU down
-    //     Syst.push_back("3_Up");      // 3 up: XSec up
-    //     Syst.push_back("3_Down");    // 3 down: Xsec down
-    //     Syst.push_back("6_Up");      // 6 up: BtagSF up
-    //     Syst.push_back("6_Down");    // 6 down: BtagSF down
+    // // Background
+    // else{
+    //     Syst.push_back("0");   // 0:       Central
+    //     Syst.push_back("0");   // 1 up:    PU up
+    //     Syst.push_back("0");   // 1 down:  PU down
+    //     Syst.push_back("0");   // 3 up:    XSEC up
+    //     Syst.push_back("0");   // 3 down:  XSEC down
+    //     Syst.push_back("0");   // 5 up:    LepSF up
+    //     Syst.push_back("0");   // 5 down:  LepSF down
+    //     Syst.push_back("0");   // 6 up:    BtagSF up
+    //     Syst.push_back("0");   // 6 down:  BtagSF down
+    //     Syst.push_back("0");   // 11 up:   L1Prefire up
+    //     Syst.push_back("0");   // 11 down: L1Prefire down
     // };
 
     // ==============================================================
-
-    // 2=JES, 3=XSEC
-    // if (Name.Index("Data") >= 0 ) { // for data we have:
-    //     Syst.push_back("0");                 //   0: central
-    //     Syst.push_back("2_Up");              //   2 up: JES up
-    //     Syst.push_back("2_Down");            //   2 down: JES down
-    // }
-    // else if (Name.Index("UNFOLDING") >= 0 && /*Name.Index("DYJets") >= 0 &&*/ Name.Index("Tau") < 0) {
-    //     // for DYJets in case of Z+Jets or for WJets in case of W+Jets analysis we have:
-    //     Syst.push_back("0");         // 0: central
-    //     Syst.push_back("0");      // 1 up: PU up
-    //     Syst.push_back("0");    // 1 down: PU down
-    //     Syst.push_back("0");      // 4 up: JER up
-    //     Syst.push_back("0");    // 4 down: JER down
-    //     Syst.push_back("0");      // 5 up: LepSF up
-    //     Syst.push_back("0");    // 5 down: LepSF down
-    //     Syst.push_back("0");      // 6 up: BtagSF up
-    //     Syst.push_back("0");    // 6 down: BtagSF down
-    // }
-    // else { // for background we have
-    //     Syst.push_back("0");         // 0: central
-    //     Syst.push_back("0");      // 1 up: PU up
-    //     Syst.push_back("0");    // 1 down: PU down
-    //     Syst.push_back("3_Up");      // 3 up: XSec up
-    //     Syst.push_back("3_Down");    // 3 down: Xsec down
-    //     Syst.push_back("0");      // 6 up: BtagSF up
-    //     Syst.push_back("0");    // 6 down: BtagSF down
-    // };
-
-    // ==============================================================
-
-    // // No systematics
-    // if (Name.Index("Data") >= 0) { // for data we have:
-    //    Syst.push_back("0");                 //   0: central
-    //    Syst.push_back("0");              //   2 up: JES up
-    //    Syst.push_back("0");            //   2 down: JES down
-    // }
-    // else if (Name.Index("UNFOLDING") >= 0 && /*Name.Index("DYJets") >= 0 &&*/ Name.Index("Tau") < 0) {
-    //    // for DYJets in case of Z+Jets or for WJets in case of W+Jets analysis we have:
-    //    Syst.push_back("0");         // 0: central
-    //    Syst.push_back("0");      // 1 up: PU up
-    //    Syst.push_back("0");    // 1 down: PU down
-    //    Syst.push_back("0");      // 4 up: JER up
-    //    Syst.push_back("0");      // 4 down: JER down
-    //    Syst.push_back("0");      // 5 up: LepSF up
-    //    Syst.push_back("0");    // 5 down: LepSF down
-    //    Syst.push_back("0");      // 6 up: BtagSF up
-    //    Syst.push_back("0");    // 6 down: BtagSF down
-    // }
-    // else { // for background we have
-    //    Syst.push_back("0");         // 0: central
-    //    Syst.push_back("0");      // 1 up: PU up
-    //    Syst.push_back("0");    // 1 down: PU down
-    //    Syst.push_back("0");      // 3 up: XSec up
-    //    Syst.push_back("0");    // 3 down: Xsec down
-    //    Syst.push_back("0");      // 6 up: BtagSF up
-    //    Syst.push_back("0");    // 6 down: BtagSF down
-    // };
-
-    // ==============================================================
-
     
-    //--- determnie how many files we have and open them all ---
+    // Determine how many files we have and open them all
     int nSyst(Syst.size());
     std::cout << "Size of nSyst: " << nSyst << std::endl;
     for (int i(0); i < nSyst; i++) {
@@ -230,50 +159,41 @@ void getFiles(TString histoDir, TFile *Files[], TString lepSel, TString energy, 
     //----------------------------------------------------------
 }
 
-void getAllFiles(TString histoDir, TString lepSel, TString energy, int jetPtMin, int jetEtaMax, TFile *fData[3], TFile *fDYJets[9], TFile *fBg[][7], int nBg){
+void getAllFiles(TString histoDir, TString lepSel, TString energy, int jetPtMin, int jetEtaMax, TFile *fData[3], TFile *fDYJets[11], TFile *fBg[][11], int nBg){
 
-    //--- Open data files ---------------------------------------------------------------------- 
+    // Open data files ---------------------------------------------------------------------- 
     std::cout << "\nOpening data files: " << Samples[DATA].name << std::endl;
     getFiles(histoDir, fData, lepSel, energy, Samples[DATA].name, jetPtMin, jetEtaMax); 
-    //------------------------------------------------------------------------------------------ 
 
-    //--- Open DYJets files --------------------------------------------------------------------
+    // Open DYJets files --------------------------------------------------------------------
     std::cout << "\nOpening signal files: " << Samples[DYJETS].name << std::endl;
     getFiles(histoDir, fDYJets, lepSel, energy, Samples[DYJETS].name, jetPtMin, jetEtaMax); 
-    //------------------------------------------------------------------------------------------ 
 
-    //--- Open Bg files ------------------------------------------------------------------------
+    // Open Bg files ------------------------------------------------------------------------
     std::cout << "\nOpening BG files" << std::endl;
     for (unsigned short iBg = 0; iBg < nBg; ++iBg){
-	    assert(iBg+1 < (int)NFILESDYJETS);
+	    assert(iBg+1 < (int) NFILESDYJETS);
 	    int j = FilesDYJets[iBg+1];
 	    assert(j < NSamples);
-	    // std::cout << "-----> "  << __FILE__ << ":" << __LINE__ << ".  Includes background from " << Samples[j].name << "\n";
         std::cout << "Includes background from " << Samples[j].name << "\n";
         getFiles(histoDir, fBg[iBg], lepSel, energy, Samples[j].name, jetPtMin, jetEtaMax);
     }
-    //------------------------------------------------------------------------------------------ 
 }
 
 void closeFile(TFile *File){
-    if (File) {
+    if (File){
         if (File->IsOpen()) File->Close();
         cout << "Closing: " << File->GetName() << "   --->   Closed ? " << (!(File->IsOpen())) << endl;
     }
 }
 
 void closeFiles(TFile *Files[]){
-
-    if (Files[0]) {
+    if (Files[0]){
         TString fileName = gSystem->BaseName(Files[0]->GetName());
-        int nFiles;
-        if (fileName.Index("Data") >= 0 || fileName.Index("data") >= 0 || fileName.Index("DATA") >= 0) {
-            nFiles = 3; 
-        }
-	else if (/*fileName.Index("DYJets") >= 0 &&*/ fileName.Index("UNFOLDING") >=0 && fileName.Index("Tau") < 0){
-            nFiles = 9;
-        }
-        else nFiles = 7; 
+        int nFiles(0);
+        if (fileName.Index("Data") >= 0) nFiles = 3; 
+	    else if (fileName.Index("UNFOLDING") >=0) nFiles = 11;
+        else nFiles = 11; 
 
         for (int i(0); i < nFiles; i++){
             Files[i]->cd();
@@ -283,7 +203,6 @@ void closeFiles(TFile *Files[]){
 }
 
 void closeFiles(TFile *Files[], int nFiles){
-
     TString fileName = gSystem->BaseName(Files[0]->GetName());
     for (int i(0); i < nFiles; i++){
         Files[i]->cd();
@@ -292,21 +211,19 @@ void closeFiles(TFile *Files[], int nFiles){
     }
 }
 
-void closeAllFiles(TFile *fData[3], TFile *fDYJets[9], TFile *fBg[][7], int nBg){
+void closeAllFiles(TFile *fData[3], TFile *fDYJets[11], TFile *fBg[][11], int nBg){
 
-    //--- Close data files ---------------------------------------------------------------------
+    // Close data files
     closeFiles(fData);
-    //------------------------------------------------------------------------------------------ 
 
-    //--- Close DYJets files -------------------------------------------------------------------
+    // Close DYJets files
     closeFiles(fDYJets);
-    //------------------------------------------------------------------------------------------ 
 
-    //--- Close Bg files -----------------------------------------------------------------------
-    for (unsigned short iBg = 0; iBg < nBg; ++iBg) {
+    // Close Bg files
+    for (unsigned short iBg = 0; iBg < nBg; ++iBg){
         closeFiles(fBg[iBg]);
     }
-    //----------------------------------l------------------------------------------------------- 
+
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -316,8 +233,8 @@ void setNegBinZero(TH2D *histograms2D){
     int nBinsY(histograms2D->GetNbinsY());
     
     for (int i = 1; i <= nBinsX; i++){
-        for(int j = 1; j <= nBinsY; j++){
-            if ( histograms2D->GetBinContent(i,j) < 0 ){
+        for (int j = 1; j <= nBinsY; j++){
+            if ( histograms2D->GetBinContent(i,j) < 0. ){
                 histograms2D->SetBinContent(i, j, 0.);
                 histograms2D->SetBinError(i, j, 0.);
             }
@@ -329,141 +246,135 @@ void setNegBinZero(TH2D *histograms2D){
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 TH1D* getHisto(TFile *File, const TString variable){
+
     TH1D *histo = (TH1D*) File->Get(variable);
-
-    //---- ttbar scaling (starts here) ----------------------------------------------------------
-	TString fileName = gSystem->BaseName(File->GetName());
-	bool isTTbar = (fileName.Index("SMu_13TeV_TT") >= 0);
-
-    // ALW 23 APRIL 20
-    isTTbar = false;
-
-    //andrew -- ttBar SFs for 2016 data added -- 3 May 2019
-    std::cout << "isTTbar = " << isTTbar << std::endl;
-	if (isTTbar){
-        std::cout << " ----- Scaling ttbar BG for " << variable << "!" << std::endl;
-        // inclusive distributions
-        if (variable.Index("Zinc2jet") >= 0) histo->Scale(1.04904374);
-        else if (variable.Index("Zinc3jet") >= 0) histo->Scale(0.99624372);
-        else if (variable.Index("Zinc4jet") >= 0) histo->Scale(0.97243212);
-        else if (variable.Index("Zinc5jet") >= 0) histo->Scale(0.94750793);
-        else if (variable.Index("Zinc6jet") >= 0) histo->Scale(0.92506162);
-        // exclusive distributions
-		else if (variable.Index("Zexc2jet") >= 0) histo->Scale(1.28532061);
-		else if (variable.Index("Zexc3jet") >= 0) histo->Scale(1.02880218);
-		else if (variable.Index("Zexc4jet") >= 0) histo->Scale(0.98994466);
-		else if (variable.Index("Zexc5jet") >= 0) histo->Scale(0.95915763);
-		else if (variable.Index("Zexc6jet") >= 0) histo->Scale(0.93695869);
-        // jet multiplicity distributions
-		else if (variable.Index("ZNGoodJets_Zinc") >= 0 || variable.Index("ZNGoodJetsFull_Zinc") >= 0) {
-			histo->SetBinContent(3, histo->GetBinContent(3)*1.04904374);
-			histo->SetBinContent(4, histo->GetBinContent(4)*0.99624372);
-			histo->SetBinContent(5, histo->GetBinContent(5)*0.97243212);
-			histo->SetBinContent(6, histo->GetBinContent(6)*0.94750793);
-			histo->SetBinContent(7, histo->GetBinContent(7)*0.92506162);
-			
-			histo->SetBinError(3, histo->GetBinError(3)*1.04904374);
-			histo->SetBinError(4, histo->GetBinError(4)*0.99624372);
-			histo->SetBinError(5, histo->GetBinError(5)*0.97243212);
-			histo->SetBinError(6, histo->GetBinError(6)*0.94750793);
-			histo->SetBinError(7, histo->GetBinError(7)*0.92506162);
-		}
-		else if (variable.Index("ZNGoodJets_Zexc") >= 0 || variable.Index("ZNGoodJetsFull_Zexc") >= 0) {
-			histo->SetBinContent(3, histo->GetBinContent(3)*1.28532061);
-			histo->SetBinContent(4, histo->GetBinContent(4)*1.02880218);
-			histo->SetBinContent(5, histo->GetBinContent(5)*0.98994466);
-			histo->SetBinContent(6, histo->GetBinContent(6)*0.95915763);
-			histo->SetBinContent(7, histo->GetBinContent(7)*0.93695869);
-			
-			histo->SetBinError(3, histo->GetBinError(3)*1.28532061);
-			histo->SetBinError(4, histo->GetBinError(4)*1.02880218);
-			histo->SetBinError(5, histo->GetBinError(5)*0.98994466);
-			histo->SetBinError(6, histo->GetBinError(6)*0.95915763);
-			histo->SetBinError(7, histo->GetBinError(7)*0.93695869);
-		}
-	}	
-		
-    //---- ttbar scaling (ends here) ----------------------------------------------------------
 
     //We had for an unknown reason some histo with the CanExtendAxis option active,
     //which causes troubles for the unfolding code: setting the overflow bin of
     //fake histogram was doubling the number of bins. Following line ensures
     //that the option is disabled:
-    if(histo) histo->SetCanExtend(kFALSE);
-    if(histo) histo->SetDirectory(0);
+    if (histo) histo->SetCanExtend(kFALSE);
+    if (histo) histo->SetDirectory(0);
+
     return histo;
 }
 
-void getHistos(TH1D *histograms[], TFile *Files[], TString variable){
+void getHistos(TH1D *histograms[], TFile *Files[], TString variable, int year){
 
     TString fileName = gSystem->BaseName(Files[0]->GetName());
-    bool isData   = (fileName.Index("Data") >= 0 || fileName.Index("data") >= 0 || fileName.Index("DATA") >= 0);
-    bool isSignal = (fileName.Index("UNFOLDING") >=0 && fileName.Index("Tau") < 0);
-    bool isTTbar  = (fileName.Index("SMu_13TeV_TT") >= 0);  //needed for ttbar scaling 
+    bool isData   = (fileName.Index("Data") >= 0);
+    bool isSignal = (fileName.Index("UNFOLDING") >= 0);
+    bool isTTbar  = (fileName.Index("SMu_13TeV_TT_") >= 0); // for ttbar scaling 
 
-    int nFiles = 0;
-    if (fileName.Index("Data") >= 0 || fileName.Index("data") >= 0 || fileName.Index("DATA") >= 0) nFiles = 3;
-    else if (fileName.Index("UNFOLDING") >=0 && fileName.Index("Tau") < 0) nFiles = 9;
-    else nFiles = 7; 
+    int nFiles(0);
+    if (isData) nFiles = 3;
+    else if (isSignal) nFiles = 11;
+    else nFiles = 11; 
 
-    //--- grabbing histograms from files
-    // std::cout << "Getting histo for variable " << variable << "!" << std::endl;
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // List ttBar SFs as arrays --
+    // 2016
+    float ttBarSF_2016exc[7] = {1.058563,	1.004681,	0.995014,	0.972899,	0.948714,	0.939270,	0.947502};
+    float ttBarSF_2016inc[7] = {1.002029,	0.991079,	0.981770,	0.963568,	0.946061,	0.939943,	0.941690};
+    // 2017
+    float ttBarSF_2017exc[7] = {1.363999,	1.113553,	1.070007,	1.071000,	1.094611,	1.132046,	1.198218};
+    float ttBarSF_2017inc[7] = {1.138375,	1.091542,	1.076260,	1.085047,	1.112406,	1.154916,	1.217493};
+    // 2018
+    float ttBarSF_2018exc[7] = {1.123496,	0.997161,	0.955899,	0.950875,	0.947921,	0.981318,	1.032589};
+    float ttBarSF_2018inc[7] = {0.997299,	0.972467,	0.955640,	0.955278,	0.963813,	1.001809,	1.058206};
+
+    // Select ttBar SF set based on year
+    float ttBarSF_exc[7];
+    float ttBarSF_inc[7];
+    for (int i = 0; i < 7; i++){
+        if (year == 2016){
+            ttBarSF_exc[i] = ttBarSF_2016exc[i];
+            ttBarSF_inc[i] = ttBarSF_2016inc[i];
+        }
+        else if (year == 2017){
+            ttBarSF_exc[i] = ttBarSF_2017exc[i];
+            ttBarSF_inc[i] = ttBarSF_2017inc[i];
+        }
+        else if (year == 2018){
+            ttBarSF_exc[i] = ttBarSF_2018exc[i];
+            ttBarSF_inc[i] = ttBarSF_2018inc[i];
+        }
+        else isTTbar = false; // just turn off scaling if year not specified
+    }
+    
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Getting histograms from files
     for (int i(0); i < nFiles; i++){
-        if(Files[i] == 0) abort();
+        if (Files[i] == 0) abort();
         Files[i]->cd();
         std::cout << "#" << i << ": Doing filename " << Files[i]->GetName() << std::endl;
         histograms[i] = (TH1D*) Files[i]->Get(variable);	
 
-        // ALW 23 APRIL 20
-        isTTbar = false;
-
-        //--- ttbar rescaling
-        //andrew -- ttBar SFs for 2016 data added -- 3 May 2019
+        // tt-bar rescaling
 	    if (isTTbar){
-            std::cout << " ----- Scaling ttbar BG for " << variable << "!" << std::endl;
+            std::cout << " ----- Re-scaling ttbar BG! " << std::endl;
+            std::cout << " ----- year: " << year << ", variable: " << variable << std::endl;
 
             // inclusive distributions
-            if (variable.Index("Zinc2jet") >= 0) histograms[i]->Scale(1.04904374);
-            else if (variable.Index("Zinc3jet") >= 0) histograms[i]->Scale(0.99624372);
-            else if (variable.Index("Zinc4jet") >= 0) histograms[i]->Scale(0.97243212);
-            else if (variable.Index("Zinc5jet") >= 0) histograms[i]->Scale(0.94750793);
-            else if (variable.Index("Zinc6jet") >= 0) histograms[i]->Scale(0.92506162);
-
+            if (variable.Index("Zinc2jet") >= 0)      histograms[i]->Scale(ttBarSF_inc[0]);
+            else if (variable.Index("Zinc3jet") >= 0) histograms[i]->Scale(ttBarSF_inc[1]);
+            else if (variable.Index("Zinc4jet") >= 0) histograms[i]->Scale(ttBarSF_inc[2]);
+            else if (variable.Index("Zinc5jet") >= 0) histograms[i]->Scale(ttBarSF_inc[3]);
+            else if (variable.Index("Zinc6jet") >= 0) histograms[i]->Scale(ttBarSF_inc[4]);
+            else if (variable.Index("Zinc7jet") >= 0) histograms[i]->Scale(ttBarSF_inc[5]);
+            else if (variable.Index("Zinc8jet") >= 0) histograms[i]->Scale(ttBarSF_inc[6]);
             // exclusive distributions
-            else if (variable.Index("Zexc2jet") >= 0) histograms[i]->Scale(1.28532061);
-            else if (variable.Index("Zexc3jet") >= 0) histograms[i]->Scale(1.02880218);
-            else if (variable.Index("Zexc4jet") >= 0) histograms[i]->Scale(0.98994466);
-            else if (variable.Index("Zexc5jet") >= 0) histograms[i]->Scale(0.95915763);
-            else if (variable.Index("Zexc6jet") >= 0) histograms[i]->Scale(0.93695869);
+            else if (variable.Index("Zexc2jet") >= 0) histograms[i]->Scale(ttBarSF_exc[0]);
+            else if (variable.Index("Zexc3jet") >= 0) histograms[i]->Scale(ttBarSF_exc[1]);
+            else if (variable.Index("Zexc4jet") >= 0) histograms[i]->Scale(ttBarSF_exc[2]);
+            else if (variable.Index("Zexc5jet") >= 0) histograms[i]->Scale(ttBarSF_exc[3]);
+            else if (variable.Index("Zexc6jet") >= 0) histograms[i]->Scale(ttBarSF_exc[4]);
+            else if (variable.Index("Zexc7jet") >= 0) histograms[i]->Scale(ttBarSF_exc[5]);
+            else if (variable.Index("Zexc8jet") >= 0) histograms[i]->Scale(ttBarSF_exc[6]);
+            // if neither
+            else histograms[i]->Scale(1.0);
 
-            // jet multiplicity distributions
-		    else if (variable.Index("ZNGoodJets_Zinc") >= 0 || variable.Index("ZNGoodJetsFull_Zinc") >= 0) {
-
-                histograms[i]->SetBinContent(3, histograms[i]->GetBinContent(3)*1.04904374);
-                histograms[i]->SetBinContent(4, histograms[i]->GetBinContent(4)*0.99624372);
-                histograms[i]->SetBinContent(5, histograms[i]->GetBinContent(5)*0.97243212);
-                histograms[i]->SetBinContent(6, histograms[i]->GetBinContent(6)*0.94750793);
-                histograms[i]->SetBinContent(7, histograms[i]->GetBinContent(7)*0.92506162);
-                
-                histograms[i]->SetBinError(3, histograms[i]->GetBinError(3)*1.04904374);
-                histograms[i]->SetBinError(4, histograms[i]->GetBinError(4)*0.99624372);
-                histograms[i]->SetBinError(5, histograms[i]->GetBinError(5)*0.97243212);
-                histograms[i]->SetBinError(6, histograms[i]->GetBinError(6)*0.94750793);
-                histograms[i]->SetBinError(7, histograms[i]->GetBinError(7)*0.92506162);
+            // inclusive jet multiplicity distribution
+		    if (variable.Index("ZNGoodJets_Zinc") >= 0){
+                // bin content
+                histograms[i]->SetBinContent(3, histograms[i]->GetBinContent(3)*ttBarSF_inc[0]);
+                histograms[i]->SetBinContent(4, histograms[i]->GetBinContent(4)*ttBarSF_inc[1]);
+                histograms[i]->SetBinContent(5, histograms[i]->GetBinContent(5)*ttBarSF_inc[2]);
+                histograms[i]->SetBinContent(6, histograms[i]->GetBinContent(6)*ttBarSF_inc[3]);
+                histograms[i]->SetBinContent(7, histograms[i]->GetBinContent(7)*ttBarSF_inc[4]);
+                histograms[i]->SetBinContent(8, histograms[i]->GetBinContent(8)*ttBarSF_inc[5]);
+                histograms[i]->SetBinContent(9, histograms[i]->GetBinContent(9)*ttBarSF_inc[6]);
+                // bin error
+                histograms[i]->SetBinError(3, histograms[i]->GetBinError(3)*ttBarSF_inc[0]);
+                histograms[i]->SetBinError(4, histograms[i]->GetBinError(4)*ttBarSF_inc[1]);
+                histograms[i]->SetBinError(5, histograms[i]->GetBinError(5)*ttBarSF_inc[2]);
+                histograms[i]->SetBinError(6, histograms[i]->GetBinError(6)*ttBarSF_inc[3]);
+                histograms[i]->SetBinError(7, histograms[i]->GetBinError(7)*ttBarSF_inc[4]);
+                histograms[i]->SetBinError(8, histograms[i]->GetBinError(8)*ttBarSF_inc[5]);
+                histograms[i]->SetBinError(9, histograms[i]->GetBinError(9)*ttBarSF_inc[6]);
 		    }
-		    else if (variable.Index("ZNGoodJets_Zexc") >= 0 || variable.Index("ZNGoodJetsFull_Zexc") >= 0) {
 
-                histograms[i]->SetBinContent(3, histograms[i]->GetBinContent(3)*1.28532061);
-                histograms[i]->SetBinContent(4, histograms[i]->GetBinContent(4)*1.02880218);
-                histograms[i]->SetBinContent(5, histograms[i]->GetBinContent(5)*0.98994466);
-                histograms[i]->SetBinContent(6, histograms[i]->GetBinContent(6)*0.95915763);
-                histograms[i]->SetBinContent(7, histograms[i]->GetBinContent(7)*0.93695869);
-                
-                histograms[i]->SetBinError(3, histograms[i]->GetBinError(3)*1.28532061);
-                histograms[i]->SetBinError(4, histograms[i]->GetBinError(4)*1.02880218);
-                histograms[i]->SetBinError(5, histograms[i]->GetBinError(5)*0.98994466);
-                histograms[i]->SetBinError(6, histograms[i]->GetBinError(6)*0.95915763);
-                histograms[i]->SetBinError(7, histograms[i]->GetBinError(7)*0.93695869);
+            // exclusive jet multiplicity distribution
+		    if (variable.Index("ZNGoodJets_Zexc") >= 0){
+                // bin content
+                histograms[i]->SetBinContent(3, histograms[i]->GetBinContent(3)*ttBarSF_exc[0]);
+                histograms[i]->SetBinContent(4, histograms[i]->GetBinContent(4)*ttBarSF_exc[1]);
+                histograms[i]->SetBinContent(5, histograms[i]->GetBinContent(5)*ttBarSF_exc[2]);
+                histograms[i]->SetBinContent(6, histograms[i]->GetBinContent(6)*ttBarSF_exc[3]);
+                histograms[i]->SetBinContent(7, histograms[i]->GetBinContent(7)*ttBarSF_exc[4]);
+                histograms[i]->SetBinContent(8, histograms[i]->GetBinContent(8)*ttBarSF_exc[5]);
+                histograms[i]->SetBinContent(9, histograms[i]->GetBinContent(9)*ttBarSF_exc[6]);
+                // bin error
+                histograms[i]->SetBinError(3, histograms[i]->GetBinError(3)*ttBarSF_exc[0]);
+                histograms[i]->SetBinError(4, histograms[i]->GetBinError(4)*ttBarSF_exc[1]);
+                histograms[i]->SetBinError(5, histograms[i]->GetBinError(5)*ttBarSF_exc[2]);
+                histograms[i]->SetBinError(6, histograms[i]->GetBinError(6)*ttBarSF_exc[3]);
+                histograms[i]->SetBinError(7, histograms[i]->GetBinError(7)*ttBarSF_exc[4]);
+                histograms[i]->SetBinError(8, histograms[i]->GetBinError(8)*ttBarSF_exc[5]);
+                histograms[i]->SetBinError(9, histograms[i]->GetBinError(9)*ttBarSF_exc[6]);
 		    }
 		
 	    }//end ttbar rescaling section	
@@ -472,184 +383,77 @@ void getHistos(TH1D *histograms[], TFile *Files[], TString variable){
         //which causes troubles for the unfolding code: setting the overflow bin of
         //fake histogram was doubling the number of bins. Following line ensures
         //that the option is disabled:
-        if(histograms[i]) histograms[i]->SetCanExtend(kFALSE);
+        if (histograms[i]) histograms[i]->SetCanExtend(kFALSE);
 
     }//end loop over files
 
-    //--- Scaling some histos for lumi statistics, SF statistics
+    // Cloning central histos for lumi systematics
     if (!isData && histograms[0]){
         Files[0]->cd();
-        //--- From central histograms, we simulate the histograms
-        //    for lumi up and down systematics. It is just a rescaliing
-        //    since it is a global effect. 
-        double lumiErr = cfg.getD("lumiUnc");
-        std::cout << "lumiErr = " << lumiErr << std::endl;
-        if (isSignal) {
-            //--- lumi scale up ---
-            histograms[9] = (TH1D*) histograms[0]->Clone();
-            histograms[9]->Scale(1. + lumiErr);
-            //--- lumi scale down ---
-            histograms[10] = (TH1D*) histograms[0]->Clone();
-            histograms[10]->Scale(1. - lumiErr);
-        }
-        else{
-            //--- lumi scale up ---
-            histograms[7] = (TH1D*) histograms[0]->Clone();
-            histograms[7]->Scale(1. + lumiErr);
-            //--- lumi scale down ---
-            histograms[8] = (TH1D*) histograms[0]->Clone();
-            histograms[8]->Scale(1. - lumiErr);
-        }
-
-        //--- From central histograms, we simulate the histograms
-        //    for scale factors up and down systematics. It is just 
-        //    a rescaling since the errors are global. The error 
-        //    is different for the two channels and are estimated to
-        //    2.5% for muons and 0.5% for electron.
-        //    This should not be applied to gen histograms however.
-        //    That is why errSF = 0 when variable contains "gen"
-	    double muEffUnc = cfg.getD("muEffUnc");
-        double errSF = muEffUnc;
-        std::cout << "errSF = " << errSF << std::endl;
-        //Scaling for lepton SFs should only be done for reco MC
-        if ( (variable.Index("gen") < 0) && (variable.Index("misses") < 0) ){ //will enter brackets variable does not contain "gen"
-            if (isSignal){
-                //--- SF up ---
-                histograms[11] = (TH1D*) histograms[0]->Clone();
-                histograms[11]->Scale(1. + errSF);
-                //--- SF down ---
-                histograms[12] = (TH1D*) histograms[0]->Clone();
-                histograms[12]->Scale(1. - errSF);
-            }
-            else{
-                //--- SF up ---
-                histograms[9] = (TH1D*) histograms[0]->Clone();
-                histograms[9]->Scale(1. + errSF);
-                //--- SF down ---
-                histograms[10] = (TH1D*) histograms[0]->Clone();
-                histograms[10]->Scale(1. - errSF);
-            }
-        }
-    }//end global scaling for systematics section
+        histograms[11] = (TH1D*) histograms[0]->Clone(); // lumi up
+        histograms[12] = (TH1D*) histograms[0]->Clone(); // lumi down
+    }
 
 }
 
-void getHistos(TH2D *histograms[], TFile *Files[], TString variable){
+void getHistos(TH2D *histograms[], TFile *Files[], TString variable, int year){
+    // NOTE: this function is only used to import the hresponse distributions, which exist only for signal
 
     TString fileName = gSystem->BaseName(Files[0]->GetName());
-    bool isData = (fileName.Index("Data") >= 0 || fileName.Index("data") >= 0 || fileName.Index("DATA") >= 0);
-    bool isSignal = (/*fileName.Index("DYJets") >= 0 &&*/ fileName.Index("UNFOLDING") >=0 && fileName.Index("Tau") < 0);
+    bool isData = (fileName.Index("Data") >= 0);
+    bool isSignal = (fileName.Index("UNFOLDING") >= 0);
 
-    int nFiles = 0;
-    if (fileName.Index("Data") >= 0 || fileName.Index("data") >= 0 || fileName.Index("DATA") >= 0) nFiles = 3; 
-    else if (/*fileName.Index("DYJets") >= 0 &&*/ fileName.Index("UNFOLDING") >=0 && fileName.Index("Tau") < 0) nFiles = 9;
-    else nFiles = 7; 
+    int nFiles(0);
+    if (isData) nFiles = 3; 
+    else if (isSignal) nFiles = 11;
+    else nFiles = 11; 
 
-    std::cout << "Getting histo for variable " << variable << "!" << std::endl;
+    std::cout << "Getting histos for variable " << variable << "!" << std::endl;
     for (unsigned short i = 0; i < nFiles; i++){
         Files[i]->cd();
         std::cout << "#" << i << ": Doing filename " << Files[i]->GetName() << std::endl;
         histograms[i] = (TH2D*) Files[i]->Get(variable);
-        if (variable.Index("hresponse") >= 0 && fileName.Index("UNFOLDING") >=0 && fileName.Index("Tau") < 0){
-            // for Signal MC response matrix set negative bin to zero
-            setNegBinZero(histograms[i]);
-        }
+
+        // For signal MC response matrix, set negative bin counts to zero
+        if (isSignal && variable.Index("hresponse") >= 0) setNegBinZero(histograms[i]);
     } 
 
-    if (!isData && histograms[0]) {
+    // Cloning central histos for lumi systematics
+    if (!isData && histograms[0]){
         Files[0]->cd();
-        //--- From central histograms, we simulate the histograms
-        //    for lumi up and down systematics. It is just a rescaliing
-        //    since it is a global effect. The error is estimated to
-        //    2.6% for 8 TeV.
-        double lumiErr = cfg.getD("lumiUnc");
-        std::cout << "lumiErr = " << lumiErr << std::endl;
-        if (isSignal){
-            //--- lumi scale up ---
-            histograms[9] = (TH2D*) histograms[0]->Clone();
-            histograms[9]->Scale(1. + lumiErr);
-            //--- lumi scale down ---
-            histograms[10] = (TH2D*) histograms[0]->Clone();
-            histograms[10]->Scale(1. - lumiErr);
-        }
-        else{
-            //--- lumi scale up ---
-            histograms[7] = (TH2D*) histograms[0]->Clone();
-            histograms[7]->Scale(1. + lumiErr);
-            //--- lumi scale down ---
-            histograms[8] = (TH2D*) histograms[0]->Clone();
-            histograms[8]->Scale(1. - lumiErr);
-        }
-
-        //--- From central histograms, we simulate the histograms
-        //    for scale factors up and down systematics. It is just 
-        //    a rescaliinga since the errors are global. The error 
-        //    is different for the two channels and are estimated to
-        //    2.5% for muons and 0.5% for electron for 8 TeV
-        //    This should not be applied to gen histograms however.
-	    double muEffUnc = cfg.getD("muEffUnc");
-        double errSF = muEffUnc;
-        std::cout << "errSF = " << errSF << std::endl;
-        //Scaling for lepton SFs should only be done for reco MC
-        if (variable.Index("gen") < 0) {
-            if (isSignal) {
-                //--- SF up ---
-                histograms[11] = (TH2D*) histograms[0]->Clone();
-                histograms[11]->Scale(1. + errSF);
-                //--- SF down ---
-                histograms[12] = (TH2D*) histograms[0]->Clone();
-                histograms[12]->Scale(1. - errSF);
-            }
-            else{
-                //--- SF up ---
-                histograms[9] = (TH2D*) histograms[0]->Clone();
-                histograms[9]->Scale(1. + errSF);
-                //--- SF down ---
-                histograms[10] = (TH2D*) histograms[0]->Clone();
-                histograms[10]->Scale(1. - errSF);
-            }
-        }
+        histograms[11] = (TH2D*) histograms[0]->Clone(); // lumi up
+        histograms[12] = (TH2D*) histograms[0]->Clone(); // lumi down
     }
 }
 
-// void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hRecDYJets[13], TH1D *hGenDYJets[11], TH2D *hResDYJets[13], TFile *fDYJets[9], TH1D *hRecBg[][11], TH1D *hRecSumBg[11], TFile *fBg[][7], int nBg, TH1D* hFakDYJets[13], TH1D *hMissDYJets[11]){
-// void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hRecDYJets[13], TH1D *hGenDYJets[11], TH2D *hResDYJets[13], TFile *fDYJets[9], TH1D *hRecBg[][11], TH1D *hRecSumBg[11], TFile *fBg[][7], int nBg, TH1D* hFakDYJets[18], TH1D *hMissDYJets[11], bool isClosureTest){
-void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hRecDYJets[13], TH1D *hGenDYJets[11], TH2D *hResDYJets[13], TFile *fDYJets[9], TH1D *hRecBg[][11], TH1D *hRecSumBg[11], TFile *fBg[][7], int nBg, TH1D* hFakDYJets[18], TH2D *hAccepDYJets[13], bool isClosureTest){
+void getAllHistos(TString variable, int year, TH1D *hRecData[3], TFile *fData[3], TH1D *hRecDYJets[13], TH1D *hGenDYJets[13], TH2D *hResDYJets[13], TFile *fDYJets[11], TH1D *hRecBg[][13], TH1D *hRecSumBg[13], TFile *fBg[][11], int nBg, TH1D* hFakDYJets[18], TH2D *hAccepDYJets[13], bool isClosureTest){
 
-
-
-    //--- get rec Data histograms ---
-    //hRecData will contain Central, JES up/down (3 objects)
+    // DATA -------------------------
+    // hRecData will contain Central, JES up/down (3 objects)
     std::cout << "\n-----> Grabbing rec data histos hRecData!" << std::endl;
-    getHistos(hRecData, fData, variable);
+    getHistos(hRecData, fData, variable, year);
 
-
-
-    //--- get rec DYJets histograms ---
-    //hRecDYJets will contain histos from the 9 fDYJets files, and then 4 more at the end for Lumi up/down, then SF up/down (13 objects)
+    // SIGNAL -----------------------
+    // hRecDYJets will contain histos from the 11 fDYJets files, and then 2 more at the end for Lumi up/down (13 objects)
     std::cout << "\n-----> Grabbing rec signal histos hRecDYJets!" << std::endl;
-    getHistos(hRecDYJets, fDYJets, variable);
-
-    //--- get gen DYJets histograms ---
-    //hGenDYJets will contain histos from the 9 fDYJets files, and then 2 more at the end for Lumi up/down (11 objects)
+    getHistos(hRecDYJets, fDYJets, variable, year);
+    // hGenDYJets will contain histos from the 11 fDYJets files, and then 2 more at the end for Lumi up/down (13 objects)
     std::cout << "\n-----> Grabbing gen signal histos hGenDYJets!" << std::endl;
-    getHistos(hGenDYJets, fDYJets, "gen" + variable);
-
-    //--- get res DYJets histograms ---
-    //hResDYJets will contain histos from the 9 fDYJets files, and then 4 more at the end for Lumi up/down, then SF up/down (13 objects)
+    getHistos(hGenDYJets, fDYJets, "gen" + variable, year);
+    // hResDYJets will contain histos from the 11 fDYJets files, and then 2 more at the end for Lumi up/down (13 objects)
     std::cout << "\n-----> Grabbing hresponse signal histos hResDYJets!" << std::endl;
-    getHistos(hResDYJets, fDYJets, "hresponse" + variable);
+    getHistos(hResDYJets, fDYJets, "hresponse" + variable, year);
 
-    //--- get rec Bg histograms ---
-    //hRecBg, hRecSumBg will contain histos from the 7 fBg files, and then 4 more at the end for Lumi up/down, then SF up/down (11 objects)
+    // BACKGROUND -------------------
+    // hRecBg, hRecSumBg will contain histos from the 11 fBg files, and then 2 more at the end for Lumi up/down (13 objects)
     std::cout << "\n-----> Grabbing rec BG histos hRecBg and hRecSumBg!" << std::endl;
+    std::cout << "variable = " << variable << std::endl;
     for (unsigned short iBg = 0; iBg < nBg; ++iBg){
 
-        // std::cout << "\n" << __FILE__ << ":" << __LINE__ << ". variable = " << variable << " file = " << fBg[iBg][0]->GetName() << std::endl;
-        std::cout << "variable = " << variable << " \nfile = " << fBg[iBg][0]->GetName() << std::endl;
-        
-        getHistos(hRecBg[iBg], fBg[iBg], variable);
-        for (unsigned short iSyst = 0; iSyst < 11; ++iSyst){
+        std::cout << " \nfile = " << fBg[iBg][0]->GetName() << std::endl;
+        getHistos(hRecBg[iBg], fBg[iBg], variable, year);
+
+        for (unsigned short iSyst = 0; iSyst < 13; ++iSyst){
             if(hRecBg[iBg][iSyst] == 0){
                 std::cerr << __FILE__ << ":" << __LINE__ << ". Missing histogram " << variable
           		<< ", systematic id " << iSyst << " for process with central value file " 
@@ -658,7 +462,7 @@ void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hR
             }	  
             if (iBg == 0) hRecSumBg[iSyst] = (TH1D*) hRecBg[0][iSyst]->Clone();
             else{
-                if (hRecSumBg[iSyst]->GetXaxis()->GetNbins()!=hRecBg[iBg][iSyst]->GetXaxis()->GetNbins()){
+                if (hRecSumBg[iSyst]->GetXaxis()->GetNbins() != hRecBg[iBg][iSyst]->GetXaxis()->GetNbins()){
           	        std::cerr << __FILE__ << ":" <<  __LINE__ << ". "
           		    << "Histogram " << hRecSumBg[iSyst]->GetName()
           		    << "for systematic index " << iSyst
@@ -670,20 +474,13 @@ void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hR
         }
     }
 
-    //--- get fakes DYJets histograms ---
-    //there are 13 hFakDYJets objects, for new method (18 for old method)
+    // OTHER ------------------------
+    // There are 18 hFakDYJets objects
     std::cout << "\n-----> Grabbing fakes objects hFakDYJets!" << std::endl;
-    // getHistos(hFakDYJets, fDYJets, "fakes" + variable); // "new" method
-    getFakes(hFakDYJets, hRecData, hRecSumBg, hRecDYJets, hResDYJets, isClosureTest); // "old" method
-
-    //--- get misses DYJets histograms ---
-    //there are 11 hMissDYJets objects
-    // std::cout << "\n-----> Grabbing misses objects hMissDYJets!" << std::endl;
+    getAllFakes(hFakDYJets, hRecData, hRecSumBg, hRecDYJets, hResDYJets, isClosureTest);
+    // There are 13 hAccepDYJets objects
     std::cout << "\n-----> Grabbing acceptance objects hAccepDYJets!" << std::endl;
-    // getPurities(hPurityDYJets, hRecData, hRecSumBg, hRecDYJets, hResDYJets);
-    // getHistos(hMissDYJets, fDYJets, "misses" + variable);
-    getHistos(hAccepDYJets, fDYJets, "hresponse" + variable + "_NOEFFWEIGHTS");
-
+    getHistos(hAccepDYJets, fDYJets, "hresponse" + variable + "_NOEFFWEIGHTS", year);
 
 }
 
@@ -728,60 +525,24 @@ TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJe
     return hFakDYJets;
 }
 
-void getFakes(TH1D *hFakDYJets[18], TH1D *hRecData[3], TH1D *hRecSumBg[11], TH1D *hRecDYJets[13], TH2D *hResDYJets[13], bool isClosureTest){
-
-    hFakDYJets[0] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[0], hResDYJets[0], true, isClosureTest);
-    hFakDYJets[1] = getFakes(hRecDYJets[0], hRecData[1], hRecSumBg[0], hResDYJets[0], false, isClosureTest);
-    hFakDYJets[2] = getFakes(hRecDYJets[0], hRecData[2], hRecSumBg[0], hResDYJets[0], false, isClosureTest);
-    hFakDYJets[3] = getFakes(hRecDYJets[1], hRecData[0], hRecSumBg[1], hResDYJets[1], false, isClosureTest);
-    hFakDYJets[4] = getFakes(hRecDYJets[2], hRecData[0], hRecSumBg[2], hResDYJets[2], false, isClosureTest);
-    hFakDYJets[5] = getFakes(hRecDYJets[3], hRecData[0], hRecSumBg[0], hResDYJets[3], false, isClosureTest);
-    hFakDYJets[6] = getFakes(hRecDYJets[4], hRecData[0], hRecSumBg[0], hResDYJets[4], false, isClosureTest);
-    hFakDYJets[7] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[3], hResDYJets[0], false, isClosureTest);
-    hFakDYJets[8] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[4], hResDYJets[0], false, isClosureTest);
-    hFakDYJets[9] = getFakes(hRecDYJets[5], hRecData[0], hRecSumBg[0], hResDYJets[5], false, isClosureTest);
-    hFakDYJets[10] = getFakes(hRecDYJets[6], hRecData[0], hRecSumBg[0], hResDYJets[6], false, isClosureTest);
-    hFakDYJets[11] = getFakes(hRecDYJets[7], hRecData[0], hRecSumBg[5], hResDYJets[7], false, isClosureTest);
-    hFakDYJets[12] = getFakes(hRecDYJets[8], hRecData[0], hRecSumBg[6], hResDYJets[8], false, isClosureTest);
-    hFakDYJets[13] = getFakes(hRecDYJets[9], hRecData[0], hRecSumBg[7], hResDYJets[9], false, isClosureTest);
-    hFakDYJets[14] = getFakes(hRecDYJets[10], hRecData[0], hRecSumBg[8], hResDYJets[10], false, isClosureTest);
-    hFakDYJets[15] = getFakes(hRecDYJets[11], hRecData[0], hRecSumBg[9], hResDYJets[11], false, isClosureTest);
-    hFakDYJets[16] = getFakes(hRecDYJets[12], hRecData[0], hRecSumBg[10], hResDYJets[12], false, isClosureTest);
-    hFakDYJets[17] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[0], hResDYJets[0], false, isClosureTest);
-
+void getAllFakes(TH1D *hFakDYJets[18], TH1D *hRecData[3], TH1D *hRecSumBg[13], TH1D *hRecDYJets[13], TH2D *hResDYJets[13], bool isClosureTest){
+    // NOTE: reco signal distributions and hresponse signal distributions MUST have the same index for fakes derivation
+    hFakDYJets[0]  = getFakes(hRecDYJets[0],  hRecData[0], hRecSumBg[0],  hResDYJets[0],  true,  isClosureTest);
+    hFakDYJets[1]  = getFakes(hRecDYJets[0],  hRecData[1], hRecSumBg[0],  hResDYJets[0],  false, isClosureTest);
+    hFakDYJets[2]  = getFakes(hRecDYJets[0],  hRecData[2], hRecSumBg[0],  hResDYJets[0],  false, isClosureTest);
+    hFakDYJets[3]  = getFakes(hRecDYJets[1],  hRecData[0], hRecSumBg[1],  hResDYJets[1],  false, isClosureTest);
+    hFakDYJets[4]  = getFakes(hRecDYJets[2],  hRecData[0], hRecSumBg[2],  hResDYJets[2],  false, isClosureTest);
+    hFakDYJets[5]  = getFakes(hRecDYJets[0],  hRecData[0], hRecSumBg[3],  hResDYJets[0],  false, isClosureTest);
+    hFakDYJets[6]  = getFakes(hRecDYJets[0],  hRecData[0], hRecSumBg[4],  hResDYJets[0],  false, isClosureTest);
+    hFakDYJets[7]  = getFakes(hRecDYJets[3],  hRecData[0], hRecSumBg[0],  hResDYJets[3],  false, isClosureTest);
+    hFakDYJets[8]  = getFakes(hRecDYJets[4],  hRecData[0], hRecSumBg[0],  hResDYJets[4],  false, isClosureTest);
+    hFakDYJets[9]  = getFakes(hRecDYJets[5],  hRecData[0], hRecSumBg[5],  hResDYJets[5],  false, isClosureTest);
+    hFakDYJets[10] = getFakes(hRecDYJets[6],  hRecData[0], hRecSumBg[6],  hResDYJets[6],  false, isClosureTest);
+    hFakDYJets[11] = getFakes(hRecDYJets[7],  hRecData[0], hRecSumBg[7],  hResDYJets[7],  false, isClosureTest);
+    hFakDYJets[12] = getFakes(hRecDYJets[8],  hRecData[0], hRecSumBg[8],  hResDYJets[8],  false, isClosureTest);
+    hFakDYJets[13] = getFakes(hRecDYJets[9],  hRecData[0], hRecSumBg[9],  hResDYJets[9],  false, isClosureTest);
+    hFakDYJets[14] = getFakes(hRecDYJets[10], hRecData[0], hRecSumBg[10], hResDYJets[10], false, isClosureTest);
+    hFakDYJets[15] = getFakes(hRecDYJets[11], hRecData[0], hRecSumBg[11], hResDYJets[11], false, isClosureTest);
+    hFakDYJets[16] = getFakes(hRecDYJets[12], hRecData[0], hRecSumBg[12], hResDYJets[12], false, isClosureTest);
+    hFakDYJets[17] = getFakes(hRecDYJets[0],  hRecData[0], hRecSumBg[0],  hResDYJets[0],  false, isClosureTest);
 }
-
-// TH1D* getPurities(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJets){ 
-
-//     TH1D* hSignal = (TH1D*) hResDYJets->ProjectionY("hSignal", 0, -1, "e");
-//     hSignal->SetDirectory(0);
-//     TH1D* hPurity = (TH1D*) hRecDYJets->Clone(TString("purity") + hRecDYJets->GetName());
-//     hPurity->Reset();
-
-//     //hRecDYJets contains all events passing the selection cuts including "fakes"
-//     hPurity->Divide(hSignal, hRecDYJets, 1., 1., "B");
-    
-//     return hPurity;
-// }
-
-// void getPurities(TH1D *hPurityDYJets[18], TH1D *hRecData[3], TH1D *hRecSumBg[11], TH1D *hRecDYJets[13], TH2D *hResDYJets[13]){
-
-//     hPurityDYJets[0] = getPurities(hRecDYJets[0], hRecData[0], hRecSumBg[0], hResDYJets[0]);
-//     hPurityDYJets[1] = getPurities(hRecDYJets[0], hRecData[1], hRecSumBg[0], hResDYJets[0]);
-//     hPurityDYJets[2] = getPurities(hRecDYJets[0], hRecData[2], hRecSumBg[0], hResDYJets[0]);
-//     hPurityDYJets[3] = getPurities(hRecDYJets[1], hRecData[0], hRecSumBg[1], hResDYJets[1]);
-//     hPurityDYJets[4] = getPurities(hRecDYJets[2], hRecData[0], hRecSumBg[2], hResDYJets[2]);
-//     hPurityDYJets[5] = getPurities(hRecDYJets[3], hRecData[0], hRecSumBg[0], hResDYJets[3]);
-//     hPurityDYJets[6] = getPurities(hRecDYJets[4], hRecData[0], hRecSumBg[0], hResDYJets[4]);
-//     hPurityDYJets[7] = getPurities(hRecDYJets[0], hRecData[0], hRecSumBg[3], hResDYJets[0]);
-//     hPurityDYJets[8] = getPurities(hRecDYJets[0], hRecData[0], hRecSumBg[4], hResDYJets[0]);
-//     hPurityDYJets[9] = getPurities(hRecDYJets[5], hRecData[0], hRecSumBg[5], hResDYJets[5]);
-//     hPurityDYJets[10] = getPurities(hRecDYJets[6], hRecData[0], hRecSumBg[6], hResDYJets[6]);
-//     hPurityDYJets[11] = getPurities(hRecDYJets[7], hRecData[0], hRecSumBg[0], hResDYJets[7]);
-//     hPurityDYJets[12] = getPurities(hRecDYJets[8], hRecData[0], hRecSumBg[0], hResDYJets[8]);
-//     hPurityDYJets[13] = getPurities(hRecDYJets[9], hRecData[0], hRecSumBg[7], hResDYJets[9]);
-//     hPurityDYJets[14] = getPurities(hRecDYJets[10], hRecData[0], hRecSumBg[8], hResDYJets[10]);
-//     hPurityDYJets[15] = getPurities(hRecDYJets[11], hRecData[0], hRecSumBg[9], hResDYJets[11]);
-//     hPurityDYJets[16] = getPurities(hRecDYJets[12], hRecData[0], hRecSumBg[10], hResDYJets[12]);
-//     hPurityDYJets[17] = getPurities(hRecDYJets[0], hRecData[0], hRecSumBg[0], hResDYJets[0]);
-// }

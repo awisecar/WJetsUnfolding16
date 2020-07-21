@@ -625,7 +625,7 @@ std::string getYaxisTitle(bool doNormalized, const TH1D *gen1){
     return title;
 }
 
-TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalized, TH1D *hStat, TH2D *hCovSyst, TH1D *hGen1, TH1D *hGen2, TH1D* hGen3, double integratedLumi){
+TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool doNormalized, TH1D *hStat, TH2D *hCovSyst, TH1D *hGen1, TH1D *hGen2, TH1D* hGen3, double integratedLumi){
 
     // Determine how many comparisons we have ---
     int numbOfGenerator = 1;
@@ -832,7 +832,10 @@ TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalize
     latexLabel->SetLineWidth(2);
     latexLabel->SetTextFont(42);
 
-    latexLabel->DrawLatex(0.13, 0.90, "35.9 fb^{-1} (13 TeV)");
+    if (year == 2016)      latexLabel->DrawLatex(0.13, 0.90, "35.9 fb^{-1} (13 TeV)");
+    else if (year == 2017) latexLabel->DrawLatex(0.13, 0.90, "41.5 fb^{-1} (13 TeV)");
+    else if (year == 2018) latexLabel->DrawLatex(0.13, 0.90, "59.7 fb^{-1} (13 TeV)");
+    else                   latexLabel->DrawLatex(0.13, 0.90, "137.16 fb^{-1} (13 TeV)");
     latexLabel->DrawLatex(0.18, 0.21-0.03, "anti-k_{T} (R = 0.4) Jets");
 
     if (canvasName.Contains("FirstJetPt50")) latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{jet} > 50 GeV, |#eta^{jet}| < 2.4 ");

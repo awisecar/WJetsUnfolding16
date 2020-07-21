@@ -41,6 +41,6 @@ TGraphAsymmErrors* createPDFSystGraph(const TH1D *hPDFUp, const TH1D *hPDFDown, 
 TGraphAsymmErrors* createScaleSystGraph(TString lepSel, TString variable, const TGraphAsymmErrors *grGenToCentral);
 TGraphAsymmErrors* createScaleSystGraphNNLO1j(TString lepSel, TString variable, const TGraphAsymmErrors *grGenToCentral);
 TGraphAsymmErrors* createTotSystGraphAMCNLO(TString lepSel, TString variable, const TGraphAsymmErrors *grGenToCentral);
-TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalized, TH1D *hData, TH2D *hCovSyst, TH1D *hGen, TH1D *hGen1 = NULL, TH1D *hGen2 = NULL, double integratedLumi = -1);
+TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool doNormalized, TH1D *hData, TH2D *hCovSyst, TH1D *hGen, TH1D *hGen1 = NULL, TH1D *hGen2 = NULL, double integratedLumi = -1);
 void createTitleVariableAnddSigma(TString variable, bool doNormalized, TString xtitle, TString &title, TString &var, TString &dSigma) ;
 #endif
