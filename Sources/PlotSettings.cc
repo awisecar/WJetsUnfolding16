@@ -632,6 +632,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool d
     if (hGen2) numbOfGenerator = 2;
     if (hGen3) numbOfGenerator = 3;
 
+    // NOTE: update
     TH1D *hPDFUp = (TH1D*) hStat->Clone("hPDFUp");
     hPDFUp->Scale(1.10);
     TH1D *hPDFDown = (TH1D*) hStat->Clone("hPDFDown");
@@ -1002,6 +1003,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool d
         plot4->RedrawAxis();
         //--- End of Fourth Pad ---
     }
+
     plots->Update();
     return plots;
 }

@@ -267,11 +267,11 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
         // 11 - BtagSF up,    12 - BtagSF down 
         // 13 - L1Prefire up, 14 - L1Prefire down
         // 15 - Lumi up,      16 - Lumi down
-        // 17 - (blank)
+        // 17 - (Blank)
 
         int nSysts = 18;
         TString name[] = {"Central", "JESUp", "JESDown", "PUUp", "PUDown", "XSECUp", "XSECDown", "JERUp", "JERDown", 
-            "LepSFUp", "LepSFDown", "BtagSFUp", "BtagSFDown", "L1PrefireUp", "L1PrefireDown", "LumiUp", "LumiDown", "blank"};
+            "LepSFUp", "LepSFDown", "BtagSFUp", "BtagSFDown", "L1PrefireUp", "L1PrefireDown", "LumiUp", "LumiDown", "Blank"};
 
         TH1D *hRecDataBinsMerged[nSysts]     = {};
         TH1D *hUnfData[nSysts]               = {};
@@ -347,44 +347,39 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
 
         std::cout << "\n<=========================================================================================>\n" << std::endl;
         
-        //--- Now create the covariance matrices ---
-        int nCovs = nSysts > 17 ? 11 : 10;
-        
+        // Calculate covariance matrices ---
         TH2D *hCov[12] = {};
+        int nCovs = 10;
+        // -- Covariance matrix for the data statistical uncertainties (input to unfolding)
         if (hUnfDataStatCov[0]){
-            std::cout << "Cloning hUnfDataStatCov[0]..." << std::endl;
+            std::cout << "Retrieving CovDataStat..." << std::endl;
             hCov[0] = (TH2D*) hUnfDataStatCov[0]->Clone("CovDataStat");
         }
+        // -- Covariance matrix for the (uncorrelated) statistical uncertainties of the response matrix
         if (hUnfMCStatCov[0]){
-            std::cout << "Cloning hUnfMCStatCov[0]..." << std::endl;
+            std::cout << "Retrieving CovMCStat..." << std::endl;
             hCov[1] = (TH2D*) hUnfMCStatCov[0]->Clone("CovMCStat");
         }
-        // if(hUnfData[1])  hCov[2] = makeCovFromUpAndDown(hUnfData[0], hUnfData[1], hUnfData[2], "CovJES");
-        // if(hUnfData[3])  hCov[3] = makeCovFromUpAndDown(hUnfData[0], hUnfData[3], hUnfData[4], "CovPU");
-        // if(hUnfData[5])  hCov[4] = makeCovFromUpAndDown(hUnfData[0], hUnfData[5], hUnfData[6], "CovJER");
-        // if(hUnfData[7])  hCov[5] = makeCovFromUpAndDown(hUnfData[0], hUnfData[7], hUnfData[8], "CovXSec");
-        // if(hUnfData[9])  hCov[6] = makeCovFromUpAndDown(hUnfData[0], hUnfData[9], hUnfData[10], "CovBlank1");
-        // if(hUnfData[11]) hCov[7] = makeCovFromUpAndDown(hUnfData[0], hUnfData[11], hUnfData[12], "CovBtagSF");
-        // if(hUnfData[13]) hCov[8] = makeCovFromUpAndDown(hUnfData[0], hUnfData[13], hUnfData[14], "CovLumi");
-        // if(hUnfData[15]) hCov[9] = makeCovFromUpAndDown(hUnfData[0], hUnfData[15], hUnfData[16], "CovSF");
-        // if(hUnfData[17]) hCov[10] = makeCovFromUpAndDown(hUnfData[0], hUnfData[17], hUnfData[0], "CovBlank5");
-        if(hUnfMCStatCov[0]) hCov[11] = (TH2D*) hUnfMCStatCov[0]->Clone("CovTotSyst");
-        // if (hCov[11]){
-        //     for (int i = 2; i < nCovs; ++i){
-        //         if(hCov[i]) hCov[11]->Add(hCov[i]);
-        //     }
-        // }
+        // -- Covariance matrices for systematic variations
+        if (hUnfData[1])  hCov[2] = makeCovFromUpAndDown(hUnfData[0], hUnfData[1], hUnfData[2], "CovJES");
+        if (hUnfData[3])  hCov[3] = makeCovFromUpAndDown(hUnfData[0], hUnfData[3], hUnfData[4], "CovPU");
+        if (hUnfData[5])  hCov[4] = makeCovFromUpAndDown(hUnfData[0], hUnfData[5], hUnfData[6], "CovXSEC");
+        if (hUnfData[7])  hCov[5] = makeCovFromUpAndDown(hUnfData[0], hUnfData[7], hUnfData[8], "CovJER");
+        if (hUnfData[9])  hCov[6] = makeCovFromUpAndDown(hUnfData[0], hUnfData[9], hUnfData[10], "CovLepSF");
+        // if (hUnfData[11]) hCov[7] = makeCovFromUpAndDown(hUnfData[0], hUnfData[11], hUnfData[12], "CovBtagSF"); // not currently using
+        if (hUnfData[13]) hCov[8] = makeCovFromUpAndDown(hUnfData[0], hUnfData[13], hUnfData[14], "CovL1Prefire");
+        if (hUnfData[15]) hCov[9] = makeCovFromUpAndDown(hUnfData[0], hUnfData[15], hUnfData[16], "CovLumi");
+        // if (hUnfData[17]) hCov[10] = makeCovFromUpAndDown(hUnfData[0], hUnfData[17], hUnfData[0], "CovBlank"); // not currently using
+        // -- Covariance matrix for all systematics summed
+        if (hCov[1]) hCov[11] = (TH2D*) hCov[1]->Clone("CovTotSyst");
+        if (hCov[11]){
+            std::cout << "Calculating CovTotSyst from all systematic contributions!" << std::endl;
+            for (int i = 2; i <= nCovs; ++i){
+                if (hCov[i]) hCov[11]->Add(hCov[i]);
+            }
+        }
 
-        // if (doNormalized) {
-        //     double Madtot = hMadGenCrossSection->Integral("width");
-        //     //double gen1tot = hGen1CrossSection->Integral("width");
-        //     //double gen2tot = hGen2CrossSection->Integral("width");
-        //     hMadGenCrossSection->Scale(1.0/Madtot);
-        //     //hGen1CrossSection->Scale(1.0/gen1tot);    
-        //     //hGen2CrossSection->Scale(1.0/gen2tot);
-        // }
-
-     
+        // Plot central unfolded distribution (w/ stat & syst errors), theory predictions ---
         // TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, year, variable, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection, hGen1CrossSection, hGen2CrossSection);
         // TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, year, variable, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection, hGen1CrossSection);  
         // TCanvas *crossSectionPlot;
@@ -397,11 +392,10 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
 
         // TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, year, variable, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection); 
         TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, year, variable, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection, hGen1CrossSection);
-
         crossSectionPlot->Draw();
         crossSectionPlot->SaveAs(outputFileName + ".pdf");
 
-        //Plot response matrix for central distribution
+        // Plot response matrix for central distribution ---
         plotRespMat(hResDYJets[0], variable, unfoldDir, 0, hGenDYJets[0]);
         //if #recobins = 2 * #genbins, then generate alternate plot of response matrix (done for TUnfold)
         if (variable.Contains("_TUnfold")) plotRespMat(hResDYJets[0], variable, unfoldDir, 1, hGenDYJets[0]);
@@ -438,16 +432,16 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
 
         hRecData[0]->Write("hRecData_Central"); //reco data before BG subtraction and fakes removal
         hRecSumBg[0]->Write("hRecSumBg_Central"); //sum of all BGs to be subtracted from reco data
+        hFakDYJets[0]->Write("hFakDYJets_Central");
         hRecDYJets[0]->Write("hRecDYJets_Central"); //reco MC for W+jets signal
         hGenDYJets[0]->Write("hGenDYJets_Central"); //gen MC for W+jets NLO FxFx signal
         hResDYJets[0]->Write("hResDYJets_Central"); //hResDYJets is the response matrix
-        hFakDYJets[0]->Write("hFakDYJets_Central");
         hMadGenCrossSection->Write("hMadGenCrossSection"); //gen MC for W+jets NLO FxFx signal (also)
         hGen1CrossSection->Write("hGen1CrossSection"); //gen MC for W+jets LO MLM signal
         // hGen2CrossSection->Write("hGen2CrossSection");
-        // Write out unfolded distributions ---
+
+        // Write out unfolded distributions and covariance matrices ---
         for (int iSyst = 0; iSyst < nSysts; ++iSyst) if (hUnfData[iSyst]) hUnfData[iSyst]->Write();     
-        // Write out covariance matrices ---
         for (int i = 0; i <= 11; ++i) if (hCov[i]) hCov[i]->Write();
 
         // TH1D *h_TotalUncer = (TH1D*) hUnfData[0]->Clone();
@@ -1339,33 +1333,71 @@ void createTable(TString outputFileName, TString lepSel, TString variable, bool 
 }
 
 TH2D* makeCovFromUpAndDown(const TH1D* hUnfDataCentral, const TH1D* hUnfDataUp, const TH1D* hUnfDataDown, TString name){
-    int nBins = hUnfDataCentral->GetNbinsX();
-    TH2D* h = new TH2D(name, name, nBins, 0, nBins, nBins, 0, nBins);
+    std::cout << "Calculating " << name << "..." << std::endl;
 
-    for (int i = 1; i <= nBins; ++i) {
-        double sigmaMeani = 0.5*fabs(hUnfDataUp->GetBinContent(i) - hUnfDataDown->GetBinContent(i)); 
-        if (name.Index("Sherpa") >= 0) sigmaMeani *= 2;
-        int signi = (hUnfDataUp->GetBinContent(i) - hUnfDataDown->GetBinContent(i) < 0) ? -1 : 1;
-        if (i > 1 && i < nBins) {
-            if ((hUnfDataUp->GetBinContent(i-1) - hUnfDataDown->GetBinContent(i-1)) * (hUnfDataUp->GetBinContent(i+1) - hUnfDataDown->GetBinContent(i+1)) < 0) {
-                sigmaMeani = 0.5*(0.5*fabs(hUnfDataUp->GetBinContent(i-1) - hUnfDataDown->GetBinContent(i-1)) + 0.5*fabs(hUnfDataUp->GetBinContent(i+1) - hUnfDataDown->GetBinContent(i+1)));
-                if (name.Index("Sherpa") >= 0) sigmaMeani *= 2;
-            }
+    // Setup ---
+    // Get #bins of unfolded distribution
+    int nBins = hUnfDataCentral->GetNbinsX();
+    // Get binning of distribution
+    Double_t binEdgesUnf[nBins+1]; //array of bin edges from unfolded dist.
+    for (int i(1); i <= nBins + 1; i++){ //use low bin edge of overflow bin for upper bin edge of last real bin
+        binEdgesUnf[i-1] = hUnfDataCentral->GetBinLowEdge(i);
+    }
+    // Create TH2 for covariance matrix
+    TH2D* h = new TH2D(name, name, nBins, binEdgesUnf, nBins, binEdgesUnf);
+
+    // Covariance calculation ---
+    // Covariance(i,j) = Correlation_Pearson(i,j) * Sigma(i) * Sigma(j)
+    // Sign of covariance (+-) is determined by sign of correlation coefficient
+    for (int i = 1; i <= nBins; ++i){
+        // Calculate the average systematic deviation from both Up, Down variations
+        double errUpi = fabs(hUnfDataUp->GetBinContent(i) - hUnfDataCentral->GetBinContent(i));
+        double errDowni = fabs(hUnfDataCentral->GetBinContent(i) - hUnfDataDown->GetBinContent(i));
+        double sigmaMeani = 0.5 * (errUpi + errDowni);
+
+        // Check if the Up/Down variations cross over in bin i
+        if (i > 1 && i < nBins){
+            double err1i = (hUnfDataUp->GetBinContent(i-1) - hUnfDataDown->GetBinContent(i-1));
+            double err2i = (hUnfDataUp->GetBinContent(i+1) - hUnfDataDown->GetBinContent(i+1));
+            // If variations cross over in bin i, set error using average of error in bins (i-1) and (i+1)
+            if ( (err1i * err2i) < 0) sigmaMeani = 0.5 * ( 0.5*fabs(err1i) + 0.5*fabs(err2i) );
         }
 
-        for (int j = 1; j <= nBins; ++j) {
-            double sigmaMeanj = 0.5*fabs(hUnfDataUp->GetBinContent(j) - hUnfDataDown->GetBinContent(j)); 
-            if (name.Index("Sherpa") >= 0) sigmaMeanj *= 2;
-            int signj = (hUnfDataUp->GetBinContent(j) - hUnfDataDown->GetBinContent(j) < 0) ? -1 : 1;
-            if (j > 1 && j < nBins) {
-                if ((hUnfDataUp->GetBinContent(j-1) - hUnfDataDown->GetBinContent(j-1)) * (hUnfDataUp->GetBinContent(j+1) - hUnfDataDown->GetBinContent(j+1)) < 0) {
-                    sigmaMeanj = 0.5*(0.5*fabs(hUnfDataUp->GetBinContent(j-1) - hUnfDataDown->GetBinContent(j-1)) + 0.5*fabs(hUnfDataUp->GetBinContent(j+1) - hUnfDataDown->GetBinContent(j+1)));
-                    if (name.Index("Sherpa") >= 0) sigmaMeanj *= 2;
-                }
+        // Check if the "Up" variation is higher than the "Down" variation, or vice versa
+        // Evaluates to -1 if "Down" is above "Up", and 1 otherwise
+        int signi = ( (hUnfDataUp->GetBinContent(i) - hUnfDataDown->GetBinContent(i)) < 0 ) ? -1 : 1;
+
+        for (int j = 1; j <= nBins; ++j){
+            // Calculate the average systematic deviation from both Up, Down variations
+            double errUpj = fabs(hUnfDataUp->GetBinContent(j) - hUnfDataCentral->GetBinContent(j));
+            double errDownj = fabs(hUnfDataCentral->GetBinContent(j) - hUnfDataDown->GetBinContent(j));
+            double sigmaMeanj = 0.5 * (errUpj + errDownj);
+
+            // Check if the Up/Down variations cross over in bin j
+            if (j > 1 && j < nBins){
+                double err1j = (hUnfDataUp->GetBinContent(j-1) - hUnfDataDown->GetBinContent(j-1));
+                double err2j = (hUnfDataUp->GetBinContent(j+1) - hUnfDataDown->GetBinContent(j+1));
+                // If variations cross over in bin j, set error using average of error in bins (j-1) and (j+1)
+                if ( (err1j * err2j) < 0) sigmaMeanj = 0.5 * ( 0.5*fabs(err1j) + 0.5*fabs(err2j) );
             }
 
-            double correlation = (i == j) ? 1 : 1;
-            h->SetBinContent(i, j, correlation * signi * signj * sigmaMeani * sigmaMeanj);
+            // Check if the "Up" variation is higher than the "Down" variation, or vice versa
+            // Evaluates to -1 if "Down" is above "Up", and 1 otherwise
+            int signj = ( (hUnfDataUp->GetBinContent(j) - hUnfDataDown->GetBinContent(j)) < 0) ? -1 : 1;
+
+            // ---
+
+            // Set the magnitude of the correlation (1 is total correlation)
+            // Assumption taken here: a total correlation of 1 is assigned for any of the off-diagonal elements where i =/= j
+            double correlationStrength = (i == j) ? 1. : 1.; 
+
+            // Fill covariance for bin (i,j)
+            // correlationStrength is the magnitude of the Pearson correlation coefficient (value between 0, 1)
+            // (signi * signj) keeps track if bins i,j are positively/negatively correlated (the sign +-)
+            // sigmaMeani, sigmaMeanj are the errors in bins i,j respectively
+            h->SetBinContent(i, j, correlationStrength * (signi * signj) * sigmaMeani * sigmaMeanj);
+            
+            // ---
 
         }//end second loop over nBins
     } //end first loop over nBins
