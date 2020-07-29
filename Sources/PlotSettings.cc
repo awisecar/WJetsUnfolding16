@@ -6,7 +6,7 @@
 
 extern ConfigVJets cfg;
 
-void setAndDrawTPad(TString canvasName, TPad *plot, int plotNumber, int numbOfGenerator){
+void setAndDrawTPad(TString canvasName, TPad *plot, int plotNumber, int numbOfGenerator, bool isRatio){
     if (numbOfGenerator == 1) {
         if (plotNumber == 1) {
             plot->SetPad(0.01, 0.35, 0.99, 0.99);
@@ -61,7 +61,8 @@ void setAndDrawTPad(TString canvasName, TPad *plot, int plotNumber, int numbOfGe
     }
 
 
-    if (plotNumber == 1 && (canvasName.Index("Eta") < 0 && canvasName.Index("AbsRapidity") < 0 && canvasName.Index("DPhi") < 0)) plot->SetLogy();
+    if (plotNumber == 1 && (canvasName.Index("Eta") < 0 && canvasName.Index("AbsRapidity") < 0 && canvasName.Index("DPhi") < 0 && !isRatio)) plot->SetLogy();
+
     plot->SetLeftMargin(0.13);
     plot->SetRightMargin(0.07);
     plot->SetFillStyle(0);
@@ -96,8 +97,8 @@ void customizeLegend(TLegend *legend, int numbOfGenerator){
     }
 }
 
-void customizeLegend(TLegend *legend, int genNumb, int numbOfGenerator)
-{
+void customizeLegend(TLegend *legend, int genNumb, int numbOfGenerator){
+
     legend->SetFillColor(0);
     legend->SetFillStyle(ZJetsFillStyle);
     legend->SetBorderSize(0);
@@ -452,7 +453,8 @@ void customizeGenHist(TH1D *gen, int genNumb, TLegend *legend, TString legText){
 }
 
 
-void configYaxis(TH1D *grCentralSyst, TH1D *gen1, TH1D *gen2, TH1D *gen3){
+void configYaxis(TH1D *grCentralSyst, TH1D *gen1, TH1D *gen2, TH1D *gen3, bool isRatio){
+
     //--- Configure Y axis of the plot ---
     double minimumToPlot  = grCentralSyst->GetMaximum();
     double minimumToPlot2 = gen1->GetMaximum();
@@ -480,7 +482,10 @@ void configYaxis(TH1D *grCentralSyst, TH1D *gen1, TH1D *gen2, TH1D *gen3){
     //if (gen2) maximumToPlot = TMath::Max(maximumToPlot, gen2->GetBinContent(gen2->GetMaximumBin()));
     //if (gen3) maximumToPlot = TMath::Max(maximumToPlot, gen3->GetBinContent(gen3->GetMaximumBin()));
 
-    grCentralSyst->GetYaxis()->SetRangeUser(0.2*minimumToPlot, 5*maximumToPlot);
+    
+    if (isRatio) grCentralSyst->GetYaxis()->SetRangeUser(0.01, 1.5*maximumToPlot);
+    else grCentralSyst->GetYaxis()->SetRangeUser(0.2*minimumToPlot, 5.*maximumToPlot);
+
     //if (TString(grCentralSyst->GetName()).Contains("Eta")) {
     //    grCentralSyst->GetYaxis()->SetRangeUser(0.001, 1.4*maximumToPlot);
     //}
@@ -595,7 +600,7 @@ void configXaxis(TH1D *grCentralSyst, TH1D *gen1, TString variable){
 
 }
 
-std::string getYaxisTitle(bool doNormalized, const TH1D *gen1){
+std::string getYaxisTitle(bool doNormalized, const TH1D *gen1, bool isRatio){
     std::string title = "";
     std::string xtitle = gen1->GetXaxis()->GetTitle();
     std::string shortVar = xtitle.substr(0, xtitle.find(" "));
@@ -622,10 +627,13 @@ std::string getYaxisTitle(bool doNormalized, const TH1D *gen1){
         if (unit != "" ) title += "/" + unit;
         title += "]";
     }
+
+    if (isRatio) title = "Ratio";
+
     return title;
 }
 
-TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool doNormalized, TH1D *hStat, TH2D *hCovSyst, TH1D *hGen1, TH1D *hGen2, TH1D* hGen3, double integratedLumi){
+TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool isRatio, bool doNormalized, TH1D *hStat, TH2D *hCovSyst, TH1D *hGen1, TH1D *hGen2, TH1D* hGen3, double integratedLumi){
 
     // Determine how many comparisons we have ---
     int numbOfGenerator = 1;
@@ -685,7 +693,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool d
     //--- First Pad ---
     plots->cd();
     TPad *plot1 = new TPad("plot1", "plot1", 0., 0., 0., 0.);
-    setAndDrawTPad(canvasName, plot1, 1, numbOfGenerator);
+    setAndDrawTPad(canvasName, plot1, 1, numbOfGenerator, isRatio);
 
     //--- TLegend ---
     TLegend *legend = new TLegend(0.7, 0.74, 0.99, 0.98);
@@ -708,7 +716,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool d
     else hSyst->GetYaxis()->SetLabelSize(0.055);
 
     configXaxis(hSyst, hGen1, variable);
-    configYaxis(hSyst, hGen1, hGen2, hGen3);
+    configYaxis(hSyst, hGen1, hGen2, hGen3, isRatio);
 
     // Here begins the axis ranges ---
     // Set a default x-axis range first
@@ -796,6 +804,9 @@ TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool d
     if (canvasName.Contains("dPhiLepJet3")) hSyst->GetYaxis()->SetRangeUser(0.2*minimum, 5.0*maximum);
     if (canvasName.Contains("dPhiLepJet4")) hSyst->GetYaxis()->SetRangeUser(0.2*minimum, 5.0*maximum);
 
+    // For all ratios
+    // if (isRatio) hSyst->GetYaxis()->SetRangeUser(0.01, 2.15);
+
     // Now draw histograms, graphs
     hSyst->DrawCopy("e");
     grCentralSyst->SetName("grCentralSyst");
@@ -817,7 +828,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool d
     grCentralStat->Draw("p");
     legend->Draw("same");
 
-    //--- TLatex stuff ---
+    // --- TLatex stuff ---
     TLatex *latexLabel = new TLatex(); 
     latexLabel->SetNDC();
     latexLabel->SetTextSize(0.04);
@@ -826,54 +837,75 @@ TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool d
     latexLabel->SetLineWidth(2);
     latexLabel->SetTextFont(61);
 
-    if (canvasName.Contains("dPhiLepJet1")) latexLabel->DrawLatex(0.18, 0.23, "CMS Work in Progress");
-    else latexLabel->DrawLatex(0.18, 0.25, "CMS Work in Progress");
+    if (isRatio) latexLabel->DrawLatex(0.57, 0.25, "CMS Work in Progress");
+    else{
+        if (canvasName.Contains("dPhiLepJet1")) latexLabel->DrawLatex(0.18, 0.23, "CMS Work in Progress");
+        else latexLabel->DrawLatex(0.18, 0.25, "CMS Work in Progress");
+    }
 
     latexLabel->SetTextSize(0.044);
     latexLabel->SetLineWidth(2);
     latexLabel->SetTextFont(42);
 
-    if (year == 2016)      latexLabel->DrawLatex(0.13, 0.90, "35.9 fb^{-1} (13 TeV)");
-    else if (year == 2017) latexLabel->DrawLatex(0.13, 0.90, "41.5 fb^{-1} (13 TeV)");
-    else if (year == 2018) latexLabel->DrawLatex(0.13, 0.90, "59.7 fb^{-1} (13 TeV)");
-    else                   latexLabel->DrawLatex(0.13, 0.90, "137.16 fb^{-1} (13 TeV)");
-    latexLabel->DrawLatex(0.18, 0.21-0.03, "anti-k_{T} (R = 0.4) Jets");
+    if (year == 2016)      latexLabel->DrawLatex(0.14, 0.90, "35.9 fb^{-1} (13 TeV)");
+    else if (year == 2017) latexLabel->DrawLatex(0.14, 0.90, "41.5 fb^{-1} (13 TeV)");
+    else if (year == 2018) latexLabel->DrawLatex(0.14, 0.90, "59.7 fb^{-1} (13 TeV)");
+    else                   latexLabel->DrawLatex(0.15, 0.90, "137.16 fb^{-1} (13 TeV)");
 
-    if (canvasName.Contains("FirstJetPt50")) latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{jet} > 50 GeV, |#eta^{jet}| < 2.4 ");
-    else if (canvasName.Contains("FirstJetPt80")) latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{jet} > 80 GeV, |#eta^{jet}| < 2.4 ");
-    else if (canvasName.Contains("ZPt150")) latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{Z} > 150 GeV, p_{T}^{jet} > 30 GeV, |#eta^{jet}| < 2.4 ");
-    else if (canvasName.Contains("ZPt300")) latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{Z} > 300 GeV, p_{T}^{jet} > 30 GeV, |#eta^{jet}| < 2.4 ");
-    else if (canvasName.Contains("DifJetRapidityl2")) latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{jet} > 30 GeV, |#eta^{jet}| < 2.4, |y_{jet1}-y_{jet2}| > 2 ");
-    else if (canvasName.Contains("DifJetRapiditys2")) latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{jet} > 30 GeV, |#eta^{jet}| < 2.4, |y_{jet1}-y_{jet2}| < 2 ");
-    else if (canvasName.Contains("ZPt150_HT300")) latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{Z} > 150 GeV, p_{T}^{jet} > 30 GeV, |#eta^{jet}| < 2.4, H_{T}^{jet} > 300 GeV ");
-    else if (canvasName.Contains("dRptmin100LepCloseJetCo300dR04_Zinc1jet")) latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{jet} > 100 GeV, p_{T}^{lead jet} > 300 GeV, |y^{jet}| < 2.4 ");
-    else latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{jet} > 30 GeV, |y^{jet}| < 2.4 ");
+    if (isRatio){
+        if (canvasName.Contains("JetAK8Pt")) latexLabel->DrawLatex(0.57, 0.21-0.03, "anti-k_{T} (R = 0.8) Jets");
+        else latexLabel->DrawLatex(0.57, 0.21-0.03, "anti-k_{T} (R = 0.4) Jets");
+    }
+    else {
+        if (canvasName.Contains("JetAK8Pt")) latexLabel->DrawLatex(0.18, 0.21-0.03, "anti-k_{T} (R = 0.8) Jets");
+        else latexLabel->DrawLatex(0.18, 0.21-0.03, "anti-k_{T} (R = 0.4) Jets");
+    }
 
-    if (canvasName.Contains("FirstJetPt_Zinc1jet")||canvasName.Contains("JetsHT_Zinc1jet")||canvasName.Contains("FirstJetAbsRapidity_Zinc1jet")||canvasName.Contains("dPhiLepJet1_Zinc1jet")||canvasName.Contains("dRptmin100LepCloseJetCo300dR04_Zinc1jet")){
-        if (lepSel == "SMu") latexLabel->DrawLatex(0.18,0.21-0.15,"W(#mu#nu) + #geq 1-jet");
-        else if (lepSel == "DMu") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
-        else if (lepSel == "DE") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
-    }
-    else if (canvasName.Contains("SecondJetPt_Zinc2jet")||canvasName.Contains("JetsHT_Zinc2jet")||canvasName.Contains("SecondJetAbsRapidity_Zinc2jet")||canvasName.Contains("dPhiLepJet2_Zinc2jet")){
-        if (lepSel == "SMu") latexLabel->DrawLatex(0.18,0.21-0.15,"W(#mu#nu) + #geq 2-jets");
-        else if (lepSel == "DMu") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
-        else if (lepSel == "DE") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
-    }
-    else if (canvasName.Contains("ThirdJetPt_Zinc3jet")||canvasName.Contains("JetsHT_Zinc3jet")||canvasName.Contains("ThirdJetAbsRapidity_Zinc3jet")||canvasName.Contains("dPhiLepJet3_Zinc3jet")){
-        if (lepSel == "SMu") latexLabel->DrawLatex(0.18,0.21-0.15,"W(#mu#nu) + #geq 3-jets");
-        else if (lepSel == "DMu") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
-        else if (lepSel == "DE") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
-    }
-    else if (canvasName.Contains("FourthJetPt_Zinc4jet")||canvasName.Contains("JetsHT_Zinc4jet")||canvasName.Contains("FourthJetAbsRapidity_Zinc4jet")||canvasName.Contains("dPhiLepJet4_Zinc4jet")){
-        if (lepSel == "SMu") latexLabel->DrawLatex(0.18,0.21-0.15,"W(#mu#nu) + #geq 4-jets");
-        else if (lepSel == "DMu") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
-        else if (lepSel == "DE") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
+    if (isRatio){
+        if (canvasName.Contains("JetAK8Pt")) latexLabel->DrawLatex(0.57, 0.21-0.09,"p_{T}^{jet} > 200 GeV, |y^{jet}| < 2.4");
+        else latexLabel->DrawLatex(0.57, 0.21-0.09,"p_{T}^{jet} > 30 GeV, |y^{jet}| < 2.4");
+
+        if (lepSel == "SMu") latexLabel->DrawLatex(0.57, 0.21-0.15,"W(#mu#nu) + jets");        
     }
     else{
-        if (lepSel == "SMu") latexLabel->DrawLatex(0.18,0.21-0.15,"W(#mu#nu) + jets");
-        else if (lepSel == "DMu") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
-        else if (lepSel == "DE") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
+        if (canvasName.Contains("FirstJetPt50")) latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{jet} > 50 GeV, |#eta^{jet}| < 2.4 ");
+        else if (canvasName.Contains("FirstJetPt80")) latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{jet} > 80 GeV, |#eta^{jet}| < 2.4 ");
+        else if (canvasName.Contains("ZPt150")) latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{Z} > 150 GeV, p_{T}^{jet} > 30 GeV, |#eta^{jet}| < 2.4 ");
+        else if (canvasName.Contains("ZPt300")) latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{Z} > 300 GeV, p_{T}^{jet} > 30 GeV, |#eta^{jet}| < 2.4 ");
+        else if (canvasName.Contains("DifJetRapidityl2")) latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{jet} > 30 GeV, |#eta^{jet}| < 2.4, |y_{jet1}-y_{jet2}| > 2 ");
+        else if (canvasName.Contains("DifJetRapiditys2")) latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{jet} > 30 GeV, |#eta^{jet}| < 2.4, |y_{jet1}-y_{jet2}| < 2 ");
+        else if (canvasName.Contains("ZPt150_HT300")) latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{Z} > 150 GeV, p_{T}^{jet} > 30 GeV, |#eta^{jet}| < 2.4, H_{T}^{jet} > 300 GeV ");
+        else if (canvasName.Contains("dRptmin100LepCloseJetCo300dR04_Zinc1jet")) latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{jet} > 100 GeV, p_{T}^{lead jet} > 300 GeV, |y^{jet}| < 2.4 ");
+        else if (canvasName.Contains("JetAK8Pt")) latexLabel->DrawLatex(0.18, 0.21-0.09,"p_{T}^{jet} > 200 GeV, |y^{jet}| < 2.4 ");
+        else latexLabel->DrawLatex(0.18, 0.21-0.09,"p_{T}^{jet} > 30 GeV, |y^{jet}| < 2.4 ");
+
+        if (canvasName.Contains("FirstJetPt_Zinc1jet")||canvasName.Contains("JetsHT_Zinc1jet")||canvasName.Contains("FirstJetAbsRapidity_Zinc1jet")||canvasName.Contains("dPhiLepJet1_Zinc1jet")||canvasName.Contains("dRptmin100LepCloseJetCo300dR04_Zinc1jet")){
+            if (lepSel == "SMu") latexLabel->DrawLatex(0.18,0.21-0.15,"W(#mu#nu) + #geq 1-jet");
+            else if (lepSel == "DMu") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
+            else if (lepSel == "DE") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
+        }
+        else if (canvasName.Contains("SecondJetPt_Zinc2jet")||canvasName.Contains("JetsHT_Zinc2jet")||canvasName.Contains("SecondJetAbsRapidity_Zinc2jet")||canvasName.Contains("dPhiLepJet2_Zinc2jet")){
+            if (lepSel == "SMu") latexLabel->DrawLatex(0.18,0.21-0.15,"W(#mu#nu) + #geq 2-jets");
+            else if (lepSel == "DMu") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
+            else if (lepSel == "DE") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
+        }
+        else if (canvasName.Contains("ThirdJetPt_Zinc3jet")||canvasName.Contains("JetsHT_Zinc3jet")||canvasName.Contains("ThirdJetAbsRapidity_Zinc3jet")||canvasName.Contains("dPhiLepJet3_Zinc3jet")){
+            if (lepSel == "SMu") latexLabel->DrawLatex(0.18,0.21-0.15,"W(#mu#nu) + #geq 3-jets");
+            else if (lepSel == "DMu") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
+            else if (lepSel == "DE") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
+        }
+        else if (canvasName.Contains("FourthJetPt_Zinc4jet")||canvasName.Contains("JetsHT_Zinc4jet")||canvasName.Contains("FourthJetAbsRapidity_Zinc4jet")||canvasName.Contains("dPhiLepJet4_Zinc4jet")){
+            if (lepSel == "SMu") latexLabel->DrawLatex(0.18,0.21-0.15,"W(#mu#nu) + #geq 4-jets");
+            else if (lepSel == "DMu") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
+            else if (lepSel == "DE") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
+        }
+        else{
+            if (lepSel == "SMu") latexLabel->DrawLatex(0.18,0.21-0.15,"W(#mu#nu) + jets");
+            else if (lepSel == "DMu") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
+            else if (lepSel == "DE") latexLabel->DrawLatex(0.18,0.21-0.17,"W#rightarrow #mu#nu channel");
+        }
     }
+
     latexLabel->SetName("latexLabel");
     latexLabel->Draw("same");
 
@@ -888,8 +920,8 @@ TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool d
     ytitle->SetNDC();
     ytitle->SetTextAlign(33);
     ytitle->SetTextAngle(90);
-    std::string strYtitle = getYaxisTitle(doNormalized, hGen1);
-    if (strYtitle.find("eta") != std::string::npos) {
+    std::string strYtitle = getYaxisTitle(doNormalized, hGen1, isRatio);
+    if (strYtitle.find("eta") != std::string::npos){
         size_t first = strYtitle.find("#eta");
         std::string tmp1 = strYtitle.substr(0, first);
         std::string tmp2 = strYtitle.substr(first);
@@ -906,7 +938,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool d
     //--- Second Pad ---
     plots->cd();
     TPad *plot2 = new TPad("plot2", "plot2", 0., 0., 0., 0.);
-    setAndDrawTPad(canvasName, plot2, 2, numbOfGenerator);
+    setAndDrawTPad(canvasName, plot2, 2, numbOfGenerator, isRatio);
 
     //--- TLegend ---
     TLegend *legend2 = new TLegend(0.16, 0.05, 0.42, 0.20);
@@ -941,7 +973,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool d
         //--- Third Pad ---
         plots->cd();
         TPad *plot3 = new TPad("plot3", "plot3", 0., 0., 0., 0.);
-        setAndDrawTPad(canvasName, plot3, 3, numbOfGenerator);
+        setAndDrawTPad(canvasName, plot3, 3, numbOfGenerator, isRatio);
 
         //--- TLegend ---
         TLegend *legend3 = new TLegend(0.16, 0.05, 0.42, 0.20);
@@ -974,7 +1006,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool d
         //--- Fourth Pad ---
         plots->cd();
         TPad *plot4 = new TPad("plot4", "plot4", 0., 0., 0., 0.);
-        setAndDrawTPad(canvasName, plot4, 4, numbOfGenerator);
+        setAndDrawTPad(canvasName, plot4, 4, numbOfGenerator, isRatio);
 
         //--- TLegend ---
         TLegend *legend4 = new TLegend(0.16, 0.05, 0.42, 0.20);

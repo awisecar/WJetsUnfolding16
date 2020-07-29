@@ -23,11 +23,11 @@ const int ZJetsFillStyle = 1001;
 //const double TheoScaleInclusive[11] = {0.04,0.062,0.089,0.118,0.119,0.155,0.123,0.203,0.0,0.0,0.0}; //inclusive (0-7 Jet scales)
 
 
-void setAndDrawTPad(TString canvasName, TPad *plot, int plotNumber, int numbOfGenerator);
-std::string getYaxisTitle(bool doNormalized, const TH1D *gen1);
+void setAndDrawTPad(TString canvasName, TPad *plot, int plotNumber, int numbOfGenerator, bool isRatio);
+std::string getYaxisTitle(bool doNormalized, const TH1D *gen1, bool isRatio);
 void customizeLegend(TLegend *legend, int numbOfGenerator);
 void customizeLegend(TLegend *legend, int genNumb, int numbOfGenerator);
-void configYaxis(TH1D *grCentralSyst, TH1D *gen1, TH1D *gen2 = NULL, TH1D *gen3 = NULL);
+void configYaxis(TH1D *grCentralSyst, TH1D *gen1, TH1D *gen2 = NULL, TH1D *gen3 = NULL, bool isRatio = false);
 void configXaxis(TH1D *grCentralSyst, TH1D *gen1, TString variable);
 void customizeCentral(TGraphAsymmErrors *grCentral, bool ratio);
 void customizeCentral(TGraphAsymmErrors *grCentral, TLegend *legend, TString legText = "");
@@ -41,6 +41,6 @@ TGraphAsymmErrors* createPDFSystGraph(const TH1D *hPDFUp, const TH1D *hPDFDown, 
 TGraphAsymmErrors* createScaleSystGraph(TString lepSel, TString variable, const TGraphAsymmErrors *grGenToCentral);
 TGraphAsymmErrors* createScaleSystGraphNNLO1j(TString lepSel, TString variable, const TGraphAsymmErrors *grGenToCentral);
 TGraphAsymmErrors* createTotSystGraphAMCNLO(TString lepSel, TString variable, const TGraphAsymmErrors *grGenToCentral);
-TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool doNormalized, TH1D *hData, TH2D *hCovSyst, TH1D *hGen, TH1D *hGen1 = NULL, TH1D *hGen2 = NULL, double integratedLumi = -1);
+TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool isRatio, bool doNormalized, TH1D *hData, TH2D *hCovSyst, TH1D *hGen, TH1D *hGen1 = NULL, TH1D *hGen2 = NULL, double integratedLumi = -1);
 void createTitleVariableAnddSigma(TString variable, bool doNormalized, TString xtitle, TString &title, TString &var, TString &dSigma) ;
 #endif

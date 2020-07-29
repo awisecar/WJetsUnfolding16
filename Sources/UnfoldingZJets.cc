@@ -41,7 +41,6 @@ extern ConfigVJets cfg;
 using namespace std;
 
 void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TString unfoldDir, int jetPtMin, int jetEtaMax, TString variable, bool doNormalized, int whichSyst, bool isClosureTest){
-
     gStyle->SetOptStat(0);
 
     //--- Get input histogram directory for specific year ---
@@ -289,7 +288,7 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
         std::cout << "whichSyst = " << whichSyst << std::endl;
         for (int iSyst = 0; iSyst < nSysts; ++iSyst){
             std::cout << "\n >>>>>>>>>> Start iSyst = " << iSyst << "! <<<<<<<<<<" << std::endl;
-            if(iSyst != 0 && whichSyst >= 0 && iSyst != whichSyst) continue;
+            if (iSyst != 0 && whichSyst >= 0 && iSyst != whichSyst) continue;
             
             // Grab file indices for reco, gen, response distributions relevant for unfolding
             int iData(0), iBg(0), iGen(0), iResp(0); 
@@ -380,18 +379,18 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
         }
 
         // Plot central unfolded distribution (w/ stat & syst errors), theory predictions ---
-        // TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, year, variable, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection, hGen1CrossSection, hGen2CrossSection);
-        // TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, year, variable, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection, hGen1CrossSection);  
+        // TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, year, variable, false, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection, hGen1CrossSection, hGen2CrossSection);
+        // TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, year, variable, false, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection, hGen1CrossSection);  
         // TCanvas *crossSectionPlot;
         // if (variable == "FirstJetPt_Zinc1jet" || variable == "JetsHT_Zinc1jet" || variable == "FirstJetAbsRapidity_Zinc1jet" || variable == "dRptmin100LepCloseJetCo300dR04_Zinc1jet" || variable == "dPhiLepJet1_Zinc1jet"){
-        //     crossSectionPlot = makeCrossSectionPlot(lepSel, year, variable, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection, hGen1CrossSection, hGen2CrossSection);
+        //     crossSectionPlot = makeCrossSectionPlot(lepSel, year, variable, false, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection, hGen1CrossSection, hGen2CrossSection);
         // }
         // else {
-        //     crossSectionPlot = makeCrossSectionPlot(lepSel, year, variable, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection, hGen1CrossSection);
+        //     crossSectionPlot = makeCrossSectionPlot(lepSel, year, variable, false, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection, hGen1CrossSection);
         // }  //add nnlo here
 
-        // TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, year, variable, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection); 
-        TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, year, variable, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection, hGen1CrossSection);
+        // TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, year, variable, false, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection); 
+        TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, year, variable, false, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection, hGen1CrossSection);
         crossSectionPlot->Draw();
         crossSectionPlot->SaveAs(outputFileName + ".pdf");
 
@@ -637,15 +636,15 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
     // Number of points for ScanLcurve or ScanTau methods
     // Int_t nPointsTauScan = 50;
     // Int_t nPointsTauScan = 100;
-    Int_t nPointsTauScan = 200;
+    Int_t nPointsTauScan = 250;
 
     // Min and max values of tau for scan
     // Automatic values
     // Double_t tauMin = 0.0;
     // Double_t tauMax = 0.0;
     // Large range
-    Double_t tauMin = 0.000000001;
-    Double_t tauMax = 0.001;
+    Double_t tauMin = 0.00000005;
+    Double_t tauMax = 0.01;
 
     int iBest(0);
     TSpline *logTauX, *logTauY;
@@ -1208,7 +1207,7 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
     }
     }
 
-    TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, year, TString("ZNGoodJets_Zinc"), doNormalized, hInc, hCovInc[11], hIncMad, hIncShe);
+    TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, year, TString("ZNGoodJets_Zinc"), false, doNormalized, hInc, hCovInc[11], hIncMad, hIncShe);
     outputFileName.ReplaceAll("_Zexc", "_Zinc");
     crossSectionPlot->Draw();
     crossSectionPlot->SaveAs(outputFileName + ".png");
