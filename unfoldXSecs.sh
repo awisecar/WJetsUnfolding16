@@ -1,28 +1,53 @@
 #!/bin/sh
 
-# 28 July 20 --
+# 30 July 20 --
 # AK4 jet kinematics
-./runUnfoldingZJets year=2016 variable=FirstJetPt_Zinc1jet_TUnfold
-./runUnfoldingZJets year=2016 variable=FirstJetAbsRapidity_Zinc1jet_TUnfold
-./runUnfoldingZJets year=2016 variable=dPhiLepJet1_Zinc1jet_TUnfold
-./runUnfoldingZJets year=2016 variable=SecondJetPt_Zinc2jet_TUnfold
-./runUnfoldingZJets year=2016 variable=SecondJetAbsRapidity_Zinc2jet_TUnfold
-./runUnfoldingZJets year=2016 variable=dPhiLepJet2_Zinc2jet_TUnfold
+./runUnfoldingCombinedRun2 variable=FirstJetPt_Zinc1jet_TUnfold
+./runUnfoldingCombinedRun2 variable=FirstJetAbsRapidity_Zinc1jet_TUnfold
+./runUnfoldingCombinedRun2 variable=dPhiLepJet1_Zinc1jet_TUnfold
+./runUnfoldingCombinedRun2 variable=SecondJetPt_Zinc2jet_TUnfold
+./runUnfoldingCombinedRun2 variable=SecondJetAbsRapidity_Zinc2jet_TUnfold
+./runUnfoldingCombinedRun2 variable=dPhiLepJet2_Zinc2jet_TUnfold
 # AK8 jet kinematics
-./runUnfoldingZJets year=2016 variable=FirstJetAK8Pt_Zinc1jet_TUnfold
-./runUnfoldingZJets year=2016 variable=FirstJetAK8AbsRapidity_Zinc1jet_TUnfold
-./runUnfoldingZJets year=2016 variable=dPhiLepJet1AK8_Zinc1jet_TUnfold
-./runUnfoldingZJets year=2016 variable=SecondJetAK8Pt_Zinc2jet_TUnfold
-./runUnfoldingZJets year=2016 variable=SecondJetAK8AbsRapidity_Zinc2jet_TUnfold
-./runUnfoldingZJets year=2016 variable=dPhiLepJet2AK8_Zinc2jet_TUnfold
+./runUnfoldingCombinedRun2 variable=FirstJetAK8Pt_Zinc1jet_TUnfold
+./runUnfoldingCombinedRun2 variable=FirstJetAK8AbsRapidity_Zinc1jet_TUnfold
+./runUnfoldingCombinedRun2 variable=dPhiLepJet1AK8_Zinc1jet_TUnfold
+./runUnfoldingCombinedRun2 variable=SecondJetAK8Pt_Zinc2jet_TUnfold
+./runUnfoldingCombinedRun2 variable=SecondJetAK8AbsRapidity_Zinc2jet_TUnfold
+./runUnfoldingCombinedRun2 variable=dPhiLepJet2AK8_Zinc2jet_TUnfold
 # alpha-s ratios
-./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetPt_Zinc1jet_TUnfold
-./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetPt_Zinc2jet_TUnfold
-./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetPt_Zinc3jet_TUnfold
-./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetPt_Zexc1jet_TUnfold
-./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold
-./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold
-./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetAK8Pt_Zexc1jet_TUnfold
+./runUnfoldingCombinedRun2 variable=LepPtPlusLeadingJetPt_Zinc1jet_TUnfold
+./runUnfoldingCombinedRun2 variable=LepPtPlusLeadingJetPt_Zinc2jet_TUnfold
+# ./runUnfoldingCombinedRun2 variable=LepPtPlusLeadingJetPt_Zinc3jet_TUnfold
+./runUnfoldingCombinedRun2 variable=LepPtPlusLeadingJetPt_Zexc1jet_TUnfold
+./runUnfoldingCombinedRun2 variable=LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold
+./runUnfoldingCombinedRun2 variable=LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold
+# ./runUnfoldingCombinedRun2 variable=LepPtPlusLeadingJetAK8Pt_Zinc3jet_TUnfold
+./runUnfoldingCombinedRun2 variable=LepPtPlusLeadingJetAK8Pt_Zexc1jet_TUnfold
+
+# # 28 July 20 --
+# # AK4 jet kinematics
+# ./runUnfoldingZJets year=2016 variable=FirstJetPt_Zinc1jet_TUnfold
+# ./runUnfoldingZJets year=2016 variable=FirstJetAbsRapidity_Zinc1jet_TUnfold
+# ./runUnfoldingZJets year=2016 variable=dPhiLepJet1_Zinc1jet_TUnfold
+# ./runUnfoldingZJets year=2016 variable=SecondJetPt_Zinc2jet_TUnfold
+# ./runUnfoldingZJets year=2016 variable=SecondJetAbsRapidity_Zinc2jet_TUnfold
+# ./runUnfoldingZJets year=2016 variable=dPhiLepJet2_Zinc2jet_TUnfold
+# # AK8 jet kinematics
+# ./runUnfoldingZJets year=2016 variable=FirstJetAK8Pt_Zinc1jet_TUnfold
+# ./runUnfoldingZJets year=2016 variable=FirstJetAK8AbsRapidity_Zinc1jet_TUnfold
+# ./runUnfoldingZJets year=2016 variable=dPhiLepJet1AK8_Zinc1jet_TUnfold
+# ./runUnfoldingZJets year=2016 variable=SecondJetAK8Pt_Zinc2jet_TUnfold
+# ./runUnfoldingZJets year=2016 variable=SecondJetAK8AbsRapidity_Zinc2jet_TUnfold
+# ./runUnfoldingZJets year=2016 variable=dPhiLepJet2AK8_Zinc2jet_TUnfold
+# # alpha-s ratios
+# ./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetPt_Zinc1jet_TUnfold
+# ./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetPt_Zinc2jet_TUnfold
+# ./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetPt_Zinc3jet_TUnfold
+# ./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetPt_Zexc1jet_TUnfold
+# ./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold
+# ./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold
+# ./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetAK8Pt_Zexc1jet_TUnfold
 
 # 3 July 20 --
 # ./runUnfoldingZJets year=2017 variable=FirstJetPt_Zinc1jet_TUnfold

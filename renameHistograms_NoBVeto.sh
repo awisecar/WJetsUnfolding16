@@ -1,5 +1,7 @@
 #!/bin/bash
 cd HistoFiles_2016
+# cd HistoFiles_2017
+# cd HistoFiles_2018
 echo $PWD
 
 ########## Central

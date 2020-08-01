@@ -48,8 +48,8 @@ CXXFLAGS      += -MD -Wall
 # list of all source files
 SOURCES = \
 ArgParser.cc variablesOfInterestZJets.cc getFilesAndHistogramsZJets.cc \
-ConfigVJets.cc functions.cc UnfoldingZJets.cc UnfoldingZJetsRatios.cc \
-PlotSettings.cc CombineUnfoldedRun2.cc 
+ConfigVJets.cc functions.cc UnfoldingZJets.cc UnfoldingZJetsRatios.cc UnfoldingCombinedRun2.cc \
+PlotSettings.cc CombineUnfoldedRun2.cc TakeRatiosOfUnfoldedXSecs.cc
 
 SRCLIST = $(addprefix $(SRCDIR), $(SOURCES))
 OBJLIST = $(SRCLIST:.cc=.o)
@@ -59,7 +59,9 @@ DEPS    = $(SRCLIST:.cc=.d)
 
 all: runUnfoldingZJets \
 runUnfoldingZJetsRatios \
-runCombineUnfoldedRun2
+runUnfoldingCombinedRun2 \
+runCombineUnfoldedRun2 \
+runTakeRatiosOfUnfoldedXSecs
 
 # ===========================================================================
 %.o: %.cc
@@ -75,7 +77,13 @@ runUnfoldingZJets: runUnfoldingZJets.o $(OBJLIST) RooUnfold/libRooUnfold.so
 runUnfoldingZJetsRatios: runUnfoldingZJetsRatios.o $(OBJLIST) RooUnfold/libRooUnfold.so
 	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
+runUnfoldingCombinedRun2: runUnfoldingCombinedRun2.o $(OBJLIST) RooUnfold/libRooUnfold.so
+	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
+
 runCombineUnfoldedRun2: runCombineUnfoldedRun2.o $(OBJLIST) RooUnfold/libRooUnfold.so 
+	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
+
+runTakeRatiosOfUnfoldedXSecs: runTakeRatiosOfUnfoldedXSecs.o $(OBJLIST) RooUnfold/libRooUnfold.so 
 	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
 RooUnfold/libRooUnfold.so:

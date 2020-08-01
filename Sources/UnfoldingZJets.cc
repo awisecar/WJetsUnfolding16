@@ -439,7 +439,8 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
         hGen1CrossSection->Write("hGen1CrossSection"); //gen MC for W+jets LO MLM signal
         // hGen2CrossSection->Write("hGen2CrossSection");
 
-        // Write out unfolded distributions and covariance matrices ---
+        // Write out reco-level and unfolded distributions and covariance matrices ---
+        for (int iSyst = 0; iSyst < nSysts; ++iSyst) if (hRecDataBinsMerged[iSyst]) hRecDataBinsMerged[iSyst]->Write(); 
         for (int iSyst = 0; iSyst < nSysts; ++iSyst) if (hUnfData[iSyst]) hUnfData[iSyst]->Write();     
         for (int i = 0; i <= 11; ++i) if (hCov[i]) hCov[i]->Write();
 
@@ -488,7 +489,8 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
     TString unfoldOutputDir = "UnfoldingCheck";
     if (doRatioUnfold) unfoldOutputDir += "Ratio";
     unfoldOutputDir += "_";
-    unfoldOutputDir += year;
+    if (year == 9999) unfoldOutputDir += "Run2";
+    else              unfoldOutputDir += year;
     unfoldOutputDir += "/";
     system("mkdir -p "+unfoldOutputDir);
     TFile *f = new TFile(unfoldOutputDir + lepSel + "_" + variable + "_" + name + ".root", "RECREATE");
@@ -737,7 +739,7 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
     // ---------------------------------------------------------------------------
 
     // Get output from unfolding ---
-    hUnfData = (TH1D*) unfold.GetOutput("hUnfData")->Clone();
+    hUnfData = (TH1D*) unfold.GetOutput("hUnfData_"+name)->Clone();
     hUnfData->SetTitle(hRecDataMinusFakes->GetTitle());
     hUnfData->GetXaxis()->SetTitle(hRecDataMinusFakes->GetXaxis()->GetTitle());
     hUnfData->GetYaxis()->SetTitle("diff xsec.");
@@ -903,7 +905,7 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
         
         newHistoCounter++;
     }
-    hRecDataBinsMerged = (TH1D*) recoData_binsMerged->Clone("hRecDataBinsMerged");
+    hRecDataBinsMerged = (TH1D*) recoData_binsMerged->Clone("hRecDataBinsMerged_"+name);
     recoData_binsMerged->Write();
     
 
@@ -933,7 +935,8 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
     if (year == 2016)      lumiUnc = 0.025;
     else if (year == 2017) lumiUnc = 0.023;
     else if (year == 2018) lumiUnc = 0.025;
-    else                   lumiUnc = 0.0;
+    // for full Run 2, lumi uncertainties uncorrelated across years (?), so add in quadrature
+    else                   lumiUnc = sqrt( pow(0.025, 2.) + pow(0.023, 2.) + pow(0.025, 2.) ); // around 4.2%
 
     // Scale by integrated lumi
     hRecDataBinsMerged->Scale(1./integratedLumi);
@@ -1560,8 +1563,8 @@ void plotRespMat(TH2D *hResp, TString variable, TString unfoldDir, bool addSwitc
         latexLabel->SetTextSize(0.035);
         latexLabel->SetLineWidth(2);
         latexLabel->SetTextFont(42);
-        latexLabel->DrawLatex(0.200, 0.75, "Condition # = ");
-        latexLabel->DrawLatex(0.300, 0.75, conditionNumber_string);
+        // latexLabel->DrawLatex(0.200, 0.75, "Condition # = ");
+        // latexLabel->DrawLatex(0.300, 0.75, conditionNumber_string);
 
         canRespMatrix->Print(outputFileName + ".pdf");
         delete canRespMatrix;
@@ -1646,8 +1649,8 @@ void plotRespMat(TH2D *hResp, TString variable, TString unfoldDir, bool addSwitc
         latexLabel->SetTextSize(0.035);
         latexLabel->SetLineWidth(2);
         latexLabel->SetTextFont(42);
-        latexLabel->DrawLatex(0.200, 0.75, "Condition # = ");
-        latexLabel->DrawLatex(0.300, 0.75, conditionNumber_string);
+        // latexLabel->DrawLatex(0.200, 0.75, "Condition # = ");
+        // latexLabel->DrawLatex(0.300, 0.75, conditionNumber_string);
 
         // Now output as pdf ---
         canRespMatrix->Print(outputFileName + ".pdf");

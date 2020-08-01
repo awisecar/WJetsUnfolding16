@@ -847,22 +847,22 @@ TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool i
     latexLabel->SetLineWidth(2);
     latexLabel->SetTextFont(42);
 
-    if (year == 2016)      latexLabel->DrawLatex(0.14, 0.90, "35.9 fb^{-1} (13 TeV)");
-    else if (year == 2017) latexLabel->DrawLatex(0.14, 0.90, "41.5 fb^{-1} (13 TeV)");
-    else if (year == 2018) latexLabel->DrawLatex(0.14, 0.90, "59.7 fb^{-1} (13 TeV)");
-    else                   latexLabel->DrawLatex(0.15, 0.90, "137.16 fb^{-1} (13 TeV)");
+    if (year == 2016)      latexLabel->DrawLatex(0.13, 0.90, "35.9 fb^{-1} (13 TeV)");
+    else if (year == 2017) latexLabel->DrawLatex(0.13, 0.90, "41.5 fb^{-1} (13 TeV)");
+    else if (year == 2018) latexLabel->DrawLatex(0.13, 0.90, "59.7 fb^{-1} (13 TeV)");
+    else                   latexLabel->DrawLatex(0.13, 0.90, "137.16 fb^{-1} (13 TeV)");
 
     if (isRatio){
-        if (canvasName.Contains("JetAK8Pt")) latexLabel->DrawLatex(0.57, 0.21-0.03, "anti-k_{T} (R = 0.8) Jets");
+        if (canvasName.Contains("AK8")) latexLabel->DrawLatex(0.57, 0.21-0.03, "anti-k_{T} (R = 0.8) Jets");
         else latexLabel->DrawLatex(0.57, 0.21-0.03, "anti-k_{T} (R = 0.4) Jets");
     }
     else {
-        if (canvasName.Contains("JetAK8Pt")) latexLabel->DrawLatex(0.18, 0.21-0.03, "anti-k_{T} (R = 0.8) Jets");
+        if (canvasName.Contains("AK8")) latexLabel->DrawLatex(0.18, 0.21-0.03, "anti-k_{T} (R = 0.8) Jets");
         else latexLabel->DrawLatex(0.18, 0.21-0.03, "anti-k_{T} (R = 0.4) Jets");
     }
 
     if (isRatio){
-        if (canvasName.Contains("JetAK8Pt")) latexLabel->DrawLatex(0.57, 0.21-0.09,"p_{T}^{jet} > 200 GeV, |y^{jet}| < 2.4");
+        if (canvasName.Contains("AK8")) latexLabel->DrawLatex(0.57, 0.21-0.09,"p_{T}^{jet} > 200 GeV, |y^{jet}| < 2.4");
         else latexLabel->DrawLatex(0.57, 0.21-0.09,"p_{T}^{jet} > 30 GeV, |y^{jet}| < 2.4");
 
         if (lepSel == "SMu") latexLabel->DrawLatex(0.57, 0.21-0.15,"W(#mu#nu) + jets");        
@@ -876,7 +876,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool i
         else if (canvasName.Contains("DifJetRapiditys2")) latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{jet} > 30 GeV, |#eta^{jet}| < 2.4, |y_{jet1}-y_{jet2}| < 2 ");
         else if (canvasName.Contains("ZPt150_HT300")) latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{Z} > 150 GeV, p_{T}^{jet} > 30 GeV, |#eta^{jet}| < 2.4, H_{T}^{jet} > 300 GeV ");
         else if (canvasName.Contains("dRptmin100LepCloseJetCo300dR04_Zinc1jet")) latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{jet} > 100 GeV, p_{T}^{lead jet} > 300 GeV, |y^{jet}| < 2.4 ");
-        else if (canvasName.Contains("JetAK8Pt")) latexLabel->DrawLatex(0.18, 0.21-0.09,"p_{T}^{jet} > 200 GeV, |y^{jet}| < 2.4 ");
+        else if (canvasName.Contains("AK8")) latexLabel->DrawLatex(0.18, 0.21-0.09,"p_{T}^{jet} > 200 GeV, |y^{jet}| < 2.4 ");
         else latexLabel->DrawLatex(0.18, 0.21-0.09,"p_{T}^{jet} > 30 GeV, |y^{jet}| < 2.4 ");
 
         if (canvasName.Contains("FirstJetPt_Zinc1jet")||canvasName.Contains("JetsHT_Zinc1jet")||canvasName.Contains("FirstJetAbsRapidity_Zinc1jet")||canvasName.Contains("dPhiLepJet1_Zinc1jet")||canvasName.Contains("dRptmin100LepCloseJetCo300dR04_Zinc1jet")){
