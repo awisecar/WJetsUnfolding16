@@ -483,7 +483,7 @@ void configYaxis(TH1D *grCentralSyst, TH1D *gen1, TH1D *gen2, TH1D *gen3, bool i
     //if (gen3) maximumToPlot = TMath::Max(maximumToPlot, gen3->GetBinContent(gen3->GetMaximumBin()));
 
     
-    if (isRatio) grCentralSyst->GetYaxis()->SetRangeUser(0.01, 1.5*maximumToPlot);
+    if (isRatio) grCentralSyst->GetYaxis()->SetRangeUser(0.001, 1.5*maximumToPlot);
     else grCentralSyst->GetYaxis()->SetRangeUser(0.2*minimumToPlot, 5.*maximumToPlot);
 
     //if (TString(grCentralSyst->GetName()).Contains("Eta")) {
@@ -648,7 +648,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool i
 
     TH1D *hSyst = (TH1D*) hStat->Clone("hSyst");
     int nBins = hSyst->GetNbinsX();
-    for (int i = 1; i <= nBins; ++i) {
+    for (int i = 1; i <= nBins; ++i){
         hSyst->SetBinError(i, sqrt(pow(hStat->GetBinError(i), 2) + hCovSyst->GetBinContent(i, i)));
     }
 
@@ -684,7 +684,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool i
     //--- Main Canvas ---
     double maximum = hGen1->GetMaximum();
     double minimum = hGen1->GetMinimum();
-    if (! minimum > 0) minimum = 1e-06;
+    if (!minimum > 0) minimum = 1e-06;
 
     TString canvasName = "canvas" + variable;
     TCanvas *plots = new TCanvas(canvasName, hStat->GetTitle(), 600, 800);
@@ -718,15 +718,38 @@ TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool i
     configXaxis(hSyst, hGen1, variable);
     configYaxis(hSyst, hGen1, hGen2, hGen3, isRatio);
 
-    // Here begins the axis ranges ---
+    // --- Here begins the axis ranges ---
+
     // Set a default x-axis range first
     hSyst->GetXaxis()->SetRangeUser(hSyst->GetXaxis()->GetXmin(), hSyst->GetXaxis()->GetXmax());
-    // Now can change specifically for each distribution
-    if (canvasName.Contains("ZNGoodJets")) {
+
+    // Now can tweak specifically for each distribution
+    if (canvasName.Contains("ZNGoodJets")){
         //hSyst->GetXaxis()->SetRangeUser(0.5, hSyst->GetXaxis()->GetXmax());
         hSyst->GetXaxis()->SetRangeUser(0.5, 8.5);
         hSyst->GetYaxis()->SetRangeUser(0.011, 5.0*maximum);
     }
+    if ( canvasName.Contains("FirstJetPt_Zinc1jet") || canvasName.Contains("SecondJetPt_Zinc2jet") ){
+        hSyst->GetXaxis()->SetRangeUser(30., hSyst->GetXaxis()->GetXmax());
+    }
+    if ( canvasName.Contains("FirstJetAK8Pt_Zinc1jet") || canvasName.Contains("SecondJetAK8Pt_Zinc2jet") ){
+        hSyst->GetXaxis()->SetRangeUser(250., hSyst->GetXaxis()->GetXmax());
+    }
+    if ( canvasName.Contains("LepPtPlusLeadingJetAK8Pt_Z") ){
+        hSyst->GetXaxis()->SetRangeUser(300., hSyst->GetXaxis()->GetXmax());
+    }
+    if ( canvasName.Contains("LepPtPlusHT2over2AK8_Z") ){
+        hSyst->GetXaxis()->SetRangeUser(400., hSyst->GetXaxis()->GetXmax());
+    }
+    //if (isRatio){
+    //    hSyst->GetXaxis()->SetRangeUser(300., hSyst->GetXaxis()->GetXmax());
+    //}
+
+
+
+
+
+
     // if (canvasName.Contains("JetPt_Zinc")) {
     //     hSyst->GetXaxis()->SetRangeUser(30, hSyst->GetXaxis()->GetXmax());
     // }
@@ -776,8 +799,12 @@ TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool i
     //     hSyst->GetXaxis()->SetRangeUser(30,900);
     //     hSyst->GetYaxis()->SetRangeUser(minimum, maximum*100.);
     // }
-    if (canvasName.Contains("JetAbsRapidity_Zinc1jet")) hSyst->GetYaxis()->SetRangeUser(0.2, 1.5*maximum);
-    if (canvasName.Contains("JetAbsRapidity_Zinc2jet")) hSyst->GetYaxis()->SetRangeUser(0.2, 1.5*maximum);
+    if ( canvasName.Contains("JetAbsRapidity_Zinc1jet") || canvasName.Contains("JetAK8AbsRapidity_Zinc1jet") ){
+        hSyst->GetYaxis()->SetRangeUser(0.1, 1.5*maximum);
+    }
+    if ( canvasName.Contains("JetAbsRapidity_Zinc2jet") || canvasName.Contains("JetAK8AbsRapidity_Zinc2jet") ){
+        hSyst->GetYaxis()->SetRangeUser(0.1, 1.5*maximum);
+    }
     if (canvasName.Contains("JetAbsRapidity_Zinc3jet")) hSyst->GetYaxis()->SetRangeUser(0.2, 1.5*maximum);
     if (canvasName.Contains("JetAbsRapidity_Zinc4jet")) hSyst->GetYaxis()->SetRangeUser(0.1, 1.8*maximum);
     //   if (canvasName.Contains("HT_Zinc1jet")) {
@@ -798,7 +825,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool i
     //       hSyst->GetXaxis()->SetRangeUser(203, 910);
     //       hSyst->GetYaxis()->SetRangeUser(0.28*minimum, 3.4*maximum);
     //   }
-    if (canvasName.Contains("DPhi")) hSyst->GetYaxis()->SetRangeUser(0.2*minimum, 1.5*maximum);
+    if (canvasName.Contains("DPhi"))        hSyst->GetYaxis()->SetRangeUser(0.2*minimum, 1.5*maximum);
     if (canvasName.Contains("dPhiLepJet1")) hSyst->GetYaxis()->SetRangeUser(0.15*minimum, 4.0*maximum);
     if (canvasName.Contains("dPhiLepJet2")) hSyst->GetYaxis()->SetRangeUser(0.15*minimum, 5.0*maximum);
     if (canvasName.Contains("dPhiLepJet3")) hSyst->GetYaxis()->SetRangeUser(0.2*minimum, 5.0*maximum);

@@ -46,7 +46,11 @@ void TakeRatiosOfUnfoldedXSecs(TString lepSel, int year, TString algo, TString h
 
     TString inputDir = "UnfoldedFiles";
     if (year == 9999) inputDir += "_Run2";
-    else              inputDir += year;
+    else{
+        inputDir += "_";
+        inputDir += year;
+    }
+    std::cout << "Input directory: " << inputDir << std::endl;
 
     unfoldDir += "Ratio";
     unfoldDir += "_";
@@ -217,6 +221,12 @@ void TakeRatiosOfUnfoldedXSecs(TString lepSel, int year, TString algo, TString h
     crossSectionPlot->SaveAs(outputFileName + ".pdf");
 
     std::cout << "\n<=========================================================================================>" << std::endl;
+
+    // Save other things --- 
+    outputRootFile->cd();
+    
+    // Write out covariance matrices ---
+    for (int i = 0; i <= 11; ++i) if (hCovRATIO[i]) hCovRATIO[i]->Write();
 
     outputRootFile->Close();
     if (inputFileNUM) inputFileNUM->Close();

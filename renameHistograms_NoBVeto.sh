@@ -1,10 +1,12 @@
 #!/bin/bash
-cd HistoFiles_2016
+# cd HistoFiles_2016
 # cd HistoFiles_2017
-# cd HistoFiles_2018
+cd HistoFiles_2018
 echo $PWD
 
+
 ########## Central
+
 ### Data and Signal MC (NLO & LO) --
 mv SMu_13TeV_Data_dR_5311_List_EffiCorr_0_TrigCorr_1_Syst_0_JetPtMin_30_VarWidth.root            SMu_13TeV_Data_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root
 mv SMu_13TeV_WJets_FxFx_Wpt_dR_5311_List_EffiCorr_1_TrigCorr_1_Syst_0_JetPtMin_30_VarWidth.root  SMu_13TeV_WJetsToLN_UNFOLDING_FxFx_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root
@@ -109,4 +111,3 @@ mv SMu_13TeV_WZ_dR_5311_List_EffiCorr_1_TrigCorr_1_Syst_11_Down_JetPtMin_30_VarW
 mv SMu_13TeV_WZ_dR_5311_List_EffiCorr_1_TrigCorr_1_Syst_11_Up_JetPtMin_30_VarWidth.root                SMu_13TeV_WZ_TrigCorr_1_Syst_11_Up_JetPtMin_30_JetEtaMax_24.root
 mv SMu_13TeV_ZZ_dR_5311_List_EffiCorr_1_TrigCorr_1_Syst_11_Down_JetPtMin_30_VarWidth.root              SMu_13TeV_ZZ_TrigCorr_1_Syst_11_Down_JetPtMin_30_JetEtaMax_24.root
 mv SMu_13TeV_ZZ_dR_5311_List_EffiCorr_1_TrigCorr_1_Syst_11_Up_JetPtMin_30_VarWidth.root                SMu_13TeV_ZZ_TrigCorr_1_Syst_11_Up_JetPtMin_30_JetEtaMax_24.root
-

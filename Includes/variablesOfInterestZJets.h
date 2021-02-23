@@ -25,6 +25,8 @@ const variableStruct VAROFINTERESTZJETS[] = {
     {"SecondJetPt_Zinc2jet_TUnfold",               1,      1,          1,              4,             1,            1 ,               1    },
     {"SecondJetAbsRapidity_Zinc2jet_TUnfold",      1,      1,          1,              4,             1,            1 ,               1    },
     {"dPhiLepJet2_Zinc2jet_TUnfold",               1,      1,          1,              4,             1,            1 ,               1    },
+    // other
+    {"dRapidityJets_Zinc2jet_TUnfold",               1,      1,          1,              4,             1,            1 ,               1    },
     // AK8 jet kinematics ---
     // 1st jet
     {"FirstJetAK8Pt_Zinc1jet_TUnfold",               1,      1,          1,              4,             1,            1 ,               1    },
@@ -34,6 +36,9 @@ const variableStruct VAROFINTERESTZJETS[] = {
     {"SecondJetAK8Pt_Zinc2jet_TUnfold",               1,      1,          1,              4,             1,            1 ,               1    },
     {"SecondJetAK8AbsRapidity_Zinc2jet_TUnfold",      1,      1,          1,              4,             1,            1 ,               1    },
     {"dPhiLepJet2AK8_Zinc2jet_TUnfold",               1,      1,          1,              4,             1,            1 ,               1    },
+    // other
+    {"dRapidityJetsAK8_Zinc2jet_TUnfold",               1,      1,          1,              4,             1,            1 ,               1    },
+
     // For alpha-s ratios ---
     // Muon Pt + AK4 Jet Pt
     {"LepPtPlusLeadingJetPt_Zinc1jet_TUnfold",         1,      1,          1,              4,             1,            1 ,               1    },
@@ -49,6 +54,10 @@ const variableStruct VAROFINTERESTZJETS[] = {
     {"LepPtPlusLeadingJetAK8Pt_Zexc1jet_TUnfold",      1,      1,          1,              4,             1,            1 ,               1    },
     {"LepPtPlusLeadingJetAK8Pt_Zexc2jet_TUnfold",      1,      1,          1,              4,             1,            1 ,               1    },
     {"LepPtPlusLeadingJetAK8Pt_Zexc3jet_TUnfold",      1,      1,          1,              4,             1,            1 ,               1    },
+    // Muon Pt + HT,2/2 (AK8)
+    {"LepPtPlusHT2over2AK8_Zinc2jet_TUnfold",      1,      1,          1,              4,             1,            1 ,               1    },
+    {"LepPtPlusHT2over2AK8_Zinc3jet_TUnfold",      1,      1,          1,              4,             1,            1 ,               1    },
+
 }; 
 
 const unsigned int NVAROFINTERESTZJETS = sizeof(VAROFINTERESTZJETS)/sizeof(VAROFINTERESTZJETS[0]);
