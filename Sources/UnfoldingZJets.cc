@@ -40,7 +40,8 @@
 extern ConfigVJets cfg;
 using namespace std;
 
-void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TString unfoldDir, int jetPtMin, int jetEtaMax, TString variable, bool doNormalized, int whichSyst, bool isClosureTest){
+void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TString unfoldDir, 
+    int jetPtMin, int jetEtaMax, TString variable, bool doNormalized, int whichSyst, bool isClosureTest){
     gStyle->SetOptStat(0);
 
     //--- Get input histogram directory for specific year ---
@@ -223,6 +224,21 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
         getAllHistos(variable, year, hRecData, fData, hRecDYJets, hGenDYJets, hResDYJets, fDYJets, 
             hRecBg, hRecSumBg, fBg, NBGDYJETS, hFakDYJets, hAccepDYJets, isClosureTest);
         
+        // ------------------------------------------------
+        // Get fake rates dist.
+        TH1D* hFakeRate_Central = (TH1D*) hFakDYJets[0]->Clone("hFakeRate_Central"); 
+        if (isClosureTest) hFakeRate_Central->Divide(hRecDYJets[0]);
+        else{
+            TH1D *hRecDataMinusBg = (TH1D*) hRecData[0]->Clone();
+            hRecDataMinusBg->Add(hRecSumBg[0], -1);
+            hFakeRate_Central->Divide(hRecDataMinusBg);
+        }
+        hFakeRate_Central->SetTitle("hFakeRate_Central");
+        hFakeRate_Central->GetXaxis()->SetTitle(hRecData[0]->GetXaxis()->GetTitle());
+        hFakeRate_Central->GetYaxis()->SetTitle("Fake Rate");
+        hFakeRate_Central->GetYaxis()->SetRangeUser(0., 1.);
+        // ------------------------------------------------
+
         //--- Get histos from theory files (if files opened above)
         TH1D *hGen1 = NULL;
         TH1D *hGen2 = NULL;
@@ -245,7 +261,7 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
         TH1D *hGen1CrossSection = makeCrossSectionHist(hGen1, integratedLumi);
         hGen1CrossSection->SetZTitle(generatorNames[gen1][1]);
 
-        //this is the tag for another theory prediciton (NNLO prediction in 2015 W+jets)
+        //this is the tag for another theory prediction (NNLO prediction in 2015 W+jets)
         TH1D *hGen2CrossSection;
         if (NNLO1JFILENAME.Length() > 0 ){
             if (variable == "FirstJetPt_Zinc1jet" || variable == "JetsHT_Zinc1jet" || variable == "FirstJetAbsRapidity_Zinc1jet" || variable == "dRptmin100LepCloseJetCo300dR04_Zinc1jet" || variable == "dPhiLepJet1_Zinc1jet"){
@@ -298,7 +314,7 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
             // Selecting input distibution to unfold
 
             TH1D *hRecDataMinusFakes = NULL;
-            if (!isClosureTest){ // NOMINAL DIST. (Reco data that is BG- and fake-subtracted)
+            if(!isClosureTest){ // NOMINAL DIST. (Reco data that is BG- and fake-subtracted)
                 // Grab reco data ---
                 std::cout << "\nFetching main reco data histo hRecData[iData], " << "iData = " << iData << std::endl;
                 hRecDataMinusFakes = (TH1D*) hRecData[iData]->Clone();
@@ -396,8 +412,10 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
 
         // Plot response matrix for central distribution ---
         plotRespMat(hResDYJets[0], variable, unfoldDir, 0, hGenDYJets[0]);
-        //if #recobins = 2 * #genbins, then generate alternate plot of response matrix (done for TUnfold)
-        if (variable.Contains("_TUnfold")) plotRespMat(hResDYJets[0], variable, unfoldDir, 1, hGenDYJets[0]);
+        // --> If #recobins = 2 * #genbins, then generate alternate plot of response matrix (done for TUnfold)
+        if ( variable.Contains("_TUnfold") && !variable.Contains("LepPtPlusLeadingJetAK8Pt_Z") ){
+            plotRespMat(hResDYJets[0], variable, unfoldDir, 1, hGenDYJets[0]);
+        }
         
         //      if(whichSyst < 0){
         //          createSystPlots(outputFileName, variable, lepSel, hUnfData, logy);
@@ -432,6 +450,7 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
         hRecData[0]->Write("hRecData_Central"); //reco data before BG subtraction and fakes removal
         hRecSumBg[0]->Write("hRecSumBg_Central"); //sum of all BGs to be subtracted from reco data
         hFakDYJets[0]->Write("hFakDYJets_Central");
+        hFakeRate_Central->Write("hFakeRate_Central");
         hRecDYJets[0]->Write("hRecDYJets_Central"); //reco MC for W+jets signal
         hGenDYJets[0]->Write("hGenDYJets_Central"); //gen MC for W+jets NLO FxFx signal
         hResDYJets[0]->Write("hResDYJets_Central"); //hResDYJets is the response matrix
@@ -476,9 +495,7 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
 
 }
 
-void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRecDataMinusFakes, TH1D* &hRecDataBinsMerged, TH1D* &hUnfData, TH1D* &hUnfDataNoScale, 
-    TH2D* &hUnfDataStatCov, TH2D* &hUnfDataStatCovNoScale, TH2D* &hUnfMCStatCov, TH2D* &hUnfMCStatCovNoScale, TString name, double integratedLumi, 
-    TH1D* hGenDYJets, TH2D* hAccepDYJets, bool logy, bool doRatioUnfold, int year){
+void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRecDataMinusFakes, TH1D* &hRecDataBinsMerged, TH1D* &hUnfData, TH1D* &hUnfDataNoScale, TH2D* &hUnfDataStatCov, TH2D* &hUnfDataStatCovNoScale, TH2D* &hUnfMCStatCov, TH2D* &hUnfMCStatCovNoScale, TString name, double integratedLumi, TH1D* hGenDYJets, TH2D* hAccepDYJets, bool logy, bool doRatioUnfold, int year){
 
     printf("=========================================================================\n");
     printf("Beginning TUnfoldData function for varation: %s \n", name.Data());
@@ -569,9 +586,9 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
 
         // ALW 5 JUNE 20
         // Set reco underflow bins to 0 in response matrix!!!
-        // We will do the acceptance correction below after distribution has been unfolded!
-        responseMatrix->SetBinContent(0, i, 0.);
-        acceptDY->SetBinContent(0, i, 0.);
+        // We will do the acceptance/efficiency correction below after distribution has been unfolded!
+        responseMatrix->SetBinContent(0, i, 0.0);
+        acceptDY->SetBinContent(0, i, 0.0);
 
     }
 
@@ -615,44 +632,48 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
 
     // Set input options:
     // 1) Regularization scheme -----
-    TUnfold::ERegMode regMode = TUnfold::kRegModeDerivative; // "regularize the 1st derivative of the output distribution"
+    TUnfold::ERegMode regMode = TUnfold::kRegModeDerivative; // "regularize the 1st derivative of the output distribution", NOMINAL
     // TUnfold::ERegMode regMode = TUnfold::kRegModeCurvature; // "regularize the 2nd derivative of the output distribution"
     // 2) Area constraint -----
     // TUnfold::EConstraint constraintMode = TUnfold::kEConstraintNone;  // "use no extra constraint"
-    TUnfold::EConstraint constraintMode = TUnfold::kEConstraintArea; // "enforce preservation of the area"
+    TUnfold::EConstraint constraintMode = TUnfold::kEConstraintArea; // "enforce preservation of the area", NOMINAL
     // 3) "Choice of regularisation scale factors to construct the matrix L" -----
-    TUnfoldDensity::EDensityMode densityMode = TUnfoldDensity::kDensityModeeNone; // "no scale factors, matrix L is similar to unity matrix" (typo of "kDensityModeNone" in TUnfold v17.1)
+    TUnfoldDensity::EDensityMode densityMode = TUnfoldDensity::kDensityModeeNone; // "no scale factors, matrix L is similar to unity matrix" (typo of "kDensityModeNone" in TUnfold v17.1), NOMINAL
     // TUnfoldDensity::EDensityMode densityMode = TUnfoldDensity::kDensityModeBinWidth; // "scale factors from multidimensional bin width"
 
     //Define constructor and use SetInput to input the measurement that is to be unfolded ---
-    // TUnfoldDensity unfold(responseMatrix, TUnfold::kHistMapOutputVert, regMode, constraintMode, densityMode); // NOTE: "responseMatrix" is our current default migration matrix
-    TUnfoldDensity unfold(acceptDY, TUnfold::kHistMapOutputVert, regMode, constraintMode, densityMode); // for testing
+    TUnfoldDensity unfold(responseMatrix, TUnfold::kHistMapOutputVert, regMode, constraintMode, densityMode); // NOTE: "responseMatrix" is our current default migration matrix, NOMINAL CHOICE
+    // TUnfoldDensity unfold(acceptDY, TUnfold::kHistMapOutputVert, regMode, constraintMode, densityMode); // has been used for testing
     unfold.SetInput(recoData);
 
     // Regularization strength determination ---
-    // int regSwitch = -1; // ScanLcurve
-    int regSwitch = 1; // ScanTau
-    // int regSwitch = 0; // DoUnfold (using manually set value of tau above)
+    int regSwitch(0);
     Double_t tau = 0.0; // Value of tau given if using DoUnfold
-
-    // Number of points for ScanLcurve or ScanTau methods
-    // Int_t nPointsTauScan = 50;
-    // Int_t nPointsTauScan = 100;
+    // For now, only use regularization on the distributions used for the ratio
+    if (variable.Contains("LepPtPlusLeadingJetAK8Pt_Z")){
+        // regSwitch = -1; // ScanLcurve
+        regSwitch = 1; // ScanTau, NOMINAL CHOICE
+    }
+    else{
+        regSwitch = 0; // DoUnfold (using manually set value of tau)
+    }
+    
+    // Number of points for ScanLcurve or ScanTau methods ---
     Int_t nPointsTauScan = 250;
-
-    // Min and max values of tau for scan
+    // Min and max values of tau for scan ---
     // Automatic values
     // Double_t tauMin = 0.0;
     // Double_t tauMax = 0.0;
     // Large range
-    Double_t tauMin = 0.00000005;
-    Double_t tauMax = 0.01;
-
+    Double_t tauMin = 0.00000001; // NOMINAL CHOICE
+    Double_t tauMax = 0.0001; // NOMINAL CHOICE
+    // Additional setup ---
     int iBest(0);
     TSpline *logTauX, *logTauY;
     TSpline *rhoLogTau = 0;
     TGraph *lCurve = 0;
 
+    // Do unfolding ---
     if (regSwitch < 0){
         printf("\n-----> Doing ScanLcurve method\n");
         iBest = unfold.ScanLcurve(nPointsTauScan, tauMin, tauMax, &lCurve, &logTauX, &logTauY);
@@ -667,7 +688,11 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
         unfold.DoUnfold(tau);
     }
     
+
+
+    // ---
     // Results for determination of regularization strength tau ---
+    // ---
 
     // Final value of tau
     Double_t tauFinal = unfold.GetTau();
@@ -734,6 +759,8 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
 
         if (name == "Central") canCorrScan->SaveAs(unfoldOutputDir + "CorrCoeffScan_" + variable + "_" + name + ".pdf");
         canCorrScan->Write();
+
+        delete canCorrScan;
     }
 
     // ---------------------------------------------------------------------------
@@ -765,19 +792,48 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
     // ---
 
     // ATTEMPT 2 (using response matrix filled w/ no eff SFs in weights) --
-    std::cout << "\nReconstruction efficiency/acceptance rate -- " << std::endl;
+    std::cout << "\nReconstruction efficiency rate (for eff. correction) -- " << std::endl;
+    TH1D* hRecoEffRate = (TH1D*) genDY->Clone("hRecoEffRate"); // histogram to record the reconstruction efficiency fraction
     for (int i = 1; i <= hUnfData->GetNbinsX(); i++){
 
-        double acceptedEvents(0.);
-        for (int j = 1; j <= acceptDY->GetNbinsX()+1; j++){
-            acceptedEvents += acceptDY->GetBinContent(j,i);
+        double acceptedEvents(0.0), acceptedEventsErr(0.0);
+        for (int j = 1; j <= responseMatrix->GetNbinsX(); j++){
+
+            // NOTE: for the closure test w/ reco MC, have to use the responseMatrix object to derive the correction
+            // as both it and the input recohistogram are filled using weights affected by the eff. SFs applied
+            // when correcting simulation to better model data at reconstructed level 
+            // ...but for the unfolded data, should the eff. correction be derived using accepDY or responseMatrix?
+            // using accepDY means that you would only correct for the lost counts when the gen-level events
+            // don't get reconstructed by the detector.. using responeMatrix means you correct for this affect,
+            // but also you correct also for the eff. SFs applied on the reco MC
+            // so if the idea is to correct the data as much as you would the reco MC, then use responseMatrix
+
+            // NOMINAL
+            acceptedEvents += responseMatrix->GetBinContent(j,i);
+            acceptedEventsErr += pow(responseMatrix->GetBinError(j,i), 2.0);
+
+            // doesn't work/close completely for closure test...
+            // acceptedEvents += acceptDY->GetBinContent(j,i);
+            // acceptedEventsErr += pow(acceptDY->GetBinError(j,i), 2.0);
+
         }
+        acceptedEventsErr = sqrt(acceptedEventsErr);
 
         double acceptance = acceptedEvents/genDY->GetBinContent(i);
         std::cout << "Bin #" << i << ": " << acceptance << std::endl;
 
+        // fill histogram with acceptance/reconstruction efficiency for each bin
+        hRecoEffRate->SetBinContent(i, acceptance);
+        hRecoEffRate->SetBinError(i, acceptance * sqrt(   pow(acceptedEventsErr/acceptedEvents, 2.0) + pow(genDY->GetBinError(i)/genDY->GetBinContent(i), 2.0)   )); 
+
+        // then correct the unfolded distribution
         hUnfData->SetBinContent(i, hUnfData->GetBinContent(i)/acceptance);
     }
+    hRecoEffRate->SetTitle("hRecoEffRate");
+    hRecoEffRate->GetXaxis()->SetTitle(hRecDataMinusFakes->GetXaxis()->GetTitle());
+    hRecoEffRate->GetYaxis()->SetTitle("Reconstruction Eff.");
+    hRecoEffRate->GetYaxis()->SetRangeUser(0., 1.);
+    hRecoEffRate->Write();
 
 
     // ---------
@@ -792,22 +848,22 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
     }
     printf("#Events in unfolded dist.: %F\n", unfEventCounter);
     hUnfDataNoScale = (TH1D*) hUnfData->Clone("hUnfDataNoScale");
-    hUnfDataNoScale->Write();
+    // hUnfDataNoScale->Write();
 
     //Get covariance contribution from the input uncertainties (data statistical uncertainties) 
     hUnfDataStatCov = (TH2D*) unfold.GetEmatrixInput("dataStatCov", "dataStatCov", 0, 0, kTRUE)->Clone(); //Last 3 inputs are default;
     hUnfDataStatCov->SetName("hUnfDataStatCov");
     hUnfDataStatCov->SetTitle(hRecDataMinusFakes->GetTitle());
     hUnfDataStatCovNoScale = (TH2D*) hUnfDataStatCov->Clone("hUnfDataStatCovNoScale");
-    hUnfDataStatCovNoScale->Write();
+    // hUnfDataStatCovNoScale->Write();
     
-    //Retreive covariance contribution from uncorrelated (statistical) uncertainties of the response matrix. 
+    //Retrieve covariance contribution from uncorrelated (statistical) uncertainties of the response matrix. 
     //Equivalent to RooUnfold::Ereco(RooUnfold::kCovariance) with IncludeSystematics(2). 
     hUnfMCStatCov = (TH2D*) unfold.GetEmatrixSysUncorr("respStatCov", "respStatCov", 0, 0, kTRUE)->Clone(); //Last 3 inputs are default;
     hUnfMCStatCov->SetName("hUnfMCStatCov");
     hUnfMCStatCov->SetTitle(hRecDataMinusFakes->GetTitle());
     hUnfMCStatCovNoScale = (TH2D*) hUnfMCStatCov->Clone("hUnfMCStatCovNoScale");
-    hUnfMCStatCovNoScale->Write();
+    // hUnfMCStatCovNoScale->Write();
 
     printf("\nChi2A = %F\n", unfold.GetChi2A());
     printf("Number of degrees of freedom = %d\n", unfold.GetNdf());
@@ -836,14 +892,15 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
     //}
     printf("\n >>>>> Ratio of Folded/Reco:\n"); 
     TH1D *foldedClosureRatio = (TH1D*) foldedData->Clone("foldedClosureRatio");
-    foldedClosureRatio->SetTitle("foldedClosureRatio");
-    foldedClosureRatio->GetXaxis()->SetTitle(hRecDataMinusFakes->GetXaxis()->GetTitle());
-    foldedClosureRatio->GetYaxis()->SetTitle("Folded/Reco");
     foldedClosureRatio->Divide(recoData);
     printf("\n >>>>> foldedClosureRatio->GetNbinsX = %d\n", foldedClosureRatio->GetNbinsX());
     for(int i = 1; i <= foldedClosureRatio->GetNbinsX(); i++){
         printf("Bin %i: %F\n", i, foldedClosureRatio->GetBinContent(i));
     }
+    foldedClosureRatio->SetTitle("foldedClosureRatio");
+    foldedClosureRatio->GetXaxis()->SetTitle(hRecDataMinusFakes->GetXaxis()->GetTitle());
+    foldedClosureRatio->GetYaxis()->SetTitle("Folded/Reco");
+    foldedClosureRatio->GetYaxis()->SetRangeUser(0.5, 1.5);
     foldedClosureRatio->Write();
 
     // --------------------------------------------------------
@@ -860,68 +917,94 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
     UnfGenRatio->SetTitle("UnfGenRatio");
     UnfGenRatio->GetXaxis()->SetTitle(hRecDataMinusFakes->GetXaxis()->GetTitle());
     UnfGenRatio->GetYaxis()->SetTitle("Unfolded/Gen");
-    // set y-axis bounds between 0.5 and 1.5...
+    UnfGenRatio->GetYaxis()->SetRangeUser(0., 5.);
     UnfGenRatio->Write();
 
     // --------------------------------------------------------
 
-    // Get Unfolded/Reco to quantify the effects of the unfolding --
-
-    // 1) Have to first merge the split bins of the reco-level distribution
-    // to match the binning of the unfolded dist (which should be the same as gen-level)
-
-    //set bin content of this new histo using bin contents from original
-    TH1D *recoDataNominal = (TH1D*) recoData->Clone("recoDataNominal");
-    int numBinsXRecoNominal = recoDataNominal->GetNbinsX();
-
-    //create the resized histo using binning info from unfolded dist
-    int numBinsUnf =  hUnfData->GetNbinsX();
-    // double xminUnf = hUnfData->GetXaxis()->GetXmin();
-    // double xmaxUnf = hUnfData->GetXaxis()->GetXmax();
-    Double_t xBinsUnf[numBinsUnf+1]; //array of bin edges from unfolded dist.
-    for (int i(1); i < numBinsUnf + 2; i++){ //use low bin edge of overflow bin for upper bin edge of last real bin
-        double binlowUnf = hUnfData->GetBinLowEdge(i);
-        // double binhighUnf = hUnfData->GetXaxis()->GetBinUpEdge(i);
-        xBinsUnf[i-1] = binlowUnf;
-    }
-
-    // create new reco-level histogram with binning of unfolded distribution
-    // logic below only works because the num. of reco bins is even
-    // because #reco bins = 2 * #gen bins...
-    TH1D *recoData_binsMerged = new TH1D("recoData_binsMerged", "recoData_binsMerged", numBinsUnf, xBinsUnf);
-    int newHistoCounter = 1;
-    for (int i(1); i < numBinsXRecoNominal + 1; i += 2){
-
-        // bin contents
-        double bincount1 = recoDataNominal->GetBinContent(i);
-        double bincount2 = recoDataNominal->GetBinContent(i+1);
-        recoData_binsMerged->SetBinContent( newHistoCounter, (bincount1 + bincount2) );
-
-        // bin errors
-        // adding errors from split bins in quadrature
-        double errorcount1 = recoDataNominal->GetBinError(i);
-        double errorcount2 = recoDataNominal->GetBinError(i+1);
-        recoData_binsMerged->SetBinError( newHistoCounter, sqrt(pow(errorcount1, 2.)+pow(errorcount2, 2.)) );
+    // Plot Unfolded/Reco to quantify the total effect of the unfolding procedure --
+    // For distributions that go into ratio, binning setup is different
+    if (variable.Contains("LepPtPlusLeadingJetAK8Pt_Z")){
         
-        newHistoCounter++;
-    }
-    hRecDataBinsMerged = (TH1D*) recoData_binsMerged->Clone("hRecDataBinsMerged_"+name);
-    recoData_binsMerged->Write();
-    
+        // here, reco binning is the same as gen, except with 2 extra bins in front
+        hRecDataBinsMerged = (TH1D*) hUnfData->Clone("hRecDataBinsMerged_"+name); 
+        for(int i = 1; i <= hUnfData->GetNbinsX(); i++){
+            hRecDataBinsMerged->SetBinContent(i, recoData->GetBinContent(i+2));
+            hRecDataBinsMerged->SetBinError(i, recoData->GetBinError(i+2));
+        }
 
-    // 2) Then take the ratio
-    printf("\nRatio of Unfolded/Reco:"); 
-    TH1D *UnfRecoRatio = (TH1D*) hUnfData->Clone("UnfRecoRatio");
-    UnfRecoRatio->Divide(recoData_binsMerged);
-    printf("\n >>>>> UnfRecoRatio->GetNbinsX = %d\n", UnfRecoRatio->GetNbinsX());
-    for(int i = 1; i <= UnfRecoRatio->GetNbinsX(); i++){
-        printf("Bin %i: %F\n", i, UnfRecoRatio->GetBinContent(i));
+        printf("\nRatio of Unfolded/Reco:"); 
+        TH1D* UnfRecoRatio = (TH1D*) hUnfData->Clone("UnfRecoRatio");
+        UnfRecoRatio->Divide(hRecDataBinsMerged);
+        printf("\n >>>>> UnfRecoRatio->GetNbinsX = %d\n", UnfRecoRatio->GetNbinsX());
+        for(int i = 1; i <= UnfRecoRatio->GetNbinsX(); i++){
+            printf("Bin %i: %F\n", i, UnfRecoRatio->GetBinContent(i));
+        }
+        UnfRecoRatio->SetTitle("UnfRecoRatio");
+        UnfRecoRatio->GetXaxis()->SetTitle(hRecDataMinusFakes->GetXaxis()->GetTitle());
+        UnfRecoRatio->GetYaxis()->SetTitle("Unfolded/Reco");
+        UnfRecoRatio->GetYaxis()->SetRangeUser(0., 5.);
+        UnfRecoRatio->Write();
+
     }
-    UnfRecoRatio->SetTitle("UnfRecoRatio");
-    UnfRecoRatio->GetXaxis()->SetTitle(hRecDataMinusFakes->GetXaxis()->GetTitle());
-    UnfRecoRatio->GetYaxis()->SetTitle("Unfolded/Reco");
-    // set y-axis bounds between 0.5 and 1.5...
-    UnfRecoRatio->Write();
+    // all other distributions use the "split-in-two" binning setup
+    else{
+
+        // 1) Have to first merge the split bins of the reco-level distribution
+        // to match the binning of the unfolded dist (which should be the same as gen-level)
+
+        //set bin content of this new histo using bin contents from original
+        TH1D *recoDataNominal = (TH1D*) recoData->Clone("recoDataNominal");
+        int numBinsXRecoNominal = recoDataNominal->GetNbinsX();
+
+        //create the resized histo using binning info from unfolded dist
+        int numBinsUnf =  hUnfData->GetNbinsX();
+        // double xminUnf = hUnfData->GetXaxis()->GetXmin();
+        // double xmaxUnf = hUnfData->GetXaxis()->GetXmax();
+        Double_t xBinsUnf[numBinsUnf+1]; //array of bin edges from unfolded dist.
+        for (int i(1); i < numBinsUnf + 2; i++){ //use low bin edge of overflow bin for upper bin edge of last real bin
+            double binlowUnf = hUnfData->GetBinLowEdge(i);
+            // double binhighUnf = hUnfData->GetXaxis()->GetBinUpEdge(i);
+            xBinsUnf[i-1] = binlowUnf;
+        }
+
+        // create new reco-level histogram with binning of unfolded distribution
+        // logic below only works because the num. of reco bins is even
+        // because #reco bins = 2 * #gen bins...
+        TH1D *recoData_binsMerged = new TH1D("recoData_binsMerged", "recoData_binsMerged", numBinsUnf, xBinsUnf);
+        int newHistoCounter = 1;
+        for (int i(1); i < numBinsXRecoNominal + 1; i += 2){
+            // bin contents ---
+            double bincount1 = recoDataNominal->GetBinContent(i);
+            double bincount2 = recoDataNominal->GetBinContent(i+1);
+            recoData_binsMerged->SetBinContent( newHistoCounter, (bincount1 + bincount2) );
+            // bin errors ---
+            // adding errors from split bins in quadrature
+            double errorcount1 = recoDataNominal->GetBinError(i);
+            double errorcount2 = recoDataNominal->GetBinError(i+1);
+            recoData_binsMerged->SetBinError( newHistoCounter, sqrt(pow(errorcount1, 2.)+pow(errorcount2, 2.)) );
+            // ---
+            newHistoCounter++;
+        }
+        hRecDataBinsMerged = (TH1D*) recoData_binsMerged->Clone("hRecDataBinsMerged_"+name);
+        recoData_binsMerged->Write();
+        
+
+        // 2) Then take the ratio ---
+        printf("\nRatio of Unfolded/Reco:"); 
+        TH1D *UnfRecoRatio = (TH1D*) hUnfData->Clone("UnfRecoRatio");
+        UnfRecoRatio->Divide(recoData_binsMerged);
+        printf("\n >>>>> UnfRecoRatio->GetNbinsX = %d\n", UnfRecoRatio->GetNbinsX());
+        for(int i = 1; i <= UnfRecoRatio->GetNbinsX(); i++){
+            printf("Bin %i: %F\n", i, UnfRecoRatio->GetBinContent(i));
+        }
+        UnfRecoRatio->SetTitle("UnfRecoRatio");
+        UnfRecoRatio->GetXaxis()->SetTitle(hRecDataMinusFakes->GetXaxis()->GetTitle());
+        UnfRecoRatio->GetYaxis()->SetTitle("Unfolded/Reco");
+        UnfRecoRatio->GetYaxis()->SetRangeUser(0., 5.);
+        UnfRecoRatio->Write();
+
+    }
 
     // ---------------------------------------------------------------------------
     

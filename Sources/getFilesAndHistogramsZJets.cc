@@ -69,45 +69,45 @@ void getFiles(TString histoDir, TFile *Files[], TString lepSel, TString energy, 
 
     // ==============================================================
     
-    // Full systematics ---
-    // Data
-    if (Name.Index("Data") >= 0 ){
-        Syst.push_back("0");         // 0:      Central
-        Syst.push_back("2_Up");      // 2 up:   JES up
-        Syst.push_back("2_Down");    // 2 down: JES down
-    }
-    // Signal (W+jets)
-    else if (Name.Index("UNFOLDING") >= 0){
-        Syst.push_back("0");         // 0:       Central
-        Syst.push_back("1_Up");      // 1 up:    PU up
-        Syst.push_back("1_Down");    // 1 down:  PU down
-        Syst.push_back("4_Up");      // 4 up:    JER up
-        Syst.push_back("4_Down");    // 4 down:  JER down
-        Syst.push_back("5_Up");      // 5 up:    LepSF up
-        Syst.push_back("5_Down");    // 5 down:  LepSF down
-        // Syst.push_back("6_Up");      // 6 up:    BtagSF up
-        // Syst.push_back("6_Down");    // 6 down:  BtagSF down
-        Syst.push_back("0");      // 6 up:    BtagSF up
-        Syst.push_back("0");    // 6 down:  BtagSF down
-        Syst.push_back("11_Up");     // 11 up:   L1Prefire up
-        Syst.push_back("11_Down");   // 11 down: L1Prefire down
-    }
-    // Background
-    else{
-        Syst.push_back("0");         // 0:       Central
-        Syst.push_back("1_Up");      // 1 up:    PU up
-        Syst.push_back("1_Down");    // 1 down:  PU down
-        Syst.push_back("3_Up");      // 3 up:    XSEC up
-        Syst.push_back("3_Down");    // 3 down:  XSEC down
-        Syst.push_back("5_Up");      // 5 up:    LepSF up
-        Syst.push_back("5_Down");    // 5 down:  LepSF down
-        // Syst.push_back("6_Up");      // 6 up:    BtagSF up
-        // Syst.push_back("6_Down");    // 6 down:  BtagSF down
-        Syst.push_back("0");      // 6 up:    BtagSF up
-        Syst.push_back("0");    // 6 down:  BtagSF down
-        Syst.push_back("11_Up");     // 11 up:   L1Prefire up
-        Syst.push_back("11_Down");   // 11 down: L1Prefire down
-    };
+   // Full systematics ---
+   // Data
+   if (Name.Index("Data") >= 0 ){
+       Syst.push_back("0");         // 0:      Central
+       Syst.push_back("2_Up");      // 2 up:   JES up
+       Syst.push_back("2_Down");    // 2 down: JES down
+   }
+   // Signal (W+jets)
+   else if (Name.Index("UNFOLDING") >= 0){
+       Syst.push_back("0");         // 0:       Central
+       Syst.push_back("1_Up");      // 1 up:    PU up
+       Syst.push_back("1_Down");    // 1 down:  PU down
+       Syst.push_back("4_Up");      // 4 up:    JER up
+       Syst.push_back("4_Down");    // 4 down:  JER down
+       Syst.push_back("5_Up");      // 5 up:    LepSF up
+       Syst.push_back("5_Down");    // 5 down:  LepSF down
+       // Syst.push_back("6_Up");      // 6 up:    BtagSF up
+       // Syst.push_back("6_Down");    // 6 down:  BtagSF down
+       Syst.push_back("0");      // 6 up:    BtagSF up
+       Syst.push_back("0");    // 6 down:  BtagSF down
+       Syst.push_back("11_Up");     // 11 up:   L1Prefire up
+       Syst.push_back("11_Down");   // 11 down: L1Prefire down
+   }
+   // Background
+   else{
+       Syst.push_back("0");         // 0:       Central
+       Syst.push_back("1_Up");      // 1 up:    PU up
+       Syst.push_back("1_Down");    // 1 down:  PU down
+       Syst.push_back("3_Up");      // 3 up:    XSEC up
+       Syst.push_back("3_Down");    // 3 down:  XSEC down
+       Syst.push_back("5_Up");      // 5 up:    LepSF up
+       Syst.push_back("5_Down");    // 5 down:  LepSF down
+       // Syst.push_back("6_Up");      // 6 up:    BtagSF up
+       // Syst.push_back("6_Down");    // 6 down:  BtagSF down
+       Syst.push_back("0");      // 6 up:    BtagSF up
+       Syst.push_back("0");    // 6 down:  BtagSF down
+       Syst.push_back("11_Up");     // 11 up:   L1Prefire up
+       Syst.push_back("11_Down");   // 11 down: L1Prefire down
+   };
 
     // ==============================================================
 
@@ -149,41 +149,41 @@ void getFiles(TString histoDir, TFile *Files[], TString lepSel, TString energy, 
 
     // ==============================================================
 
-    // // No systematics ---
-    // // Data
-    // if (Name.Index("Data") >= 0 ){
-    //     Syst.push_back("0");   // 0:      Central
-    //     Syst.push_back("0");   // 2 up:   JES up
-    //     Syst.push_back("0");   // 2 down: JES down
-    // }
-    // // Signal (W+jets)
-    // else if (Name.Index("UNFOLDING") >= 0){
-    //     Syst.push_back("0");   // 0:       Central
-    //     Syst.push_back("0");   // 1 up:    PU up
-    //     Syst.push_back("0");   // 1 down:  PU down
-    //     Syst.push_back("0");   // 4 up:    JER up
-    //     Syst.push_back("0");   // 4 down:  JER down
-    //     Syst.push_back("0");   // 5 up:    LepSF up
-    //     Syst.push_back("0");   // 5 down:  LepSF down
-    //     Syst.push_back("0");   // 6 up:    BtagSF up
-    //     Syst.push_back("0");   // 6 down:  BtagSF down
-    //     Syst.push_back("0");   // 11 up:   L1Prefire up
-    //     Syst.push_back("0");   // 11 down: L1Prefire down
-    // }
-    // // Background
-    // else{
-    //     Syst.push_back("0");   // 0:       Central
-    //     Syst.push_back("0");   // 1 up:    PU up
-    //     Syst.push_back("0");   // 1 down:  PU down
-    //     Syst.push_back("0");   // 3 up:    XSEC up
-    //     Syst.push_back("0");   // 3 down:  XSEC down
-    //     Syst.push_back("0");   // 5 up:    LepSF up
-    //     Syst.push_back("0");   // 5 down:  LepSF down
-    //     Syst.push_back("0");   // 6 up:    BtagSF up
-    //     Syst.push_back("0");   // 6 down:  BtagSF down
-    //     Syst.push_back("0");   // 11 up:   L1Prefire up
-    //     Syst.push_back("0");   // 11 down: L1Prefire down
-    // };
+  //  // No systematics ---
+  //  // Data
+  //  if (Name.Index("Data") >= 0 ){
+  //      Syst.push_back("0");   // 0:      Central
+  //      Syst.push_back("0");   // 2 up:   JES up
+  //      Syst.push_back("0");   // 2 down: JES down
+  //  }
+  //  // Signal (W+jets)
+  //  else if (Name.Index("UNFOLDING") >= 0){
+  //      Syst.push_back("0");   // 0:       Central
+  //      Syst.push_back("0");   // 1 up:    PU up
+  //      Syst.push_back("0");   // 1 down:  PU down
+  //      Syst.push_back("0");   // 4 up:    JER up
+  //      Syst.push_back("0");   // 4 down:  JER down
+  //      Syst.push_back("0");   // 5 up:    LepSF up
+  //      Syst.push_back("0");   // 5 down:  LepSF down
+  //      Syst.push_back("0");   // 6 up:    BtagSF up
+  //      Syst.push_back("0");   // 6 down:  BtagSF down
+  //      Syst.push_back("0");   // 11 up:   L1Prefire up
+  //      Syst.push_back("0");   // 11 down: L1Prefire down
+  //  }
+  //  // Background
+  //  else{
+  //      Syst.push_back("0");   // 0:       Central
+  //      Syst.push_back("0");   // 1 up:    PU up
+  //      Syst.push_back("0");   // 1 down:  PU down
+  //      Syst.push_back("0");   // 3 up:    XSEC up
+  //      Syst.push_back("0");   // 3 down:  XSEC down
+  //      Syst.push_back("0");   // 5 up:    LepSF up
+  //      Syst.push_back("0");   // 5 down:  LepSF down
+  //      Syst.push_back("0");   // 6 up:    BtagSF up
+  //      Syst.push_back("0");   // 6 down:  BtagSF down
+  //      Syst.push_back("0");   // 11 up:   L1Prefire up
+  //      Syst.push_back("0");   // 11 down: L1Prefire down
+  //  };
 
     // ==============================================================
     
@@ -536,8 +536,8 @@ TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJe
     if (isVerbose) std::cout << std::endl;
     for (int i = 1; i <= hResDYJets->GetNbinsX(); i++){ // count over RECO bins
 
-        double nmes(0.);
-        for (int j = 1; j <= hResDYJets->GetNbinsY() + 1; j++){ // count over GEN bins (include overflow)
+        double nmes(0.0);
+        for (int j = 1; j <= hResDYJets->GetNbinsY(); j++){ // count over GEN bins (currently don't include overflow bin)
             nmes += hResDYJets->GetBinContent(i, j);
         }
 
@@ -546,7 +546,7 @@ TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJe
         if (isVerbose) std::cout << "Fake rate calculated for bin #" << i << ": " << fakeRate << std::endl;
 
         // Now get fakes distribution
-        // For data, #fakes is (fake rate from signal MC) * (#events in data we estimate to be signal events)
+        // For data, #fakes is (fake rate from signal MC) * (#events in data we expect to be signal events)
         if (!isClosureTest) hFakDYJets->SetBinContent( i, fakeRate * (hRecData->GetBinContent(i) - hRecSumBg->GetBinContent(i)) );
         else hFakDYJets->SetBinContent( i, fakeRate * hRecDYJets->GetBinContent(i) );
 

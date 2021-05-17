@@ -2,19 +2,29 @@
 
 
 # # 6 December 20 --
-# # ratio distributions for 2016 only
+# # ratio distributions with 2016 only
 # ./runTakeRatiosOfUnfoldedXSecs year=2016  variableNUM=LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold  variableDENOM=LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold
-# ./runTakeRatiosOfUnfoldedXSecs year=2016  variableNUM=LepPtPlusLeadingJetAK8Pt_Zinc3jet_TUnfold  variableDENOM=LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold
-# ./runTakeRatiosOfUnfoldedXSecs year=2016  variableNUM=LepPtPlusLeadingJetAK8Pt_Zinc3jet_TUnfold  variableDENOM=LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold
-# ./runTakeRatiosOfUnfoldedXSecs year=2016  variableNUM=LepPtPlusHT2over2AK8_Zinc3jet_TUnfold      variableDENOM=LepPtPlusHT2over2AK8_Zinc2jet_TUnfold
+# # ./runTakeRatiosOfUnfoldedXSecs year=2016  variableNUM=LepPtPlusLeadingJetAK8Pt_Zinc3jet_TUnfold  variableDENOM=LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold
+# # ./runTakeRatiosOfUnfoldedXSecs year=2016  variableNUM=LepPtPlusLeadingJetAK8Pt_Zinc3jet_TUnfold  variableDENOM=LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold
+# # ./runTakeRatiosOfUnfoldedXSecs year=2016  variableNUM=LepPtPlusHT2over2AK8_Zinc3jet_TUnfold      variableDENOM=LepPtPlusHT2over2AK8_Zinc2jet_TUnfold
 
 
 # 16 November 20 --
-# unfolding distributions for ratio with full Run 2 data
+# ratio distributions with full Run 2 data
 ./runTakeRatiosOfUnfoldedXSecs year=9999  variableNUM=LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold  variableDENOM=LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold
-./runTakeRatiosOfUnfoldedXSecs year=9999  variableNUM=LepPtPlusLeadingJetAK8Pt_Zinc3jet_TUnfold  variableDENOM=LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold
-./runTakeRatiosOfUnfoldedXSecs year=9999  variableNUM=LepPtPlusLeadingJetAK8Pt_Zinc3jet_TUnfold  variableDENOM=LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold
-./runTakeRatiosOfUnfoldedXSecs year=9999  variableNUM=LepPtPlusHT2over2AK8_Zinc3jet_TUnfold      variableDENOM=LepPtPlusHT2over2AK8_Zinc2jet_TUnfold
+# ./runTakeRatiosOfUnfoldedXSecs year=9999  variableNUM=LepPtPlusLeadingJetAK8Pt_Zinc3jet_TUnfold  variableDENOM=LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold
+# ./runTakeRatiosOfUnfoldedXSecs year=9999  variableNUM=LepPtPlusLeadingJetAK8Pt_Zinc3jet_TUnfold  variableDENOM=LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold
+# ./runTakeRatiosOfUnfoldedXSecs year=9999  variableNUM=LepPtPlusHT2over2AK8_Zinc3jet_TUnfold      variableDENOM=LepPtPlusHT2over2AK8_Zinc2jet_TUnfold
+
+
+
+
+
+
+
+
+
+
 
 # 13 November 20 --
 # unfolding distributions with just 2016 data today
@@ -49,4 +59,3 @@
 # # ./runUnfoldingZJetsRatios  year=2016  variableNUM=LepPtPlusLeadingJetAK8Pt_Zexc2jet_TUnfold  variableDENOM=LepPtPlusLeadingJetAK8Pt_Zexc1jet_TUnfold # R21 exc
 # # ./runUnfoldingZJetsRatios  year=2016  variableNUM=LepPtPlusLeadingJetAK8Pt_Zexc3jet_TUnfold  variableDENOM=LepPtPlusLeadingJetAK8Pt_Zexc2jet_TUnfold # R32 exc
 # ./runUnfoldingZJetsRatios  year=2016  variableNUM=LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold  variableDENOM=LepPtPlusLeadingJetAK8Pt_Zexc1jet_TUnfold # R2inc/1exc
-

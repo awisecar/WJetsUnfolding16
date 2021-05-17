@@ -63,7 +63,7 @@ void getFiles(TString histoDir, TFile *Files[], TString lepSel, TString energy, 
  *                    corresponds to the sample, second one to the systematic
  *                    uncertainty variation.
  * @param nBg         Number of background samples. It must be equal to number of
- *                    Samples (see filesNameZJets.h) element minus 2, or a smallest
+ *                    Samples (see fileNamesZJets.h) element minus 2, or a smallest
  *                    number in which case only the first nBg samples listed in Samples
  *                    will be considered.
  */
@@ -87,4 +87,3 @@ void getAllHistos(TString variable, int year, TH1D *hRecData[3], TFile *fData[3]
 
 
 #endif
-

@@ -39,7 +39,8 @@
 extern ConfigVJets cfg;
 using namespace std;
 
-void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histoDir, TString unfoldDir, int jetPtMin, int jetEtaMax, TString variable, bool doNormalized, int whichSyst, bool isClosureTest){
+void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histoDir, TString unfoldDir, 
+    int jetPtMin, int jetEtaMax, TString variable, bool doNormalized, int whichSyst, bool isClosureTest){
     gStyle->SetOptStat(0);
 
     std::cout << "\n----- Begin unfolding of Run 2 data, combined at reco level! -----" << std::endl;
@@ -53,6 +54,14 @@ void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histo
     //--- Create output directory if does not exist ---
     unfoldDir += "_Run2";
     system("mkdir -p " + unfoldDir);
+
+    if (isClosureTest){
+        std::cout << "\n ///////////////////////////////////////////////////////" << std::endl;
+        std::cout << " //                                                   //" << std::endl;
+        std::cout << " //      Doing closure test with W+jets reco MC!      //" << std::endl;
+        std::cout << " //                                                   //" << std::endl;
+        std::cout << " ///////////////////////////////////////////////////////" << std::endl;
+    }
 
     //--- Choosing distribution to unfold
     int start = 0;
@@ -169,9 +178,8 @@ void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histo
 
     std::cout << "\n<=========================================================================================>" << std::endl;
 
-    // All necessary files have now been opened
-    // Begin loop over different variables
-
+    // All necessary files have now been opened!
+    // Begin loop over different variables...
     for (int i = start; i < end; ++i){
         variable = VAROFINTERESTZJETS[i].name;
 
@@ -186,7 +194,7 @@ void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histo
         outputFileName += doNormalized ? "_normalized" : "";   
         TFile *outputRootFile = new TFile(outputFileName + ".root", "RECREATE");
 
-        // Now declare TH1/2 histogram arrays, get all histograms for each year ---
+        // Now declare TH1/TH2 histogram arrays, get all histograms for each year ---
 
         // -- 2016 
         TH1D *hRecData_2016[3]           = {};
@@ -200,7 +208,7 @@ void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histo
         
         std::cout << "\nGetting all histos for 2016" << std::endl;
         getAllHistos(variable, 2016, hRecData_2016, fData_2016, hRecDYJets_2016, hGenDYJets_2016, hResDYJets_2016, fDYJets_2016, 
-            hRecBg_2016, hRecSumBg_2016, fBg_2016, NBGDYJETS, hFakDYJets_2016, hAccepDYJets_2016, false);
+            hRecBg_2016, hRecSumBg_2016, fBg_2016, NBGDYJETS, hFakDYJets_2016, hAccepDYJets_2016, isClosureTest);
 
         TH1D *hGen1_2016 = NULL;
         if (DYMGPYTHIA8FILENAME.Length() > 0 ) hGen1_2016 = getHisto(fGen1_2016, "gen" + variable);
@@ -217,7 +225,7 @@ void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histo
         
         std::cout << "\nGetting all histos for 2017" << std::endl;
         getAllHistos(variable, 2017, hRecData_2017, fData_2017, hRecDYJets_2017, hGenDYJets_2017, hResDYJets_2017, fDYJets_2017, 
-            hRecBg_2017, hRecSumBg_2017, fBg_2017, NBGDYJETS, hFakDYJets_2017, hAccepDYJets_2017, false);
+            hRecBg_2017, hRecSumBg_2017, fBg_2017, NBGDYJETS, hFakDYJets_2017, hAccepDYJets_2017, isClosureTest);
 
         TH1D *hGen1_2017 = NULL;
         if (DYMGPYTHIA8FILENAME.Length() > 0 ) hGen1_2017 = getHisto(fGen1_2017, "gen" + variable);
@@ -234,10 +242,38 @@ void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histo
         
         std::cout << "\nGetting all histos for 2018" << std::endl;
         getAllHistos(variable, 2018, hRecData_2018, fData_2018, hRecDYJets_2018, hGenDYJets_2018, hResDYJets_2018, fDYJets_2018, 
-            hRecBg_2018, hRecSumBg_2018, fBg_2018, NBGDYJETS, hFakDYJets_2018, hAccepDYJets_2018, false);
+            hRecBg_2018, hRecSumBg_2018, fBg_2018, NBGDYJETS, hFakDYJets_2018, hAccepDYJets_2018, isClosureTest);
 
         TH1D *hGen1_2018 = NULL;
         if (DYMGPYTHIA8FILENAME.Length() > 0 ) hGen1_2018 = getHisto(fGen1_2018, "gen" + variable);
+
+
+        // ------------------------------------------------
+        // Get fake rates dist.
+        TH1D* hFakeRate_Central_Run2 = (TH1D*) hFakDYJets_2016[0]->Clone("hFakeRate_Central_Run2");
+        hFakeRate_Central_Run2->Add(hFakDYJets_2017[0]);
+        hFakeRate_Central_Run2->Add(hFakDYJets_2018[0]);
+        if (isClosureTest){
+            TH1D* hRecDYJets_Central_Run2 = (TH1D*) hRecDYJets_2016[0]->Clone("hRecDYJets_Central_Run2");
+            hRecDYJets_Central_Run2->Add(hRecDYJets_2017[0]);
+            hRecDYJets_Central_Run2->Add(hRecDYJets_2018[0]);
+            hFakeRate_Central_Run2->Divide(hRecDYJets_Central_Run2);
+        }
+        else{
+            TH1D *hRecDataMinusBg_Central_Run2 = (TH1D*) hRecData_2016[0]->Clone();
+            hRecDataMinusBg_Central_Run2->Add(hRecSumBg_2016[0], -1);
+            hRecDataMinusBg_Central_Run2->Add(hRecData_2017[0]);
+            hRecDataMinusBg_Central_Run2->Add(hRecSumBg_2017[0], -1);
+            hRecDataMinusBg_Central_Run2->Add(hRecData_2018[0]);
+            hRecDataMinusBg_Central_Run2->Add(hRecSumBg_2018[0], -1);
+            hFakeRate_Central_Run2->Divide(hRecDataMinusBg_Central_Run2);
+        }
+        hFakeRate_Central_Run2->SetTitle("hFakeRate_Central_Run2");
+        hFakeRate_Central_Run2->GetXaxis()->SetTitle(hRecData_2016[0]->GetXaxis()->GetTitle());
+        hFakeRate_Central_Run2->GetYaxis()->SetTitle("Fake Rate");
+        hFakeRate_Central_Run2->GetYaxis()->SetRangeUser(0., 1.);        
+        // ------------------------------------------------
+
 
         // Now get theory cross sections using all years ---
         outputRootFile->cd();
@@ -297,43 +333,62 @@ void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histo
             int iData(0), iBg(0), iGen(0), iResp(0); 
             unfoldingFileSelector(iSyst, iData, iBg, iGen, iResp);
 
-            // -- First, before combining data for all years, subtract BG and fakes
 
-            // 2016
-            TH1D *hRecDataMinusFakes_2016 = (TH1D*) hRecData_2016[iData]->Clone();
-            hRecDataMinusFakes_2016->Add(hRecSumBg_2016[iBg], -1);
-            RemoveFakes(hRecDataMinusFakes_2016, hFakDYJets_2016[iSyst]);
+            ////////////////////////////////////////////////////////////////////////////////
+            // Selecting input distibution to unfold
 
-            // 2017
-            TH1D *hRecDataMinusFakes_2017 = (TH1D*) hRecData_2017[iData]->Clone();
-            hRecDataMinusFakes_2017->Add(hRecSumBg_2017[iBg], -1);
-            RemoveFakes(hRecDataMinusFakes_2017, hFakDYJets_2017[iSyst]);
+            TH1D *hRecDataMinusFakes_2016 = NULL;
+            TH1D *hRecDataMinusFakes_2017 = NULL;
+            TH1D *hRecDataMinusFakes_2018 = NULL;
+            if(!isClosureTest){
+                // -- Before combining data for all years, subtract BG and fakes
+                // 2016 --
+                hRecDataMinusFakes_2016 = (TH1D*) hRecData_2016[iData]->Clone();
+                hRecDataMinusFakes_2016->Add(hRecSumBg_2016[iBg], -1);
+                RemoveFakes(hRecDataMinusFakes_2016, hFakDYJets_2016[iSyst]);
+                // 2017 --
+                hRecDataMinusFakes_2017 = (TH1D*) hRecData_2017[iData]->Clone();
+                hRecDataMinusFakes_2017->Add(hRecSumBg_2017[iBg], -1);
+                RemoveFakes(hRecDataMinusFakes_2017, hFakDYJets_2017[iSyst]);
+                // 2018 --
+                hRecDataMinusFakes_2018 = (TH1D*) hRecData_2018[iData]->Clone();
+                hRecDataMinusFakes_2018->Add(hRecSumBg_2018[iBg], -1);
+                RemoveFakes(hRecDataMinusFakes_2018, hFakDYJets_2018[iSyst]);
+            }
+            else{
+                // -- Before combining signal reco MC for all years, subtract fakes
+                // 2016 --
+                hRecDataMinusFakes_2016 = (TH1D*) hRecDYJets_2016[iResp]->Clone();
+                RemoveFakes(hRecDataMinusFakes_2016, hFakDYJets_2016[iSyst]);
+                // 2017 --
+                hRecDataMinusFakes_2017 = (TH1D*) hRecDYJets_2017[iResp]->Clone();
+                RemoveFakes(hRecDataMinusFakes_2017, hFakDYJets_2017[iSyst]);
+                // 2018 --
+                hRecDataMinusFakes_2018 = (TH1D*) hRecDYJets_2018[iResp]->Clone();
+                RemoveFakes(hRecDataMinusFakes_2018, hFakDYJets_2018[iSyst]);
+            }
+            ////////////////////////////////////////////////////////////////////////////////
 
-            // 2018
-            TH1D *hRecDataMinusFakes_2018 = (TH1D*) hRecData_2018[iData]->Clone();
-            hRecDataMinusFakes_2018->Add(hRecSumBg_2018[iBg], -1);
-            RemoveFakes(hRecDataMinusFakes_2018, hFakDYJets_2018[iSyst]);
 
             // -- Then add all years together, then unfold
 
-            // Reconstructed data
-
+            // Reconstructed data (or reco signal MC for closure test)
             // NOTE: THIS IS A FIX FOR A PROBLEM THAT OCCURRED WHEN A NaN IN THE FIRST BIN APPEARED
             std::cout << "hRecDataMinusFakes_2016->Integral() = " << hRecDataMinusFakes_2016->Integral() << std::endl;
             std::cout << "hRecDataMinusFakes_2017->Integral() = " << hRecDataMinusFakes_2017->Integral() << std::endl;
             std::cout << "hRecDataMinusFakes_2018->Integral() = " << hRecDataMinusFakes_2018->Integral() << std::endl;
             for (int i = 1; i <= hRecDataMinusFakes_2016->GetNbinsX(); i++){
-                if ( !(hRecDataMinusFakes_2016->GetBinContent(i) > 0.) ){
+                if ( !(hRecDataMinusFakes_2016->GetBinContent(i) > 0.0) ){
                     std::cout << "Fixing bin " << i << " of distribution for 2016" << std::endl;
                     hRecDataMinusFakes_2016->SetBinContent(i, 0.);
                     hRecDataMinusFakes_2016->SetBinError(i, 0.);
                 }
-                if ( !(hRecDataMinusFakes_2017->GetBinContent(i) > 0.) ){
+                if ( !(hRecDataMinusFakes_2017->GetBinContent(i) > 0.0) ){
                     std::cout << "Fixing bin " << i << " of distribution for 2017" << std::endl;
                     hRecDataMinusFakes_2017->SetBinContent(i, 0.);
                     hRecDataMinusFakes_2017->SetBinError(i, 0.);
                 }
-                if ( !(hRecDataMinusFakes_2018->GetBinContent(i) > 0.) ){
+                if ( !(hRecDataMinusFakes_2018->GetBinContent(i) > 0.0) ){
                     std::cout << "Fixing bin " << i << " of distribution for 2018" << std::endl;
                     hRecDataMinusFakes_2018->SetBinContent(i, 0.);
                     hRecDataMinusFakes_2018->SetBinError(i, 0.);
@@ -424,6 +479,7 @@ void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histo
         // Save other things --- 
         outputRootFile->cd();
 
+        hFakeRate_Central_Run2->Write("hFakeRate_Central_Run2");
         hMadGenCrossSection->Write("hMadGenCrossSection"); //gen MC for W+jets NLO FxFx signal (also)
         hGen1CrossSection->Write("hGen1CrossSection"); //gen MC for W+jets LO MLM signal
 

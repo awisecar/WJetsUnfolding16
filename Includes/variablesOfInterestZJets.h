@@ -27,6 +27,8 @@ const variableStruct VAROFINTERESTZJETS[] = {
     {"dPhiLepJet2_Zinc2jet_TUnfold",               1,      1,          1,              4,             1,            1 ,               1    },
     // other
     {"dRapidityJets_Zinc2jet_TUnfold",               1,      1,          1,              4,             1,            1 ,               1    },
+    {"dRLepCloseJetCo300dR04_Zinc1jet_TUnfold",               1,      1,          1,              4,             1,            1 ,               1    },
+    {"dRLepCloseJetCo500dR04_Zinc1jet_TUnfold",               1,      1,          1,              4,             1,            1 ,               1    },
     // AK8 jet kinematics ---
     // 1st jet
     {"FirstJetAK8Pt_Zinc1jet_TUnfold",               1,      1,          1,              4,             1,            1 ,               1    },
