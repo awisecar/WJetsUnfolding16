@@ -37,7 +37,8 @@
 extern ConfigVJets cfg;
 using namespace std;
 
-void TakeRatiosOfUnfoldedXSecs(TString lepSel, int year, TString algo, TString histoDir, TString unfoldDir, int jetPtMin, int jetEtaMax, TString variableNUM, TString variableDENOM, bool doNormalized, int whichSyst){
+void TakeRatiosOfUnfoldedXSecs(TString lepSel, int year, TString algo, TString histoDir, TString unfoldDir, 
+    int jetPtMin, int jetEtaMax, TString variableNUM, TString variableDENOM, bool doNormalized, int whichSyst){
     gStyle->SetOptStat(0);
 
     std::cout << "\n----- Take ratios from unfolded distributions! -----" << std::endl;
@@ -75,7 +76,6 @@ void TakeRatiosOfUnfoldedXSecs(TString lepSel, int year, TString algo, TString h
     inputFileNameNUM += "_MGPYTHIA6_";
     inputFileNameNUM += doNormalized ? "_normalized" : "";   
     inputFileNameNUM += ".root";
-
     TFile *inputFileNUM = new TFile(inputFileNameNUM, "READ");
 
     TString inputFileNameDENOM = inputDir + "/" + lepSel; 
@@ -87,7 +87,6 @@ void TakeRatiosOfUnfoldedXSecs(TString lepSel, int year, TString algo, TString h
     inputFileNameDENOM += "_MGPYTHIA6_";
     inputFileNameDENOM += doNormalized ? "_normalized" : "";   
     inputFileNameDENOM += ".root";
-
     TFile *inputFileDENOM = new TFile(inputFileNameDENOM, "READ");
 
     // Create output file ---
@@ -136,8 +135,13 @@ void TakeRatiosOfUnfoldedXSecs(TString lepSel, int year, TString algo, TString h
     TH1D *hGenSignalLOMLMDENOM = (TH1D*) inputFileDENOM->Get("hGen1CrossSection");
     hGenSignalLOMLMDENOM->SetDirectory(0);
 
-    // Take ratios, write out to file ---
+    // NLO FxFx inclusive sample
+    TH1D *hGenSignalNLOFxFxInclNUM = (TH1D*) inputFileNUM->Get("hGen3CrossSection");
+    hGenSignalNLOFxFxInclNUM->SetDirectory(0);
+    TH1D *hGenSignalNLOFxFxInclDENOM = (TH1D*) inputFileDENOM->Get("hGen3CrossSection");
+    hGenSignalNLOFxFxInclDENOM->SetDirectory(0);
 
+    // Take ratios, write out to file ---
     TH1D *hUnfDataRATIO[nSysts]  = {};
     TH1D *hRecoDataRATIO[nSysts] = {};
 
@@ -177,22 +181,68 @@ void TakeRatiosOfUnfoldedXSecs(TString lepSel, int year, TString algo, TString h
     hGenSignalLOMLMRATIO->SetTitle("MG_aMC + PY8 (#leq 4j LO + PS)");
     hGenSignalLOMLMRATIO->GetYaxis()->SetTitle("Ratio");
     hGenSignalLOMLMRATIO->Write();
+    // NLO FxFx (MG5) inclusive sample
+    TH1D *hGenSignalNLOFxFxInclRATIO = (TH1D*) hGenSignalNLOFxFxInclNUM->Clone();
+    hGenSignalNLOFxFxInclRATIO->Divide(hGenSignalNLOFxFxInclNUM, hGenSignalNLOFxFxInclDENOM, 1, 1, "B");
+    hGenSignalNLOFxFxInclRATIO->SetName("GenSignalXSecRatio_NLOFxFx_InclSample");
+    hGenSignalNLOFxFxInclRATIO->SetTitle(NLOFXFXINCLUSIVE_LEGEND);
+    hGenSignalNLOFxFxInclRATIO->GetYaxis()->SetTitle("Ratio");
+    hGenSignalNLOFxFxInclRATIO->Write();
+
 
     std::cout << "\n<=========================================================================================>" << std::endl;
 
     // Calculate covariance matrices for RATIO ---
     TH2D *hCovRATIO[12] = {};
     int nCovs = 10;
-    // // -- Covariance matrix for the data statistical uncertainties (input to unfolding)
-    // if (hUnfDataStatCov[0]){
-    //     std::cout << "Retrieving CovDataStat..." << std::endl;
-    //     hCovRATIO[0] = (TH2D*) hUnfDataStatCov[0]->Clone("CovDataStat");
-    // }
-    // // -- Covariance matrix for the (uncorrelated) statistical uncertainties of the response matrix
-    // if (hUnfMCStatCov[0]){
-    //     std::cout << "Retrieving CovMCStat..." << std::endl;
-    //     hCovRATIO[1] = (TH2D*) hUnfMCStatCov[0]->Clone("CovMCStat");
-    // }
+
+    // -- Covariance matrix for the data statistical uncertainties
+    // Get temp histogram for setup
+    TH2D *hTemp = (TH2D*) inputFileNUM->Get("CovDataStat");
+    hTemp->SetDirectory(0);
+    // ---
+    std::cout << "Calculating CovDataStat..." << std::endl;
+    hCovRATIO[0] = (TH2D*) hTemp->Clone("CovDataStat");
+    hCovRATIO[0]->Reset();
+    // std::cout << "hCovRATIO[0]->GetNbinsX() = " << hCovRATIO[0]->GetNbinsX() << std::endl;
+    // std::cout << "hCovRATIO[0]->GetNbinsY() = " << hCovRATIO[0]->GetNbinsY() << std::endl;
+    for (int i(1); i < hCovRATIO[0]->GetNbinsX()+1; i++){
+        for (int j(1); j < hCovRATIO[0]->GetNbinsY()+1; j++){
+            if (i == j){ // diagonal entries
+                double errSquared = pow(hUnfDataRATIO[0]->GetBinError(i), 2.0);
+                hCovRATIO[0]->SetBinContent(i, j, errSquared);
+            }
+            // no off-diagonal entries yet!
+            // (these are correlations across bins)
+        }
+    }
+    
+    // -- Covariance matrix for the (uncorrelated) statistical uncertainties of the response matrix
+    std::cout << "Calculating CovMCStat..." << std::endl;
+    hCovRATIO[1] = (TH2D*) hTemp->Clone("CovMCStat");
+    hCovRATIO[1]->Reset();
+    // get covariance matrices for NUM and DENOM
+    TH2D *hMCStatUncertNUM = (TH2D*) inputFileNUM->Get("CovMCStat");
+    TH2D *hMCStatUncertDENOM = (TH2D*) inputFileDENOM->Get("CovMCStat");
+    hMCStatUncertNUM->SetDirectory(0);
+    hMCStatUncertDENOM->SetDirectory(0);
+    // now calculate
+    for (int i(1); i <= hCovRATIO[1]->GetNbinsX(); i++){
+        for (int j(1); j <= hCovRATIO[1]->GetNbinsY(); j++){
+            if (i == j){ // diagonal entries
+                // assume contributions are uncorrelated for now 
+                // (so just use standard error propagation, which is the conservtive estimate)
+                double fracErrNUM = sqrt(hMCStatUncertNUM->GetBinContent(i,j))/hUnfDataNUM[0]->GetBinContent(i);
+                double fracErrDENOM = sqrt(hMCStatUncertDENOM->GetBinContent(i,j))/hUnfDataDENOM[0]->GetBinContent(i);
+                double absValRatio = fabs(hUnfDataRATIO[0]->GetBinContent(i));
+                double errRatio = absValRatio * sqrt( pow(fracErrNUM, 2.0) + pow(fracErrDENOM, 2.0) );
+                hCovRATIO[1]->SetBinContent( i, j, pow(errRatio, 2.0) );
+            }
+            // no off-diagonal entries yet!
+            // (these are correlations across bins)
+        }
+    }
+
     // -- Covariance matrices for systematic variations
     if (hUnfDataRATIO[1])  hCovRATIO[2] = makeCovFromUpAndDown(hUnfDataRATIO[0], hUnfDataRATIO[1], hUnfDataRATIO[2], "CovJES");
     if (hUnfDataRATIO[3])  hCovRATIO[3] = makeCovFromUpAndDown(hUnfDataRATIO[0], hUnfDataRATIO[3], hUnfDataRATIO[4], "CovPU");
@@ -204,12 +254,12 @@ void TakeRatiosOfUnfoldedXSecs(TString lepSel, int year, TString algo, TString h
     if (hUnfDataRATIO[15]) hCovRATIO[9] = makeCovFromUpAndDown(hUnfDataRATIO[0], hUnfDataRATIO[15], hUnfDataRATIO[16], "CovLumi");
     // if (hUnfDataRATIO[17]) hCovRATIO[10] = makeCovFromUpAndDown(hUnfDataRATIO[0], hUnfDataRATIO[17], hUnfDataRATIO[0], "CovBlank"); // not currently using
     // -- Covariance matrix for all systematics summed
-    // if (hCovRATIO[1]) hCovRATIO[11] = (TH2D*) hCovRATIO[1]->Clone("CovTotSyst");
-    if (hCovRATIO[2]) hCovRATIO[11] = (TH2D*) hCovRATIO[2]->Clone("CovTotSyst");
+    if (hCovRATIO[1]) hCovRATIO[11] = (TH2D*) hCovRATIO[1]->Clone("CovTotSyst");
+    // if (hCovRATIO[2]) hCovRATIO[11] = (TH2D*) hCovRATIO[2]->Clone("CovTotSyst");
     if (hCovRATIO[11]){
         std::cout << "Calculating CovTotSyst from all systematic contributions!" << std::endl;
-        // for (int i = 2; i <= nCovs; ++i){
-        for (int i = 3; i <= nCovs; ++i){
+        for (int i = 2; i <= nCovs; ++i){
+        // for (int i = 3; i <= nCovs; ++i){
             if (hCovRATIO[i]) hCovRATIO[11]->Add(hCovRATIO[i]);
         }
     }
@@ -219,6 +269,17 @@ void TakeRatiosOfUnfoldedXSecs(TString lepSel, int year, TString algo, TString h
     TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, year, variableRATIO, true, doNormalized, hUnfDataRATIO[0], hCovRATIO[11], hGenSignalNLOFxFxRATIO, hGenSignalLOMLMRATIO);
     crossSectionPlot->Draw();
     crossSectionPlot->SaveAs(outputFileName + ".pdf");
+
+    // Print out break down of errors ---
+    std::cout << "\nError Breakdown: " << std::endl;
+    for (int i = 1; i <= hUnfDataRATIO[0]->GetNbinsX(); ++i){
+        std::cout << "bin #" << i << ": " << hUnfDataRATIO[0]->GetBinContent(i);
+        for (int j = 0; j <= 11; ++j){
+            if(hCovRATIO[j]) std::cout << " +/- " << sqrt(hCovRATIO[j]->GetBinContent(i,i))*100./hUnfDataRATIO[0]->GetBinContent(i) << "%";
+        }
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;
 
     std::cout << "\n<=========================================================================================>" << std::endl;
 

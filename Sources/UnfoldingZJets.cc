@@ -112,18 +112,24 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
     //--- These are the names of the different WJets theory files (defined in fileNamesZJets.h)
     //--- Grabbed in the following lines below
     std::cout << "\nGrabbing names, files for some additional GEN/theory predictions..." << std::endl;
-    cout << "DYSHERPA14FILENAME = " << DYSHERPA14FILENAME << endl;
-    cout << "DYMGPYTHIA8FILENAME = " << DYMGPYTHIA8FILENAME << endl;
-    cout << "NNLO1JFILENAME = " << NNLO1JFILENAME << endl;
+    std::cout << "DYSHERPA14FILENAME = " << DYSHERPA14FILENAME << std::endl;
+    std::cout << "DYMGPYTHIA8FILENAME = " << DYMGPYTHIA8FILENAME << std::endl;
+    std::cout << "NNLO1JFILENAME = " << NNLO1JFILENAME << std::endl;
+    std::cout << "NLOFXFXINCLUSIVE_FILENAME = " << NLOFXFXINCLUSIVE_FILENAME << std::endl;
 
     TFile *fSheUnf = 0;
+
     TFile *fGen1 = NULL;
     TString gen1;
     TString gen1File;
+
     TFile *fGen2 = NULL;
     TString gen2;
     TString gen2File;
     std::map<TString, vector<TString> > generatorNames;
+
+    TFile *fGen3 = NULL;
+    TString gen3File;
 
     std::cout << std::endl;
     //--- Use this Flag for Resp Syst (sherpa unfolding in 8TeV) ---
@@ -170,6 +176,17 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
         fGen2 = new TFile(gen2File);
     }
     else std::cout << "No filename for fGen2 specified! " << std::endl; 
+    //--- Use this Flag for the NLO FxFx Inclusive sample---------
+    if (NLOFXFXINCLUSIVE_FILENAME.Length() > 0){
+        gen3File = histoDir + "/" + lepSel + "_13TeV_" + NLOFXFXINCLUSIVE_FILENAME + "_TrigCorr_1_Syst_0_JetPtMin_";
+        gen3File += jetPtMin;
+        gen3File += "_JetEtaMax_";
+        gen3File += jetEtaMax;
+        gen3File += ".root";
+        std::cout << "Opening file with name: " << gen3File << std::endl;
+        fGen3 = new TFile(gen3File);
+    }
+    else std::cout << "No filename for fGen3 specified! " << std::endl;
 
     std::cout << "\n<=========================================================================================>" << std::endl;
     //----------------------------------------------------------------------------------------- 
@@ -242,6 +259,7 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
         //--- Get histos from theory files (if files opened above)
         TH1D *hGen1 = NULL;
         TH1D *hGen2 = NULL;
+        TH1D *hGen3 = NULL;
         // if (DYSHERPA14FILENAME.Length() > 0 ) respDYJets[17] = getResp(fSheUnf, variable); // Sherpa Unfolding response (Resp Syst)
         if (DYMGPYTHIA8FILENAME.Length() > 0 ) hGen1 = getHisto(fGen1, "gen" + variable);
         if (NNLO1JFILENAME.Length() > 0 ){
@@ -250,6 +268,7 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
                 hGen2 = getHisto(fGen2, "gen" + variable);
             }
         }
+        if (NLOFXFXINCLUSIVE_FILENAME.Length() > 0) hGen3 = getHisto(fGen3, "gen" + variable);
 
         outputRootFile->cd();
 
@@ -269,6 +288,10 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
                 hGen2CrossSection->SetZTitle(generatorNames[gen2][1]);
             }
         }
+
+        // this is the W+jets NLO FxFx inclusive sample (used for blind chi2 test)
+        TH1D *hGen3CrossSection = makeCrossSectionHist(hGen3, integratedLumi);
+        hGen3CrossSection->SetZTitle(NLOFXFXINCLUSIVE_LEGEND);
 
         std::cout << "\n<=========================================================================================>" << std::endl;
 
@@ -413,24 +436,25 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
         // Plot response matrix for central distribution ---
         plotRespMat(hResDYJets[0], variable, unfoldDir, 0, hGenDYJets[0]);
         // --> If #recobins = 2 * #genbins, then generate alternate plot of response matrix (done for TUnfold)
-        if ( variable.Contains("_TUnfold") && !variable.Contains("LepPtPlusLeadingJetAK8Pt_Z") ){
+        //if ( variable.Contains("_TUnfold") && !variable.Contains("LepPtPlusLeadingJetAK8Pt_Z") ){
+        if ( variable.Contains("_TUnfold") ){
             plotRespMat(hResDYJets[0], variable, unfoldDir, 1, hGenDYJets[0]);
         }
         
-        //      if(whichSyst < 0){
-        //          createSystPlots(outputFileName, variable, lepSel, hUnfData, logy);
-        //          //--- print out break down of errors ---
-        //          for (int i = 2; i <= nCovs; ++i) {
-        //              cout << hUnfData[0]->GetBinContent(i);
-        //              for (int j = 0; j <= 11; ++j) {
-        //                  if(hCov[j]){
-        //                  cout << " +/- " << sqrt(hCov[j]->GetBinContent(i,i))*100./hUnfData[0]->GetBinContent(i) << "%";
-        //                  }
-        //               }
-        //               cout << endl;
-        //           }
-        //           createTable(outputFileName, lepSel, variable, doNormalized, hUnfData[0], hCov);
-        //      }
+        if(whichSyst < 0){
+            // createSystPlots(outputFileName, variable, lepSel, hUnfData, logy);
+            // --- Print out break down of errors ---
+            std::cout << "\nError Breakdown: " << std::endl;
+            for (int i = 1; i <= hUnfData[0]->GetNbinsX(); ++i){
+                std::cout << "bin #" << i << ": " << hUnfData[0]->GetBinContent(i);
+                for (int j = 0; j <= 11; ++j){
+                    if(hCov[j]) std::cout << " +/- " << sqrt(hCov[j]->GetBinContent(i,i))*100./hUnfData[0]->GetBinContent(i) << "%";
+                }
+                std::cout << std::endl;
+            }
+            // createTable(outputFileName, lepSel, variable, doNormalized, hUnfData[0], hCov);
+            std::cout << std::endl;
+        }
         //      
         //      
         //      if (variable.Index("ZNGoodJets_Zexc") >= 0 || variable.Index("ZNGoodJetsFull_Zexc") >= 0) {
@@ -457,6 +481,7 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
         hMadGenCrossSection->Write("hMadGenCrossSection"); //gen MC for W+jets NLO FxFx signal (also)
         hGen1CrossSection->Write("hGen1CrossSection"); //gen MC for W+jets LO MLM signal
         // hGen2CrossSection->Write("hGen2CrossSection");
+        hGen3CrossSection->Write("hGen3CrossSection"); //gen MC for W+jets NLO FxFx inclusive sample
 
         // Write out reco-level and unfolded distributions and covariance matrices ---
         for (int iSyst = 0; iSyst < nSysts; ++iSyst) if (hRecDataBinsMerged[iSyst]) hRecDataBinsMerged[iSyst]->Write(); 
@@ -491,6 +516,7 @@ void UnfoldingZJets(TString lepSel, int year, TString algo, TString histoDir, TS
     if(fSheUnf) fSheUnf->Close();
     if(fGen1) fGen1->Close();
     if(fGen2) fGen2->Close();
+    if(fGen3) fGen3->Close();
     //------------------------------------------------------------------------------------------ 
 
 }
@@ -640,7 +666,6 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
     // 3) "Choice of regularisation scale factors to construct the matrix L" -----
     TUnfoldDensity::EDensityMode densityMode = TUnfoldDensity::kDensityModeeNone; // "no scale factors, matrix L is similar to unity matrix" (typo of "kDensityModeNone" in TUnfold v17.1), NOMINAL
     // TUnfoldDensity::EDensityMode densityMode = TUnfoldDensity::kDensityModeBinWidth; // "scale factors from multidimensional bin width"
-
     //Define constructor and use SetInput to input the measurement that is to be unfolded ---
     TUnfoldDensity unfold(responseMatrix, TUnfold::kHistMapOutputVert, regMode, constraintMode, densityMode); // NOTE: "responseMatrix" is our current default migration matrix, NOMINAL CHOICE
     // TUnfoldDensity unfold(acceptDY, TUnfold::kHistMapOutputVert, regMode, constraintMode, densityMode); // has been used for testing
@@ -649,14 +674,14 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
     // Regularization strength determination ---
     int regSwitch(0);
     Double_t tau = 0.0; // Value of tau given if using DoUnfold
-    // For now, only use regularization on the distributions used for the ratio
-    if (variable.Contains("LepPtPlusLeadingJetAK8Pt_Z")){
-        // regSwitch = -1; // ScanLcurve
-        regSwitch = 1; // ScanTau, NOMINAL CHOICE
-    }
-    else{
-        regSwitch = 0; // DoUnfold (using manually set value of tau)
-    }
+ //   // For now, only use regularization on the distributions used for the ratio
+ //   if (variable.Contains("LepPtPlusLeadingJetAK8Pt_Z")){
+ //       // regSwitch = -1; // ScanLcurve
+ //       regSwitch = 1; // ScanTau
+ //   }
+ //   else{
+ //       regSwitch = 0; // DoUnfold (using manually set value of tau)
+ //   }
     
     // Number of points for ScanLcurve or ScanTau methods ---
     Int_t nPointsTauScan = 250;
@@ -923,32 +948,32 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
     // --------------------------------------------------------
 
     // Plot Unfolded/Reco to quantify the total effect of the unfolding procedure --
-    // For distributions that go into ratio, binning setup is different
-    if (variable.Contains("LepPtPlusLeadingJetAK8Pt_Z")){
-        
-        // here, reco binning is the same as gen, except with 2 extra bins in front
-        hRecDataBinsMerged = (TH1D*) hUnfData->Clone("hRecDataBinsMerged_"+name); 
-        for(int i = 1; i <= hUnfData->GetNbinsX(); i++){
-            hRecDataBinsMerged->SetBinContent(i, recoData->GetBinContent(i+2));
-            hRecDataBinsMerged->SetBinError(i, recoData->GetBinError(i+2));
-        }
+ //   // For distributions that go into ratio, binning setup is different
+ //   if (variable.Contains("LepPtPlusLeadingJetAK8Pt_Z")){
+ //       
+ //       // here, reco binning is the same as gen, except with 2 extra bins in front
+ //       hRecDataBinsMerged = (TH1D*) hUnfData->Clone("hRecDataBinsMerged_"+name); 
+ //       for(int i = 1; i <= hUnfData->GetNbinsX(); i++){
+ //           hRecDataBinsMerged->SetBinContent(i, recoData->GetBinContent(i+2));
+ //           hRecDataBinsMerged->SetBinError(i, recoData->GetBinError(i+2));
+ //       }
 
-        printf("\nRatio of Unfolded/Reco:"); 
-        TH1D* UnfRecoRatio = (TH1D*) hUnfData->Clone("UnfRecoRatio");
-        UnfRecoRatio->Divide(hRecDataBinsMerged);
-        printf("\n >>>>> UnfRecoRatio->GetNbinsX = %d\n", UnfRecoRatio->GetNbinsX());
-        for(int i = 1; i <= UnfRecoRatio->GetNbinsX(); i++){
-            printf("Bin %i: %F\n", i, UnfRecoRatio->GetBinContent(i));
-        }
-        UnfRecoRatio->SetTitle("UnfRecoRatio");
-        UnfRecoRatio->GetXaxis()->SetTitle(hRecDataMinusFakes->GetXaxis()->GetTitle());
-        UnfRecoRatio->GetYaxis()->SetTitle("Unfolded/Reco");
-        UnfRecoRatio->GetYaxis()->SetRangeUser(0., 5.);
-        UnfRecoRatio->Write();
+ //       printf("\nRatio of Unfolded/Reco:"); 
+ //       TH1D* UnfRecoRatio = (TH1D*) hUnfData->Clone("UnfRecoRatio");
+ //       UnfRecoRatio->Divide(hRecDataBinsMerged);
+ //       printf("\n >>>>> UnfRecoRatio->GetNbinsX = %d\n", UnfRecoRatio->GetNbinsX());
+ //       for(int i = 1; i <= UnfRecoRatio->GetNbinsX(); i++){
+ //           printf("Bin %i: %F\n", i, UnfRecoRatio->GetBinContent(i));
+ //       }
+ //       UnfRecoRatio->SetTitle("UnfRecoRatio");
+ //       UnfRecoRatio->GetXaxis()->SetTitle(hRecDataMinusFakes->GetXaxis()->GetTitle());
+ //       UnfRecoRatio->GetYaxis()->SetTitle("Unfolded/Reco");
+ //       UnfRecoRatio->GetYaxis()->SetRangeUser(0., 5.);
+ //       UnfRecoRatio->Write();
 
-    }
+ //   }
     // all other distributions use the "split-in-two" binning setup
-    else{
+ //   else{
 
         // 1) Have to first merge the split bins of the reco-level distribution
         // to match the binning of the unfolded dist (which should be the same as gen-level)
@@ -1004,7 +1029,7 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
         UnfRecoRatio->GetYaxis()->SetRangeUser(0., 5.);
         UnfRecoRatio->Write();
 
-    }
+ //   }
 
     // ---------------------------------------------------------------------------
     

@@ -47,22 +47,27 @@ const unsigned int NBGDYJETS = NFILESDYJETS - 2;
  */
 const unsigned int FilesDYJets[NFILESDYJETS] = {0, 1, 2, 3, 4, 5, 6, 7};
 
-//--- Use this Flag for Unfolding Resp Syst ---
+//--- Use this Flag for Unfolding Resp Syst ---------------------
 const TString DYSHERPA14FILENAME("");
 //const TString DYSHERPA14FILENAME("sherpa");
 const TString DYSHERPA14LEGEND("Sherpa1.4 LO");
 //---------------------------------------------------------------
 
-//--- Use this Flag for the 2nd Theory -----------------------
+//--- Use this Flag for the 2nd Theory --------------------------
 //const TString DYMGPYTHIA8FILENAME("");
 const TString DYMGPYTHIA8FILENAME("WJetsToLN_UNFOLDING_MLM");
 const TString DYMGPYTHIA8LEGEND("MG_aMC + PY8 (#leq 4j LO + PS)");
 //---------------------------------------------------------------
 
-//--- Use this Flag for the 3rd Theory -----------------------
+//--- Use this Flag for the 3rd Theory --------------------------
 const TString NNLO1JFILENAME("");
 //const TString NNLO1JFILENAME("NNLO1J");
 const TString NNLO1JLEGEND("N_{jetti} NNLO");
+//---------------------------------------------------------------
+
+//--- Use this Flag for the NLO FxFx Inclusive sample------------
+const TString NLOFXFXINCLUSIVE_FILENAME("WJetsToLN_UNFOLDING_FxFx_Inclusive");
+const TString NLOFXFXINCLUSIVE_LEGEND("NLO FxFx Inclusive Sample");
 //---------------------------------------------------------------
 
 #endif

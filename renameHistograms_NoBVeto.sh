@@ -9,7 +9,8 @@ echo $PWD
 
 ### Data and Signal MC (NLO & LO) --
 mv SMu_13TeV_Data_dR_5311_List_EffiCorr_0_TrigCorr_1_Syst_0_JetPtMin_30_VarWidth.root            SMu_13TeV_Data_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root
-mv SMu_13TeV_WJets_FxFx_Wpt_dR_5311_List_EffiCorr_1_TrigCorr_1_Syst_0_JetPtMin_30_VarWidth.root  SMu_13TeV_WJetsToLN_UNFOLDING_FxFx_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root
+mv SMu_13TeV_WJets_FxFx_Wpt_dR_5311_List_EffiCorr_1_TrigCorr_1_Syst_0_JetPtMin_30_VarWidth.root  SMu_13TeV_WJetsToLN_UNFOLDING_FxFx_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root 
+mv SMu_13TeV_WJets_FxFx_dR_5311_List_EffiCorr_1_TrigCorr_1_Syst_0_JetPtMin_30_VarWidth.root      SMu_13TeV_WJetsToLN_UNFOLDING_FxFx_Inclusive_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root 
 mv SMu_13TeV_WJets_MLM_dR_5311_List_EffiCorr_1_TrigCorr_1_Syst_0_JetPtMin_30_VarWidth.root       SMu_13TeV_WJetsToLN_UNFOLDING_MLM_dR_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root
 
 ### BG --

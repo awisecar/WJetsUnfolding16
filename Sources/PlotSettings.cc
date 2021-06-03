@@ -727,23 +727,19 @@ TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool i
     // Set a default x-axis range first
     hSyst->GetXaxis()->SetRangeUser(hSyst->GetXaxis()->GetXmin(), hSyst->GetXaxis()->GetXmax());
 
-    // Now can tweak specifically for each distribution
+    // Now can tweak specifically for each distribution --
+    // Setting y-max bounds for some of these b/c we keep overflow bins (for migrating events) in the unfolding
     if (canvasName.Contains("ZNGoodJets")){
         //hSyst->GetXaxis()->SetRangeUser(0.5, hSyst->GetXaxis()->GetXmax());
         hSyst->GetXaxis()->SetRangeUser(0.5, 8.5);
         hSyst->GetYaxis()->SetRangeUser(0.011, 5.0*maximum);
     }
-    if ( canvasName.Contains("FirstJetPt_Zinc1jet") )  hSyst->GetXaxis()->SetRangeUser(30., hSyst->GetXaxis()->GetXmax());
-    if ( canvasName.Contains("SecondJetPt_Zinc2jet") ) hSyst->GetXaxis()->SetRangeUser(30., 999.9); // x-max is currently 1000 for this plot
-    if ( canvasName.Contains("FirstJetAK8Pt_Zinc1jet") || canvasName.Contains("SecondJetAK8Pt_Zinc2jet") ){
-        hSyst->GetXaxis()->SetRangeUser(50., hSyst->GetXaxis()->GetXmax());
-    }
-    if ( canvasName.Contains("LepPtPlusLeadingJetAK8Pt_Z") ){
-        hSyst->GetXaxis()->SetRangeUser(200., hSyst->GetXaxis()->GetXmax());
-    }
-    //if ( canvasName.Contains("LepPtPlusHT2over2AK8_Z") ){
-    //    hSyst->GetXaxis()->SetRangeUser(400., hSyst->GetXaxis()->GetXmax());
-    //}
+    if ( canvasName.Contains("FirstJetPt_Zinc1jet") )  hSyst->GetXaxis()->SetRangeUser(30., 1499.9);
+    if ( canvasName.Contains("SecondJetPt_Zinc2jet") ) hSyst->GetXaxis()->SetRangeUser(30., 999.9);
+    if ( canvasName.Contains("FirstJetAK8Pt_Zinc1jet") )  hSyst->GetXaxis()->SetRangeUser(50., 1199.9);
+    if ( canvasName.Contains("SecondJetAK8Pt_Zinc2jet") ) hSyst->GetXaxis()->SetRangeUser(50., 899.9);
+    if ( canvasName.Contains("LepPtPlusLeadingJetAK8Pt_Z") ) hSyst->GetXaxis()->SetRangeUser(200., 1399.9);
+    if ( canvasName.Contains("dRLepCloseJetCo") ) hSyst->GetXaxis()->SetRangeUser(0.4, 3.999);
     //if (isRatio){
     //    hSyst->GetXaxis()->SetRangeUser(300., hSyst->GetXaxis()->GetXmax());
     //}
@@ -871,7 +867,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool i
     else{
         if (canvasName.Contains("dPhiLepJet1")) latexLabel->DrawLatex(0.18, 0.24, "CMS Work in Progress");
         else{
-            if ( canvasName.Contains("LepPtPlusLeadingJetAK8Pt_Z") ) latexLabel->DrawLatex(0.18, 0.25+0.05, "CMS Work in Progress");
+            if ( canvasName.Contains("LepPtPlusLeadingJetAK8Pt_Z") || canvasName.Contains("dRLepCloseJetCo") ) latexLabel->DrawLatex(0.18, 0.25+0.05, "CMS Work in Progress");
             else latexLabel->DrawLatex(0.18, 0.24, "CMS Work in Progress");
         }
     }
@@ -892,12 +888,15 @@ TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool i
         }
         else latexLabel->DrawLatex(0.57, 0.21-0.03, "anti-k_{T} (R = 0.4) Jets");
     }
-    else {
+    else{
         if (canvasName.Contains("AK8")){
             if ( canvasName.Contains("LepPtPlusLeadingJetAK8Pt_Z") ) latexLabel->DrawLatex(0.18, 0.21+0.04, "anti-k_{T} (R = 0.8) Jets");
             else latexLabel->DrawLatex(0.18, 0.21-0.03, "anti-k_{T} (R = 0.8) Jets");
         }
-        else latexLabel->DrawLatex(0.18, 0.21-0.03, "anti-k_{T} (R = 0.4) Jets");
+        else{
+            if ( canvasName.Contains("dRLepCloseJetCo") ) latexLabel->DrawLatex(0.18, 0.21+0.04, "anti-k_{T} (R = 0.4) Jets");
+            else latexLabel->DrawLatex(0.18, 0.21-0.03, "anti-k_{T} (R = 0.4) Jets");
+        }
     }
 
     if (isRatio){
@@ -931,13 +930,18 @@ TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool i
                 latexLabel->DrawLatex(0.18, 0.21-0.09,"p_{T}^{jet} > 50 GeV, |y^{jet}| < 2.4 ");
             }
         }
+        else if (canvasName.Contains("dRLepCloseJetCo")){
+            latexLabel->DrawLatex(0.18, 0.21-0.02,"p_{T}^{jet} > 30 GeV, |y^{jet}| < 2.4 ");
+            if (canvasName.Contains("dRLepCloseJetCo300dR04_Zinc1jet_TUnfold")) latexLabel->DrawLatex(0.18, 0.21-0.09,"p_{T}^{j_{1}} > 300 GeV, p_{T}^{j_{2}} > 150 GeV");
+            if (canvasName.Contains("dRLepCloseJetCo500dR04_Zinc1jet_TUnfold")) latexLabel->DrawLatex(0.18, 0.21-0.09,"p_{T}^{j_{1}} > 500 GeV, p_{T}^{j_{2}} > 300 GeV");
+        }
         else latexLabel->DrawLatex(0.18, 0.21-0.09,"p_{T}^{jet} > 30 GeV, |y^{jet}| < 2.4 ");
 
 
-        if (canvasName.Contains("_Zinc1jet")){
+        if (canvasName.Contains("_Zinc1jet") && !(canvasName.Contains("dRLepCloseJetCo")) ){
             if (lepSel == "SMu") latexLabel->DrawLatex(0.18,0.21-0.15,"W(#mu#nu) + #geq 1-jet");
         }
-        else if (canvasName.Contains("_Zinc2jet")){
+        else if (canvasName.Contains("_Zinc2jet") || (canvasName.Contains("dRLepCloseJetCo")) ){
             if (lepSel == "SMu") latexLabel->DrawLatex(0.18,0.21-0.15,"W(#mu#nu) + #geq 2-jets");
         }
         else if (canvasName.Contains("_Zinc3jet")){

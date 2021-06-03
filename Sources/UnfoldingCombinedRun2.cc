@@ -92,6 +92,7 @@ void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histo
 
     // Now declare TFile arrays, open all files for each year ---
 
+    // --------------------------------------------------------------------------------------------------------
     // -- 2016 
     TFile *fData_2016[3] = {NULL}; 
     TFile *fDYJets_2016[11] = {NULL};
@@ -122,6 +123,20 @@ void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histo
     }
     else std::cout << "\nNo filename for fGen1_2016 specified! " << std::endl;
 
+    TFile *fGen3_2016 = NULL;
+    TString gen3File;
+    if (NLOFXFXINCLUSIVE_FILENAME.Length() > 0){
+        gen3File = histoDir_2016 + "/" + lepSel + "_13TeV_" + NLOFXFXINCLUSIVE_FILENAME + "_TrigCorr_1_Syst_0_JetPtMin_";
+        gen3File += jetPtMin;
+        gen3File += "_JetEtaMax_";
+        gen3File += jetEtaMax;
+        gen3File += ".root";
+        std::cout << "Opening file with name: " << gen3File << std::endl;
+        fGen3_2016 = new TFile(gen3File);
+    }
+    else std::cout << "No filename for fGen3_2016 specified! " << std::endl;
+
+    // --------------------------------------------------------------------------------------------------------
     // -- 2017
     TFile *fData_2017[3] = {NULL}; 
     TFile *fDYJets_2017[11] = {NULL};
@@ -148,7 +163,20 @@ void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histo
         fGen1_2017 = new TFile(gen1File);
     }
     else std::cout << "\nNo filename for fGen1_2017 specified! " << std::endl;
+
+    TFile *fGen3_2017 = NULL;
+    if (NLOFXFXINCLUSIVE_FILENAME.Length() > 0){
+        gen3File = histoDir_2017 + "/" + lepSel + "_13TeV_" + NLOFXFXINCLUSIVE_FILENAME + "_TrigCorr_1_Syst_0_JetPtMin_";
+        gen3File += jetPtMin;
+        gen3File += "_JetEtaMax_";
+        gen3File += jetEtaMax;
+        gen3File += ".root";
+        std::cout << "Opening file with name: " << gen3File << std::endl;
+        fGen3_2017 = new TFile(gen3File);
+    }
+    else std::cout << "No filename for fGen3_2017 specified! " << std::endl;
     
+    // --------------------------------------------------------------------------------------------------------
     // -- 2018
     TFile *fData_2018[3] = {NULL}; 
     TFile *fDYJets_2018[11] = {NULL};
@@ -176,6 +204,18 @@ void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histo
     }
     else std::cout << "\nNo filename for fGen1_2018 specified! " << std::endl;
 
+    TFile *fGen3_2018 = NULL;
+    if (NLOFXFXINCLUSIVE_FILENAME.Length() > 0){
+        gen3File = histoDir_2018 + "/" + lepSel + "_13TeV_" + NLOFXFXINCLUSIVE_FILENAME + "_TrigCorr_1_Syst_0_JetPtMin_";
+        gen3File += jetPtMin;
+        gen3File += "_JetEtaMax_";
+        gen3File += jetEtaMax;
+        gen3File += ".root";
+        std::cout << "Opening file with name: " << gen3File << std::endl;
+        fGen3_2018 = new TFile(gen3File);
+    }
+    else std::cout << "No filename for fGen3_2018 specified! " << std::endl;
+    
     std::cout << "\n<=========================================================================================>" << std::endl;
 
     // All necessary files have now been opened!
@@ -196,6 +236,7 @@ void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histo
 
         // Now declare TH1/TH2 histogram arrays, get all histograms for each year ---
 
+        // --------------------------------------------------------------------------------------------------------
         // -- 2016 
         TH1D *hRecData_2016[3]           = {};
         TH1D *hRecDYJets_2016[13]        = {};
@@ -211,8 +252,11 @@ void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histo
             hRecBg_2016, hRecSumBg_2016, fBg_2016, NBGDYJETS, hFakDYJets_2016, hAccepDYJets_2016, isClosureTest);
 
         TH1D *hGen1_2016 = NULL;
+        TH1D *hGen3_2016 = NULL;
         if (DYMGPYTHIA8FILENAME.Length() > 0 ) hGen1_2016 = getHisto(fGen1_2016, "gen" + variable);
-
+        if (NLOFXFXINCLUSIVE_FILENAME.Length() > 0) hGen3_2016 = getHisto(fGen3_2016, "gen" + variable);
+        
+        // --------------------------------------------------------------------------------------------------------
         // -- 2017
         TH1D *hRecData_2017[3]           = {};
         TH1D *hRecDYJets_2017[13]        = {};
@@ -228,8 +272,11 @@ void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histo
             hRecBg_2017, hRecSumBg_2017, fBg_2017, NBGDYJETS, hFakDYJets_2017, hAccepDYJets_2017, isClosureTest);
 
         TH1D *hGen1_2017 = NULL;
+        TH1D *hGen3_2017 = NULL;
         if (DYMGPYTHIA8FILENAME.Length() > 0 ) hGen1_2017 = getHisto(fGen1_2017, "gen" + variable);
+        if (NLOFXFXINCLUSIVE_FILENAME.Length() > 0) hGen3_2017 = getHisto(fGen3_2017, "gen" + variable);
 
+        // --------------------------------------------------------------------------------------------------------
         // -- 2018
         TH1D *hRecData_2018[3]           = {};
         TH1D *hRecDYJets_2018[13]        = {};
@@ -245,8 +292,9 @@ void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histo
             hRecBg_2018, hRecSumBg_2018, fBg_2018, NBGDYJETS, hFakDYJets_2018, hAccepDYJets_2018, isClosureTest);
 
         TH1D *hGen1_2018 = NULL;
+        TH1D *hGen3_2018 = NULL;
         if (DYMGPYTHIA8FILENAME.Length() > 0 ) hGen1_2018 = getHisto(fGen1_2018, "gen" + variable);
-
+        if (NLOFXFXINCLUSIVE_FILENAME.Length() > 0) hGen3_2018 = getHisto(fGen3_2018, "gen" + variable);
 
         // ------------------------------------------------
         // Get fake rates dist.
@@ -274,7 +322,6 @@ void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histo
         hFakeRate_Central_Run2->GetYaxis()->SetRangeUser(0., 1.);        
         // ------------------------------------------------
 
-
         // Now get theory cross sections using all years ---
         outputRootFile->cd();
 
@@ -282,7 +329,6 @@ void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histo
         TH1D *hGenSignalNLOFxFx_Run2 = (TH1D*) hGenDYJets_2016[0]->Clone();
         hGenSignalNLOFxFx_Run2->Add(hGenDYJets_2017[0]);
         hGenSignalNLOFxFx_Run2->Add(hGenDYJets_2018[0]);
-
         TH1D *hMadGenCrossSection = makeCrossSectionHist(hGenSignalNLOFxFx_Run2, integratedLumi_Run2);
         hMadGenCrossSection->SetZTitle("MG_aMC FxFx + PY8 (#leq 2j NLO + PS)");
 
@@ -290,9 +336,15 @@ void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histo
         TH1D *hGenSignalLOMLM_Run2 = (TH1D*) hGen1_2016->Clone();
         hGenSignalLOMLM_Run2->Add(hGen1_2017);
         hGenSignalLOMLM_Run2->Add(hGen1_2018);
-
         TH1D *hGen1CrossSection = makeCrossSectionHist(hGenSignalLOMLM_Run2, integratedLumi_Run2);
         hGen1CrossSection->SetZTitle(generatorNames[gen1][1]);
+
+        // -- NLO FxFx inclusive sample
+        TH1D *hGenSignalNLOFxFxIncl_Run2 = (TH1D*) hGen3_2016->Clone();
+        hGenSignalNLOFxFxIncl_Run2->Add(hGen3_2017);
+        hGenSignalNLOFxFxIncl_Run2->Add(hGen3_2018);
+        TH1D *hGen3CrossSection = makeCrossSectionHist(hGenSignalNLOFxFxIncl_Run2, integratedLumi_Run2);
+        hGen3CrossSection->SetZTitle(NLOFXFXINCLUSIVE_LEGEND);
 
         std::cout << "\n<=========================================================================================>" << std::endl;
 
@@ -333,7 +385,6 @@ void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histo
             int iData(0), iBg(0), iGen(0), iResp(0); 
             unfoldingFileSelector(iSyst, iData, iBg, iGen, iResp);
 
-
             ////////////////////////////////////////////////////////////////////////////////
             // Selecting input distibution to unfold
 
@@ -368,7 +419,6 @@ void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histo
                 RemoveFakes(hRecDataMinusFakes_2018, hFakDYJets_2018[iSyst]);
             }
             ////////////////////////////////////////////////////////////////////////////////
-
 
             // -- Then add all years together, then unfold
 
@@ -474,6 +524,21 @@ void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histo
         //if #recobins = 2 * #genbins, then generate alternate plot of response matrix (done for TUnfold)
         if (variable.Contains("_TUnfold")) plotRespMat(hResDYJetsCentral_Run2, variable, unfoldDir, 1, hGenDYJetsCentral_Run2);
 
+        if (whichSyst < 0){
+            // createSystPlots(outputFileName, variable, lepSel, hUnfData, logy);
+            // --- Print out break down of errors ---
+            std::cout << "\nError Breakdown: " << std::endl;
+            for (int i = 1; i <= hUnfData[0]->GetNbinsX(); ++i){
+                std::cout << "bin #" << i << ": " << hUnfData[0]->GetBinContent(i);
+                for (int j = 0; j <= 11; ++j){
+                    if (hCov[j]) std::cout << " +/- " << sqrt(hCov[j]->GetBinContent(i,i))*100./hUnfData[0]->GetBinContent(i) << "%";
+                }
+                std::cout << std::endl;
+            }
+            // createTable(outputFileName, lepSel, variable, doNormalized, hUnfData[0], hCov);
+            std::cout << std::endl;
+        }
+
         std::cout << "\n<=========================================================================================>" << std::endl;
 
         // Save other things --- 
@@ -482,6 +547,7 @@ void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histo
         hFakeRate_Central_Run2->Write("hFakeRate_Central_Run2");
         hMadGenCrossSection->Write("hMadGenCrossSection"); //gen MC for W+jets NLO FxFx signal (also)
         hGen1CrossSection->Write("hGen1CrossSection"); //gen MC for W+jets LO MLM signal
+        hGen3CrossSection->Write("hGen3CrossSection"); //gen MC for W+jets NLO FxFx inclusive sample
 
         // Write out unfolded distributions and covariance matrices ---
         for (int iSyst = 0; iSyst < nSysts; ++iSyst) if (hRecDataBinsMerged[iSyst]) hRecDataBinsMerged[iSyst]->Write();
@@ -498,4 +564,7 @@ void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histo
     if(fGen1_2016) fGen1_2016->Close();
     if(fGen1_2017) fGen1_2017->Close();
     if(fGen1_2018) fGen1_2018->Close(); 
+    if(fGen3_2016) fGen3_2016->Close();
+    if(fGen3_2017) fGen3_2017->Close();
+    if(fGen3_2018) fGen3_2018->Close();
 }

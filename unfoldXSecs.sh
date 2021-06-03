@@ -1,24 +1,53 @@
 #!/bin/sh
 
+
+
+# # closure test with 2016 only
+# # AK4 jet kinematics
+# ./runUnfoldingZJets year=2016 variable=FirstJetPt_Zinc1jet_TUnfold isClosureTest=true
+# ./runUnfoldingZJets year=2016 variable=FirstJetAbsRapidity_Zinc1jet_TUnfold isClosureTest=true
+# ./runUnfoldingZJets year=2016 variable=dPhiLepJet1_Zinc1jet_TUnfold isClosureTest=true
+# ./runUnfoldingZJets year=2016 variable=SecondJetPt_Zinc2jet_TUnfold isClosureTest=true
+# ./runUnfoldingZJets year=2016 variable=SecondJetAbsRapidity_Zinc2jet_TUnfold isClosureTest=true
+# ./runUnfoldingZJets year=2016 variable=dPhiLepJet2_Zinc2jet_TUnfold isClosureTest=true
+# ./runUnfoldingZJets year=2016 variable=dRapidityJets_Zinc2jet_TUnfold isClosureTest=true
+# ./runUnfoldingZJets year=2016 variable=dRLepCloseJetCo300dR04_Zinc1jet_TUnfold isClosureTest=true
+# ./runUnfoldingZJets year=2016 variable=dRLepCloseJetCo500dR04_Zinc1jet_TUnfold isClosureTest=true
+# # AK8 jet kinematics
+# ./runUnfoldingZJets year=2016 variable=FirstJetAK8Pt_Zinc1jet_TUnfold isClosureTest=true
+# ./runUnfoldingZJets year=2016 variable=FirstJetAK8AbsRapidity_Zinc1jet_TUnfold isClosureTest=true
+# ./runUnfoldingZJets year=2016 variable=dPhiLepJet1AK8_Zinc1jet_TUnfold isClosureTest=true
+# ./runUnfoldingZJets year=2016 variable=SecondJetAK8Pt_Zinc2jet_TUnfold isClosureTest=true
+# ./runUnfoldingZJets year=2016 variable=SecondJetAK8AbsRapidity_Zinc2jet_TUnfold isClosureTest=true
+# ./runUnfoldingZJets year=2016 variable=dPhiLepJet2AK8_Zinc2jet_TUnfold isClosureTest=true
+# ./runUnfoldingZJets year=2016 variable=dRapidityJetsAK8_Zinc2jet_TUnfold isClosureTest=true
+# # alpha-s ratios
+# ./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold isClosureTest=true
+# ./runUnfoldingZJets year=2016 variable=LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold isClosureTest=true
+
+
+
+
+
 # # closure test with full Run 2 data
 # # AK4 jet kinematics
-# ./runUnfoldingCombinedRun2 variable=FirstJetPt_Zinc1jet_TUnfold isClosureTest=true
-# ./runUnfoldingCombinedRun2 variable=FirstJetAbsRapidity_Zinc1jet_TUnfold isClosureTest=true
-# ./runUnfoldingCombinedRun2 variable=dPhiLepJet1_Zinc1jet_TUnfold isClosureTest=true
-# ./runUnfoldingCombinedRun2 variable=SecondJetPt_Zinc2jet_TUnfold isClosureTest=true
-# ./runUnfoldingCombinedRun2 variable=SecondJetAbsRapidity_Zinc2jet_TUnfold isClosureTest=true
-# ./runUnfoldingCombinedRun2 variable=dPhiLepJet2_Zinc2jet_TUnfold isClosureTest=true
-# ./runUnfoldingCombinedRun2 variable=dRapidityJets_Zinc2jet_TUnfold isClosureTest=true
-# ./runUnfoldingCombinedRun2 variable=dRLepCloseJetCo300dR04_Zinc1jet_TUnfold isClosureTest=true
-# ./runUnfoldingCombinedRun2 variable=dRLepCloseJetCo500dR04_Zinc1jet_TUnfold isClosureTest=true
+# ./runUnfoldingCombinedRun2 variable=FirstJetPt_Zinc1jet_TUnfold               isClosureTest=true
+# ./runUnfoldingCombinedRun2 variable=FirstJetAbsRapidity_Zinc1jet_TUnfold      isClosureTest=true
+# ./runUnfoldingCombinedRun2 variable=dPhiLepJet1_Zinc1jet_TUnfold              isClosureTest=true
+# ./runUnfoldingCombinedRun2 variable=SecondJetPt_Zinc2jet_TUnfold              isClosureTest=true
+# ./runUnfoldingCombinedRun2 variable=SecondJetAbsRapidity_Zinc2jet_TUnfold     isClosureTest=true
+# ./runUnfoldingCombinedRun2 variable=dPhiLepJet2_Zinc2jet_TUnfold              isClosureTest=true
+# ./runUnfoldingCombinedRun2 variable=dRapidityJets_Zinc2jet_TUnfold            isClosureTest=true
+# ./runUnfoldingCombinedRun2 variable=dRLepCloseJetCo300dR04_Zinc1jet_TUnfold   isClosureTest=true
+# ./runUnfoldingCombinedRun2 variable=dRLepCloseJetCo500dR04_Zinc1jet_TUnfold   isClosureTest=true
 # # AK8 jet kinematics
-# ./runUnfoldingCombinedRun2 variable=FirstJetAK8Pt_Zinc1jet_TUnfold isClosureTest=true
-# ./runUnfoldingCombinedRun2 variable=FirstJetAK8AbsRapidity_Zinc1jet_TUnfold isClosureTest=true
-# ./runUnfoldingCombinedRun2 variable=dPhiLepJet1AK8_Zinc1jet_TUnfold isClosureTest=true
-# ./runUnfoldingCombinedRun2 variable=SecondJetAK8Pt_Zinc2jet_TUnfold isClosureTest=true
-# ./runUnfoldingCombinedRun2 variable=SecondJetAK8AbsRapidity_Zinc2jet_TUnfold isClosureTest=true
-# ./runUnfoldingCombinedRun2 variable=dPhiLepJet2AK8_Zinc2jet_TUnfold isClosureTest=true
-# ./runUnfoldingCombinedRun2 variable=dRapidityJetsAK8_Zinc2jet_TUnfold isClosureTest=true
+# ./runUnfoldingCombinedRun2 variable=FirstJetAK8Pt_Zinc1jet_TUnfold            isClosureTest=true
+# ./runUnfoldingCombinedRun2 variable=FirstJetAK8AbsRapidity_Zinc1jet_TUnfold   isClosureTest=true
+# ./runUnfoldingCombinedRun2 variable=dPhiLepJet1AK8_Zinc1jet_TUnfold           isClosureTest=true
+# ./runUnfoldingCombinedRun2 variable=SecondJetAK8Pt_Zinc2jet_TUnfold           isClosureTest=true
+# ./runUnfoldingCombinedRun2 variable=SecondJetAK8AbsRapidity_Zinc2jet_TUnfold  isClosureTest=true
+# ./runUnfoldingCombinedRun2 variable=dPhiLepJet2AK8_Zinc2jet_TUnfold           isClosureTest=true
+# ./runUnfoldingCombinedRun2 variable=dRapidityJetsAK8_Zinc2jet_TUnfold         isClosureTest=true
 # # alpha-s ratios
 # ./runUnfoldingCombinedRun2 variable=LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold isClosureTest=true
 # ./runUnfoldingCombinedRun2 variable=LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold isClosureTest=true
