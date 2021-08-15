@@ -13,10 +13,12 @@ struct variableStruct{
 
 const variableStruct VAROFINTERESTZJETS[] = {
     //--  Name  ------------------ log - decrease - Mu SVD kterm - Mu Bayes kterm - E SVD kterm - E Bayes kterm  - E Bayes kterm COMBINE
-    // Jet multiplicity ---
+    
+    // ------- Jet multiplicity -------
     {"ZNGoodJets_Zexc_TUnfold",         1,      1,          1,              4,             1,            1 ,               1    },
     {"ZNGoodJetsAK8_Zexc_TUnfold",      1,      1,          1,              4,             1,            1 ,               1    },
-    // AK4 jet kinematics ---
+    
+    // ------- AK4 jet kinematics -------
     // 1st jet
     {"FirstJetPt_Zinc1jet_TUnfold",               1,      1,          1,              4,             1,            1 ,               1    },
     {"FirstJetAbsRapidity_Zinc1jet_TUnfold",      1,      1,          1,              4,             1,            1 ,               1    },
@@ -26,10 +28,14 @@ const variableStruct VAROFINTERESTZJETS[] = {
     {"SecondJetAbsRapidity_Zinc2jet_TUnfold",      1,      1,          1,              4,             1,            1 ,               1    },
     {"dPhiLepJet2_Zinc2jet_TUnfold",               1,      1,          1,              4,             1,            1 ,               1    },
     // other
+    {"dPhiJets_Zinc2jet_TUnfold",               1,      1,          1,              4,             1,            1 ,               1    },
     {"dRapidityJets_Zinc2jet_TUnfold",               1,      1,          1,              4,             1,            1 ,               1    },
+    {"dRJets_Zinc2jet_TUnfold",      1,      1,          1,              4,             1,            1 ,               1    },
+    {"diJetMass_Zinc2jet_TUnfold",      1,      1,          1,              4,             1,            1 ,               1    },
     {"dRLepCloseJetCo300dR04_Zinc1jet_TUnfold",               1,      1,          1,              4,             1,            1 ,               1    },
     {"dRLepCloseJetCo500dR04_Zinc1jet_TUnfold",               1,      1,          1,              4,             1,            1 ,               1    },
-    // AK8 jet kinematics ---
+    
+    // ------- AK8 jet kinematics -------
     // 1st jet
     {"FirstJetAK8Pt_Zinc1jet_TUnfold",               1,      1,          1,              4,             1,            1 ,               1    },
     {"FirstJetAK8AbsRapidity_Zinc1jet_TUnfold",      1,      1,          1,              4,             1,            1 ,               1    },
@@ -39,9 +45,12 @@ const variableStruct VAROFINTERESTZJETS[] = {
     {"SecondJetAK8AbsRapidity_Zinc2jet_TUnfold",      1,      1,          1,              4,             1,            1 ,               1    },
     {"dPhiLepJet2AK8_Zinc2jet_TUnfold",               1,      1,          1,              4,             1,            1 ,               1    },
     // other
+    {"dPhiJetsAK8_Zinc2jet_TUnfold",               1,      1,          1,              4,             1,            1 ,               1    },
     {"dRapidityJetsAK8_Zinc2jet_TUnfold",               1,      1,          1,              4,             1,            1 ,               1    },
+    {"dRJetsAK8_Zinc2jet_TUnfold",      1,      1,          1,              4,             1,            1 ,               1    },
+    {"diJetAK8Mass_Zinc2jet_TUnfold",      1,      1,          1,              4,             1,            1 ,               1    },
 
-    // For alpha-s ratios ---
+    // ------- For alpha-s ratios -------
     // Muon Pt + AK4 Jet Pt
     {"LepPtPlusLeadingJetPt_Zinc1jet_TUnfold",         1,      1,          1,              4,             1,            1 ,               1    },
     {"LepPtPlusLeadingJetPt_Zinc2jet_TUnfold",         1,      1,          1,              4,             1,            1 ,               1    },

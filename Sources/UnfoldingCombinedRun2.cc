@@ -507,7 +507,7 @@ void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histo
         }
 
         // Plot central unfolded distribution (w/ stat & syst errors), theory predictions ---
-        TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, 9999, variable, false, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection, hGen1CrossSection);
+        TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, 9999, variable, false, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection, hGen1CrossSection, isClosureTest);
         crossSectionPlot->Draw();
         crossSectionPlot->SaveAs(outputFileName + ".pdf");
 

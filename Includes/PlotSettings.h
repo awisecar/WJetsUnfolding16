@@ -32,7 +32,7 @@ void configXaxis(TH1D *grCentralSyst, TH1D *gen1, TString variable);
 void customizeCentral(TGraphAsymmErrors *grCentral, bool ratio);
 void customizeCentral(TGraphAsymmErrors *grCentral, TLegend *legend, TString legText = "");
 void customizeGenHist(TH1D *gen, int genNumb, TLegend *legend, TString legText);
-void customizeGenGraph(TH1D *hSyst, TGraphAsymmErrors *gen, TGraphAsymmErrors *gPDF, int genNumb, TString yTitle, int numbOfGenerator, TLegend *legend = NULL);
+void customizeGenGraph(TH1D *hSyst, TGraphAsymmErrors *gen, TGraphAsymmErrors *gPDF, int genNumb, TString yTitle, int numbOfGenerator, TLegend *legend = NULL, bool isClosureTest = false);
 TGraphAsymmErrors* createGrFromHist(const TH1D *h);
 TGraphAsymmErrors* createRatioGraph(const TGraphAsymmErrors* grCentral);
 TGraphErrors* createRatioGraph(const TGraphErrors* grCentral);
@@ -41,6 +41,6 @@ TGraphAsymmErrors* createPDFSystGraph(const TH1D *hPDFUp, const TH1D *hPDFDown, 
 TGraphAsymmErrors* createScaleSystGraph(TString lepSel, TString variable, const TGraphAsymmErrors *grGenToCentral);
 TGraphAsymmErrors* createScaleSystGraphNNLO1j(TString lepSel, TString variable, const TGraphAsymmErrors *grGenToCentral);
 TGraphAsymmErrors* createTotSystGraphAMCNLO(TString lepSel, TString variable, const TGraphAsymmErrors *grGenToCentral);
-TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool isRatio, bool doNormalized, TH1D *hData, TH2D *hCovSyst, TH1D *hGen, TH1D *hGen1 = NULL, TH1D *hGen2 = NULL, double integratedLumi = -1);
+TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool isRatio, bool doNormalized, TH1D *hData, TH2D *hCovSyst, TH1D *hGen, TH1D *hGen1 = NULL, bool isClosureTest = false, TH1D *hGen2 = NULL, double integratedLumi = -1);
 void createTitleVariableAnddSigma(TString variable, bool doNormalized, TString xtitle, TString &title, TString &var, TString &dSigma) ;
 #endif
