@@ -931,6 +931,7 @@ void TUnfoldData(const TString lepSel, const TString algo, TH2D* resp, TH1D* hRe
     // --------------------------------------------------------
 
     // Looking to crosscheck the unfolded distribution with the corresp. gen distribution --
+    // Crosscheck may break in the case of (iSyst = 17)?
 
     printf("\nRatio of Unfolded/Gen:"); 
     TH1D *UnfGenRatio = (TH1D*) hUnfData->Clone("UnfGenRatio");
@@ -1126,7 +1127,7 @@ void unfoldingFileSelector(int iSyst, int &iData, int &iBg, int &iGen, int &iRes
     iData = (iSyst == 1 || iSyst == 2) ? iSyst : 0;
 
     // BACKGROUND -------------------
-    // Central, JES, JER, blank
+    // Central, JES, JER, Unfolding
     if (iSyst == 0 || iSyst == 1 || iSyst == 2 || iSyst == 7 || iSyst == 8 || iSyst == 17) iBg = 0;
     // PU, XSEC
     else if (iSyst == 3 || iSyst == 4 || iSyst == 5 || iSyst == 6) iBg = iSyst - 2;
@@ -1134,7 +1135,7 @@ void unfoldingFileSelector(int iSyst, int &iData, int &iBg, int &iGen, int &iRes
     else if (iSyst == 9 || iSyst == 10 || iSyst == 11 || iSyst == 12 || iSyst == 13 || iSyst == 14 || iSyst == 15 || iSyst == 16) iBg = iSyst - 4;
 
     // SIGNAL -----------------------
-    // Central, JES, XSEC, blank
+    // Central, JES, XSEC, Unfolding
     if (iSyst == 0 || iSyst == 1 || iSyst == 2 || iSyst == 5 || iSyst == 6 || iSyst == 17){
         iGen = 0;
         iResp = 0;

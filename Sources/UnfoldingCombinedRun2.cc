@@ -358,11 +358,11 @@ void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histo
         // 11 - BtagSF up,    12 - BtagSF down 
         // 13 - L1Prefire up, 14 - L1Prefire down
         // 15 - Lumi up,      16 - Lumi down
-        // 17 - (Blank)
+        // 17 - Unfolding
 
         int nSysts = 18;
         TString name[] = {"Central", "JESUp", "JESDown", "PUUp", "PUDown", "XSECUp", "XSECDown", "JERUp", "JERDown", 
-            "LepSFUp", "LepSFDown", "BtagSFUp", "BtagSFDown", "L1PrefireUp", "L1PrefireDown", "LumiUp", "LumiDown", "Blank"};
+            "LepSFUp", "LepSFDown", "BtagSFUp", "BtagSFDown", "L1PrefireUp", "L1PrefireDown", "LumiUp", "LumiDown", "Unfolding"};
 
         TH1D *hRecDataBinsMerged[nSysts]     = {};
         TH1D *hUnfData[nSysts]               = {};
@@ -379,7 +379,8 @@ void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histo
         std::cout << "nSysts = " << nSysts << std::endl;
         std::cout << "whichSyst = " << whichSyst << std::endl;
         for (int iSyst = 0; iSyst < nSysts; ++iSyst){
-            std::cout << "\n >>>>>>>>>> Start iSyst = " << iSyst << "! <<<<<<<<<<" << std::endl;
+            std::cout << "\n >>>>>>>>>> iSyst = " << iSyst << std::endl;
+            std::cout << " >>>>>>>>>> name[iSyst] = " << name[iSyst] << std::endl;
             if (iSyst != 0 && whichSyst >= 0 && iSyst != whichSyst) continue;
 
             int iData(0), iBg(0), iGen(0), iResp(0); 
@@ -392,7 +393,7 @@ void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histo
             TH1D *hRecDataMinusFakes_2017 = NULL;
             TH1D *hRecDataMinusFakes_2018 = NULL;
             if(!isClosureTest){
-                // -- Before combining data for all years, subtract BG and fakes
+                // -- Before combining data for all years, subtract BG and fakes for each year
                 // 2016 --
                 hRecDataMinusFakes_2016 = (TH1D*) hRecData_2016[iData]->Clone();
                 hRecDataMinusFakes_2016->Add(hRecSumBg_2016[iBg], -1);
@@ -450,9 +451,15 @@ void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histo
             std::cout << "hRecDataMinusFakes_Run2->Integral() = " << hRecDataMinusFakes_Run2->Integral() << std::endl;
 
             // Response matrices (derived from signal MC)
-            TH2D *hResDYJets_Run2 = (TH2D*) hResDYJets_2016[iResp]->Clone();
-            hResDYJets_Run2->Add(hResDYJets_2017[iResp]);
-            hResDYJets_Run2->Add(hResDYJets_2018[iResp]);
+            TH2D *hResDYJets_Run2 = NULL;
+            // for unfolding systematic uncertainty
+            if (iSyst == 17) hResDYJets_Run2 = (TH2D*) hResDYJets_2016[iResp]->Clone();
+            // nominal case
+            else{ 
+                hResDYJets_Run2 = (TH2D*) hResDYJets_2016[iResp]->Clone();
+                hResDYJets_Run2->Add(hResDYJets_2017[iResp]);
+                hResDYJets_Run2->Add(hResDYJets_2018[iResp]);
+            }
 
             // Acceptance counts (derived from signal MC)
             TH2D *hAccepDYJets_Run2 = (TH2D*) hAccepDYJets_2016[iGen]->Clone();
@@ -460,9 +467,15 @@ void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histo
             hAccepDYJets_Run2->Add(hAccepDYJets_2018[iGen]);
 
             // Gen-level counts (derived from signal MC)
-            TH1D *hGenDYJets_Run2 = (TH1D*) hGenDYJets_2016[iGen]->Clone();
-            hGenDYJets_Run2->Add(hGenDYJets_2017[iGen]);
-            hGenDYJets_Run2->Add(hGenDYJets_2018[iGen]);
+            TH1D *hGenDYJets_Run2 = NULL;
+            // for unfolding systematic uncertainty
+            if (iSyst == 17) hGenDYJets_Run2 = (TH1D*) hGenDYJets_2016[iGen]->Clone();
+            // nominal case
+            else{
+                hGenDYJets_Run2 = (TH1D*) hGenDYJets_2016[iGen]->Clone();
+                hGenDYJets_Run2->Add(hGenDYJets_2017[iGen]);
+                hGenDYJets_Run2->Add(hGenDYJets_2018[iGen]);
+            }
 
             // Use TUnfold package for unfolding
             if (algo == "TUnfold"){
@@ -488,20 +501,22 @@ void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histo
             hCov[1] = (TH2D*) hUnfMCStatCov[0]->Clone("CovMCStat");
         }
         // -- Covariance matrices for systematic variations
-        if (hUnfData[1])  hCov[2] = makeCovFromUpAndDown(hUnfData[0], hUnfData[1], hUnfData[2], "CovJES");
-        if (hUnfData[3])  hCov[3] = makeCovFromUpAndDown(hUnfData[0], hUnfData[3], hUnfData[4], "CovPU");
-        if (hUnfData[5])  hCov[4] = makeCovFromUpAndDown(hUnfData[0], hUnfData[5], hUnfData[6], "CovXSEC");
-        if (hUnfData[7])  hCov[5] = makeCovFromUpAndDown(hUnfData[0], hUnfData[7], hUnfData[8], "CovJER");
-        if (hUnfData[9])  hCov[6] = makeCovFromUpAndDown(hUnfData[0], hUnfData[9], hUnfData[10], "CovLepSF");
+        if (hUnfData[1])  hCov[2]  = makeCovFromUpAndDown(hUnfData[0], hUnfData[1], hUnfData[2], "CovJES");
+        if (hUnfData[3])  hCov[3]  = makeCovFromUpAndDown(hUnfData[0], hUnfData[3], hUnfData[4], "CovPU");
+        if (hUnfData[5])  hCov[4]  = makeCovFromUpAndDown(hUnfData[0], hUnfData[5], hUnfData[6], "CovXSEC");
+        if (hUnfData[7])  hCov[5]  = makeCovFromUpAndDown(hUnfData[0], hUnfData[7], hUnfData[8], "CovJER");
+        if (hUnfData[9])  hCov[6]  = makeCovFromUpAndDown(hUnfData[0], hUnfData[9], hUnfData[10], "CovLepSF");
         // if (hUnfData[11]) hCov[7] = makeCovFromUpAndDown(hUnfData[0], hUnfData[11], hUnfData[12], "CovBtagSF"); // not currently using
-        if (hUnfData[13]) hCov[8] = makeCovFromUpAndDown(hUnfData[0], hUnfData[13], hUnfData[14], "CovL1Prefire");
-        if (hUnfData[15]) hCov[9] = makeCovFromUpAndDown(hUnfData[0], hUnfData[15], hUnfData[16], "CovLumi");
-        // if (hUnfData[17]) hCov[10] = makeCovFromUpAndDown(hUnfData[0], hUnfData[17], hUnfData[0], "CovBlank"); // not currently using
+        if (hUnfData[13]) hCov[8]  = makeCovFromUpAndDown(hUnfData[0], hUnfData[13], hUnfData[14], "CovL1Prefire");
+        if (hUnfData[15]) hCov[9]  = makeCovFromUpAndDown(hUnfData[0], hUnfData[15], hUnfData[16], "CovLumi");
+        if (hUnfData[17]) hCov[10] = makeCovFromUpAndDown(hUnfData[0], hUnfData[17], hUnfData[0], "CovUnfolding");
         // -- Covariance matrix for all systematics summed
-        if (hCov[1]) hCov[11] = (TH2D*) hCov[1]->Clone("CovTotSyst");
+        // if (hCov[1]) hCov[11] = (TH2D*) hCov[1]->Clone("CovTotSyst");
+        if (hCov[2]) hCov[11] = (TH2D*) hCov[2]->Clone("CovTotSyst");
         if (hCov[11]){
             std::cout << "Calculating CovTotSyst from all systematic contributions!" << std::endl;
-            for (int i = 2; i <= nCovs; ++i){
+            // for (int i = 2; i <= nCovs; ++i){
+            for (int i = 3; i <= nCovs; ++i){
                 if (hCov[i]) hCov[11]->Add(hCov[i]);
             }
         }

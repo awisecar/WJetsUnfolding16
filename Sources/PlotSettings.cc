@@ -387,19 +387,13 @@ TGraphAsymmErrors* createPDFSystGraph(const TH1D *hPDFUp, const TH1D *hPDFDown, 
     return grPDFSyst;
 }
 
-//void customizeGenGraph(TGraphAsymmErrors *gen, TGraphAsymmErrors *gPDF, int genNum, TString yTitle, int numbOfGenerator, TLegend *legend)
 void customizeGenGraph(TH1D *hSyst, TGraphAsymmErrors *gen, TGraphAsymmErrors *gPDF, int genNum, TString yTitle, int numbOfGenerator, TLegend *legend, bool isClosureTest){
     //hSyst->GetYaxis()->SetRangeUser(0.2, 1.8);
 
-
-
-    // y-axis range on the theory/data ratio subplots
+    // --- y-axis range on the theory/data ratio subplots ---
     if (!isClosureTest) hSyst->GetYaxis()->SetRangeUser(0.01, 2.15); // NOMINAL
-    else hSyst->GetYaxis()->SetRangeUser(0.851, 1.149); // zoomed in
+    else                hSyst->GetYaxis()->SetRangeUser(0.851, 1.149); // zoomed in
     
-
-
-
     hSyst->GetYaxis()->SetNdivisions(507);
     hSyst->GetYaxis()->SetLabelSize(0.154);
     hSyst->GetYaxis()->SetTitle(yTitle);
@@ -428,19 +422,15 @@ void customizeGenGraph(TH1D *hSyst, TGraphAsymmErrors *gen, TGraphAsymmErrors *g
         hSyst->GetXaxis()->SetTitleSize(0.14);
         hSyst->GetXaxis()->SetTitleOffset(0.95);
     }
-    else {
-        hSyst->GetXaxis()->SetTitle();
-    }
-
-    if (legend) {
+    else hSyst->GetXaxis()->SetTitle();
+    
+    if (legend){
         TLegendEntry *leEntry;
-        if(genNum == 3 || genNum==1) leEntry = legend->AddEntry(gen, "Syst. + stat. unc. (gen)", "f");
-        //if(genNum == 3) leEntry = legend->AddEntry(gen, "Syst. + Stat. unc. (gen)", "f");
+        if(genNum == 3 || genNum == 1) leEntry = legend->AddEntry(gen, "Syst. + stat. unc. (gen)", "f");
         else leEntry = legend->AddEntry(gen, "Stat. unc. (gen)", "f");
         leEntry->SetFillColor(ZJetsFillColor[genNum-1]);
         leEntry->SetFillStyle(ZJetsFillStyle);
     }
-
 
 }
 
@@ -596,22 +586,22 @@ TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool i
     // --- Declare all additional TGraphs ---
     TGraphAsymmErrors *grCentralStat = createGrFromHist(hStat);
     grCentralStat->SetName("gr" + variable + "CentralStatError"); 
-
     TGraphAsymmErrors *grCentralSyst = createGrFromHist(hSyst);
     grCentralSyst->SetName("gr" + variable + "CentralTotError"); 
-
     TGraphAsymmErrors *grCentralStatRatio = createRatioGraph(grCentralStat);
     TGraphAsymmErrors *grCentralSystRatio = createRatioGraph(grCentralSyst);
+
     TGraphAsymmErrors *grGen1ToCentral = createGenToCentral(hGen1, grCentralStat);
     TGraphAsymmErrors *grGen1PDFSyst = createPDFSystGraph(hPDFUp, hPDFDown, grGen1ToCentral); 
-   
-    //TGraphAsymmErrors *grGen1TotSyst = createTotSystGraphAMCNLO(lepSel, variable, grGen1ToCentral);
+    TGraphAsymmErrors *grGen1TotSyst = createTotSystGraphAMCNLO(lepSel, variable, grGen1ToCentral);
+
     TGraphAsymmErrors *grGen2ToCentral = NULL;
     TGraphAsymmErrors *grGen2PDFSyst = NULL;
     if (hGen2) {
         grGen2ToCentral = createGenToCentral(hGen2, grCentralStat);
         grGen2PDFSyst = createPDFSystGraph(hPDFUp, hPDFDown, grGen2ToCentral); 
     }
+
     TGraphAsymmErrors *grGen3ToCentral = NULL;
     TGraphAsymmErrors *grGen3PDFSyst = NULL;
     TGraphAsymmErrors *grGen3ScaleSyst = NULL;
@@ -744,7 +734,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool i
     else if (year == 2018) latexLabel->DrawLatex(0.13, 0.90, "59.7 fb^{-1} (13 TeV)");
     else                   latexLabel->DrawLatex(0.13, 0.90, "137.16 fb^{-1} (13 TeV)");
 
-    // --- ...
+    // --- labels for anti-kT jet definitions
     if (isRatio){
         if (canvasName.Contains("AK8")){ 
             if ( canvasName.Contains("LepPtPlusLeadingJetAK8Pt_Z") || canvasName.Contains("LepPtPlusHT2over2AK8_Z") ){
@@ -767,24 +757,18 @@ TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool i
         }
     }
 
-    // --- ...
+    // --- labels for kinematic cuts on objects, jet multiplicity
     if (isRatio){
-        
         if (canvasName.Contains("AK8")){
             if ( canvasName.Contains("LepPtPlusLeadingJetAK8Pt_Z") || canvasName.Contains("LepPtPlusHT2over2AK8_Z") ){
                 latexLabel->DrawLatex(0.57, 0.21-0.02,"p_{T}^{jet} > 50 GeV, |y^{jet}| < 2.4");
                 latexLabel->DrawLatex(0.57, 0.21-0.09,"p_{T}^{#mu} > 50 GeV, p_{T}^{j_{1}} > 100 GeV");
             }
-            else{
-                latexLabel->DrawLatex(0.57, 0.21-0.09,"p_{T}^{jet} > 50 GeV, |y^{jet}| < 2.4");
-            }
+            else latexLabel->DrawLatex(0.57, 0.21-0.09,"p_{T}^{jet} > 50 GeV, |y^{jet}| < 2.4");
         }
         else latexLabel->DrawLatex(0.57, 0.21-0.09,"p_{T}^{jet} > 30 GeV, |y^{jet}| < 2.4");
-
-
         // --- jet multiplicity requirement ---
         latexLabel->DrawLatex(0.57, 0.21-0.15,"W(#mu#nu) + jets");       
-
     }
     else{
         if (canvasName.Contains("FirstJetPt50")) latexLabel->DrawLatex(0.18,0.21-0.09,"p_{T}^{jet} > 50 GeV, |#eta^{jet}| < 2.4 ");
@@ -857,6 +841,16 @@ TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool i
     ytitle->DrawLatex(0.008,0.91,strYtitle.c_str());
     // --- End Of first Pad ---
 
+
+
+
+
+
+
+
+
+
+
     // ------------------------------------------------------------------------------------------
 
     // --- Second Pad ---
@@ -864,39 +858,50 @@ TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool i
     TPad *plot2 = new TPad("plot2", "plot2", 0., 0., 0., 0.);
     setAndDrawTPad(canvasName, plot2, 2, numbOfGenerator, isRatio);
 
-    // --- TLegend ---
+    // --- TLegend and aesthetics ---
     TLegend *legend2 = new TLegend(0.16, 0.05, 0.42, 0.20);
     customizeLegend(legend2, 1, numbOfGenerator);
-    TString generator1 = hGen1->GetZaxis()->GetTitle();
-    generator1 = generator1(0, generator1.Index(" "));
-
+    // TString generator1 = hGen1->GetZaxis()->GetTitle();
+    // generator1 = generator1(0, generator1.Index(" "));
     customizeGenGraph(hSyst, grGen1ToCentral, grGen1PDFSyst, 1, "MG_aMC FxFx/Data", numbOfGenerator, legend2, isClosureTest);
-    
     configXaxis(hSyst, hGen1, variable);
+
     grGen1PDFSyst->SetFillStyle(1001);
     grGen1PDFSyst->SetFillColor(kBlue-6);
-       
-    //grGen1TotSyst->SetFillStyle(1001);
-    //grGen1TotSyst->SetFillColor(kBlue-10);
+    grGen1TotSyst->SetFillStyle(1001);
+    grGen1TotSyst->SetFillColor(kBlue-10);
+
     hSyst->DrawCopy("e");
     grGen1ToCentral->SetName("grGen1ToCentral");
     grGen1ToCentral->Draw("2");
-    //grGen1PDFSyst->Draw("2");
-       
-    //grGen1TotSyst->Draw("2");
+    // grGen1PDFSyst->Draw("2");   
+    grGen1TotSyst->Draw("2");
     grCentralSystRatio->SetName("grCentralSystRatio");
     grCentralSystRatio->Draw("2");
     grCentralStatRatio->Draw("p");
     grGen1ToCentral->Draw("p");
+
     legend2->Draw("same");
-    //if (canvasName.Contains("JetPt_Zinc")) {
-    //    grGen1ToCentral->GetXaxis()->SetRangeUser(30, x + ex);
-    //}
     plot2->RedrawAxis();
     // --- End of Second Pad ---
 
-
     // ------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     if (hGen2){
 
@@ -1607,11 +1612,10 @@ TGraphAsymmErrors* createScaleSystGraphNNLO1j(TString lepSel, TString variable, 
     //    return genNNLOgrSyst;
 }
 
-
 TGraphAsymmErrors* createTotSystGraphAMCNLO(TString lepSel, TString variable, const TGraphAsymmErrors *grGenToCentral)
 {
-	//if (variable == "ZNGoodJetsFull_Zexc") variable = "ZNGoodJets_Zexc";
-	int nPoints = grGenToCentral->GetN();
+
+	int nPoints      = grGenToCentral->GetN();
 	double *xCoor    = new double[nPoints];
 	double *yCoor    = new double[nPoints];
 	double *xErr     = new double[nPoints];
@@ -1619,37 +1623,39 @@ TGraphAsymmErrors* createTotSystGraphAMCNLO(TString lepSel, TString variable, co
 	double *yErrDown = new double[nPoints];
 	
 	TString histoDir = cfg.getS("histoDir");
-	
-	TString inFileName = histoDir + "/" + lepSel + "_13TeV_AMCNLO_Syst.root";
-	std::cout << " createTotSystGraphAMCNLO from file: " << inFileName << std::endl;
-	
-	TH1D *hErrorsUp;
-	TH1D *hErrorsDown;
-	TH1D *hGenCentral;
-	TFile *fSyst = new TFile(inFileName);
-	hErrorsUp = (TH1D*)fSyst->Get("gen" + variable + "Max");
-	hErrorsDown = (TH1D*)fSyst->Get("gen" + variable + "Min");
-	hGenCentral = (TH1D*)fSyst->Get("gen" + variable + "Cen");
-	hErrorsUp->Divide(hGenCentral);
-	hErrorsDown->Divide(hGenCentral);
-	
-	for (int i(0); i < nPoints; i++) {
+    histoDir += "_2016";
+	   
+    // grab the file containing the theoretical uncertainties for the NLO FxFx prediction
+    TString inFileName = histoDir + "/" + "theoryUncertainties_nlofxfxinclusive_2016.root";
+	std::cout << "\n >>> createTotSystGraphAMCNLO from file: " << inFileName << std::endl;
+    std::cout << " >>> variable = " << variable << std::endl;
+    
+    // grab the histogram with relative uncertainties
+    TH1D *hRelUncertTotal;
+    TFile *fSyst = new TFile(inFileName, "READ");
+    hRelUncertTotal = (TH1D*) fSyst->Get("gen" + variable + "_ErrTotal");
+    
+	for (int i(0); i < nPoints; i++){
+
 		grGenToCentral->GetPoint(i, xCoor[i], yCoor[i]);
-		
 		xErr[i] = grGenToCentral->GetErrorXlow(i);
 		
-		double fracTotUp(0);
-		if (hGenCentral->GetBinContent(i+1)>0) fracTotUp = fabs(hErrorsUp->GetBinContent(i+1) - 1);
-		yErrUp[i] = fracTotUp * yCoor[i];
+        // calculate y-errors for the theory/data distribution based on relative uncertainty values
+		double fracErrUp(0.), fracErrDown(0.); 
+        if (yCoor[i] > 0){
+            fracErrUp   = hRelUncertTotal->GetBinContent(i+1);
+            fracErrDown = hRelUncertTotal->GetBinContent(i+1);
+        }
+        else{              
+            fracErrUp   = 0.;
+            fracErrDown = 0.;
+        }
+        yErrUp[i]   = fracErrUp * yCoor[i];
+		yErrDown[i] = fracErrDown * yCoor[i];
 		
-		double fracTotDn(0);
-		if (hGenCentral->GetBinContent(i+1)>0) fracTotDn = fabs(hErrorsDown->GetBinContent(i+1) - 1);
-		yErrDown[i] = fracTotDn * yCoor[i];
-		
-		std::cout << "  X coor: " << xCoor[i] << " Y coor: " << yCoor[i]
-		<< "  tot uncertainty up: " << yErrUp[i]
-		<< "  tot uncertainty down: " << yErrDown[i]
-		<< std::endl;
+		std::cout << "bin #" << i+1 << ": X coor: " << xCoor[i] << " Y coor: " << yCoor[i]
+		<< "  total uncertainty up: "   << yErrUp[i]
+		<< "  total uncertainty down: " << yErrDown[i] << std::endl;
 	}
 	
 	TGraphAsymmErrors *grTotSyst = new TGraphAsymmErrors(nPoints, xCoor, yCoor, xErr, xErr, yErrDown, yErrUp);
@@ -1657,8 +1663,4 @@ TGraphAsymmErrors* createTotSystGraphAMCNLO(TString lepSel, TString variable, co
 	fSyst->Close();
 	
 	return grTotSyst;
-	
 }
-
-
-

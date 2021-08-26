@@ -59,12 +59,6 @@ void TakeRatiosOfUnfoldedXSecs(TString lepSel, int year, TString algo, TString h
     else              unfoldDir += year;
     system("mkdir -p " + unfoldDir);
 
-    // double integratedLumi(0.);
-    // if (year == 2016)      integratedLumi = 35916.982;
-    // else if (year == 2017) integratedLumi = 41524.945;
-    // else if (year == 2018) integratedLumi = 59717.255;
-    // else                   integratedLumi = 35916.982 + 41524.945 + 59717.255;
-
     // Open the input files ---
 
     TString inputFileNameNUM = inputDir + "/" + lepSel; 
@@ -103,7 +97,7 @@ void TakeRatiosOfUnfoldedXSecs(TString lepSel, int year, TString algo, TString h
     // Get relevant histograms ---
     int nSysts = 18;
     TString name[] = {"Central", "JESUp", "JESDown", "PUUp", "PUDown", "XSECUp", "XSECDown", "JERUp", "JERDown", 
-        "LepSFUp", "LepSFDown", "BtagSFUp", "BtagSFDown", "L1PrefireUp", "L1PrefireDown", "LumiUp", "LumiDown", "Blank"};
+        "LepSFUp", "LepSFDown", "BtagSFUp", "BtagSFDown", "L1PrefireUp", "L1PrefireDown", "LumiUp", "LumiDown", "Unfolding"};
 
     TH1D *hRecDataBinsMergedNUM[nSysts]       = {}; 
     TH1D *hUnfDataNUM[nSysts]                 = {}; 
@@ -244,22 +238,22 @@ void TakeRatiosOfUnfoldedXSecs(TString lepSel, int year, TString algo, TString h
     }
 
     // -- Covariance matrices for systematic variations
-    if (hUnfDataRATIO[1])  hCovRATIO[2] = makeCovFromUpAndDown(hUnfDataRATIO[0], hUnfDataRATIO[1], hUnfDataRATIO[2], "CovJES");
-    if (hUnfDataRATIO[3])  hCovRATIO[3] = makeCovFromUpAndDown(hUnfDataRATIO[0], hUnfDataRATIO[3], hUnfDataRATIO[4], "CovPU");
-    if (hUnfDataRATIO[5])  hCovRATIO[4] = makeCovFromUpAndDown(hUnfDataRATIO[0], hUnfDataRATIO[5], hUnfDataRATIO[6], "CovXSEC");
-    if (hUnfDataRATIO[7])  hCovRATIO[5] = makeCovFromUpAndDown(hUnfDataRATIO[0], hUnfDataRATIO[7], hUnfDataRATIO[8], "CovJER");
-    if (hUnfDataRATIO[9])  hCovRATIO[6] = makeCovFromUpAndDown(hUnfDataRATIO[0], hUnfDataRATIO[9], hUnfDataRATIO[10], "CovLepSF");
+    if (hUnfDataRATIO[1])  hCovRATIO[2]  = makeCovFromUpAndDown(hUnfDataRATIO[0], hUnfDataRATIO[1], hUnfDataRATIO[2], "CovJES");
+    if (hUnfDataRATIO[3])  hCovRATIO[3]  = makeCovFromUpAndDown(hUnfDataRATIO[0], hUnfDataRATIO[3], hUnfDataRATIO[4], "CovPU");
+    if (hUnfDataRATIO[5])  hCovRATIO[4]  = makeCovFromUpAndDown(hUnfDataRATIO[0], hUnfDataRATIO[5], hUnfDataRATIO[6], "CovXSEC");
+    if (hUnfDataRATIO[7])  hCovRATIO[5]  = makeCovFromUpAndDown(hUnfDataRATIO[0], hUnfDataRATIO[7], hUnfDataRATIO[8], "CovJER");
+    if (hUnfDataRATIO[9])  hCovRATIO[6]  = makeCovFromUpAndDown(hUnfDataRATIO[0], hUnfDataRATIO[9], hUnfDataRATIO[10], "CovLepSF");
     // if (hUnfDataRATIO[11]) hCovRATIO[7] = makeCovFromUpAndDown(hUnfDataRATIO[0], hUnfDataRATIO[11], hUnfDataRATIO[12], "CovBtagSF"); // not currently using
-    if (hUnfDataRATIO[13]) hCovRATIO[8] = makeCovFromUpAndDown(hUnfDataRATIO[0], hUnfDataRATIO[13], hUnfDataRATIO[14], "CovL1Prefire");
-    if (hUnfDataRATIO[15]) hCovRATIO[9] = makeCovFromUpAndDown(hUnfDataRATIO[0], hUnfDataRATIO[15], hUnfDataRATIO[16], "CovLumi");
-    // if (hUnfDataRATIO[17]) hCovRATIO[10] = makeCovFromUpAndDown(hUnfDataRATIO[0], hUnfDataRATIO[17], hUnfDataRATIO[0], "CovBlank"); // not currently using
+    if (hUnfDataRATIO[13]) hCovRATIO[8]  = makeCovFromUpAndDown(hUnfDataRATIO[0], hUnfDataRATIO[13], hUnfDataRATIO[14], "CovL1Prefire");
+    if (hUnfDataRATIO[15]) hCovRATIO[9]  = makeCovFromUpAndDown(hUnfDataRATIO[0], hUnfDataRATIO[15], hUnfDataRATIO[16], "CovLumi");
+    if (hUnfDataRATIO[17]) hCovRATIO[10] = makeCovFromUpAndDown(hUnfDataRATIO[0], hUnfDataRATIO[17], hUnfDataRATIO[0], "CovUnfolding");
     // -- Covariance matrix for all systematics summed
-    if (hCovRATIO[1]) hCovRATIO[11] = (TH2D*) hCovRATIO[1]->Clone("CovTotSyst");
-    // if (hCovRATIO[2]) hCovRATIO[11] = (TH2D*) hCovRATIO[2]->Clone("CovTotSyst");
+    // if (hCovRATIO[1]) hCovRATIO[11] = (TH2D*) hCovRATIO[1]->Clone("CovTotSyst");
+    if (hCovRATIO[2]) hCovRATIO[11] = (TH2D*) hCovRATIO[2]->Clone("CovTotSyst");
     if (hCovRATIO[11]){
         std::cout << "Calculating CovTotSyst from all systematic contributions!" << std::endl;
-        for (int i = 2; i <= nCovs; ++i){
-        // for (int i = 3; i <= nCovs; ++i){
+        // for (int i = 2; i <= nCovs; ++i){
+        for (int i = 3; i <= nCovs; ++i){
             if (hCovRATIO[i]) hCovRATIO[11]->Add(hCovRATIO[i]);
         }
     }

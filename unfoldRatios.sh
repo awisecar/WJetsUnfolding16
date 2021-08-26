@@ -4,7 +4,7 @@
 # =========================================================================================================
 
 
-# # ratio distributions with 2016 only
+# # calculating ratio distributions with 2016 only
 # ./runTakeRatiosOfUnfoldedXSecs year=2016  variableNUM=LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold  variableDENOM=LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold
 # ./runTakeRatiosOfUnfoldedXSecs year=2016  variableNUM=LepPtPlusLeadingJetAK8Pt_Zinc3jet_TUnfold  variableDENOM=LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold
 # ./runTakeRatiosOfUnfoldedXSecs year=2016  variableNUM=LepPtPlusLeadingJetAK8Pt_Zinc3jet_TUnfold  variableDENOM=LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold
@@ -13,7 +13,7 @@
 
 # =========================================================================================================
 
-# ratio distributions with full Run 2 data
+# calculating ratio distributions with full Run 2 data
 ./runTakeRatiosOfUnfoldedXSecs year=9999  variableNUM=LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold  variableDENOM=LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold
 ./runTakeRatiosOfUnfoldedXSecs year=9999  variableNUM=LepPtPlusLeadingJetAK8Pt_Zinc3jet_TUnfold  variableDENOM=LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold
 ./runTakeRatiosOfUnfoldedXSecs year=9999  variableNUM=LepPtPlusLeadingJetAK8Pt_Zinc3jet_TUnfold  variableDENOM=LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold
