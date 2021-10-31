@@ -1,3 +1,68 @@
+ === README for the W+jets unfolding code ===
+
+
+mkdir WJetsUnfolding16_lxplus7_2020
+cd WJetsUnfolding16_lxplus7_2020
+
+
+CMSSW version: CMSSW_7_6_7
+<set up folder structure using cmsrel, then cd into src, and cmsenv>
+
+<then pull github repository>
+
+Histogram files imported here after running event-selection should be in folders titled:
+HistoFiles_<year>
+
+NOTE: histogram files necessary to make unfolded xsec plots are located here:
+/eos/cms/store/group/phys_smp/AnalysisFramework/Baobab/awisecar/wjetsRun2_histoFiles_forUnfoldedPlots
+
+If moving histogram files from reco-level event selection code for first time, need to rename them to the proper format using (make sure to change the variable for the year of data-taking) --
+./renameHistograms_NoBVeto.sh
+
+Before compiling, can change certain source code files of interest --
+1) Sources/getFilesAndHistogramsZJets.cc ==> allows you to turn off and on the running of different systematic uncertainties when unfolding the data
+2) Includes/variablesOfInterestZJets.h ==> if you need to add additional observables/distributions to unfold, can add them here
+3) Sources/PlotSettings.cc ==> allows you to change any TLatex labels, x-axis ranges, any other cosmetics concerning the final plot showing the unfolded data and the theoretical predictions
+
+To compile executables, do --
+make clean
+make
+
+Run shell script to unfold the data to measure the single-differential cross sections (currently uses the runUnfoldingCombinedRun2 macro to combine all three years of data at reco-level and unfold once) --
+./unfoldXSecs.sh
+
+And then for the cross section ratios (currently uses the runTakeRatiosOfUnfoldedXSecs macro to take ratios of the already-unfolded cross sections) --
+./unfoldRatios.sh
+
+
+
+
+
+=====
+
+NOTE on histogram naming conventions:
+- Variables unfolded using TUnfold software in this repository are named as having "_TUnfold" at the end of their name (this is done in the event selection code when setting up histograms)
+- To reiterate, one needs four histogram objects for each distribution
+--> <variable-name> (reco)
+--> gen+<variable-name> (gen)
+--> hresponse+<variable-name> (response matrix 1)
+--> hresponse+<variable-name>+_NOEFFWEIGHTS (response matrix 2)
+
+NOTE on code organization:
+- the "run" executables are in the base directory of the repository
+- source code is in "Includes" and "Sources"
+- "Makefile" is used to compile the code
+- files in "RooUnfold" are deprecated, are still in the repository from when RooUnfold software was used to do unfolding, however, the way the Makefile is set up, it grabs some libraries/dependencies in this folder (one should be able to fix this)
+- "vjets.cfg" is essentially a steering file that is needed to run the code (was used more so in past versions of the Shears framework), shouldn’t have to alter this much
+
+
+
+
+==========================================================================================================================================
+>>>> Everything below is potentially deprecated, see above
+
+
+
 Quick start
 ============
 

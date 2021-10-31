@@ -387,13 +387,14 @@ TGraphAsymmErrors* createPDFSystGraph(const TH1D *hPDFUp, const TH1D *hPDFDown, 
     return grPDFSyst;
 }
 
-void customizeGenGraph(TH1D *hSyst, TGraphAsymmErrors *gen, TGraphAsymmErrors *gPDF, int genNum, TString yTitle, int numbOfGenerator, TLegend *legend, bool isClosureTest){
-    //hSyst->GetYaxis()->SetRangeUser(0.2, 1.8);
+void customizeGenGraph(TH1D *hSyst, TGraphAsymmErrors *gen, TGraphAsymmErrors *gPDF, int genNum, TString yTitle, int numbOfGenerator, TLegend *legend, bool isClosureTest, bool isRatio){
+
 
     // --- y-axis range on the theory/data ratio subplots ---
-    if (!isClosureTest) hSyst->GetYaxis()->SetRangeUser(0.01, 2.15); // NOMINAL
-    else                hSyst->GetYaxis()->SetRangeUser(0.851, 1.149); // zoomed in
+    if (!isClosureTest && !isRatio) hSyst->GetYaxis()->SetRangeUser(0.01, 2.15);   // NOMINAL
+    else                            hSyst->GetYaxis()->SetRangeUser(0.801, 1.199); // zoomed in
     
+
     hSyst->GetYaxis()->SetNdivisions(507);
     hSyst->GetYaxis()->SetLabelSize(0.154);
     hSyst->GetYaxis()->SetTitle(yTitle);
@@ -408,7 +409,7 @@ void customizeGenGraph(TH1D *hSyst, TGraphAsymmErrors *gen, TGraphAsymmErrors *g
     gen->SetMarkerColor(ZJetsLineColor[genNum-1]);
     gen->SetMarkerStyle(ZJetsMarkerStyle[genNum-1]);
 
-    if (genNum == numbOfGenerator) {
+    if (genNum == numbOfGenerator){
         hSyst->GetYaxis()->SetLabelSize(0.09);
         if (numbOfGenerator == 2) hSyst->GetYaxis()->SetLabelSize(0.105);
         if (numbOfGenerator == 3) hSyst->GetYaxis()->SetLabelSize(0.113);
@@ -426,7 +427,7 @@ void customizeGenGraph(TH1D *hSyst, TGraphAsymmErrors *gen, TGraphAsymmErrors *g
     
     if (legend){
         TLegendEntry *leEntry;
-        if(genNum == 3 || genNum == 1) leEntry = legend->AddEntry(gen, "Syst. + stat. unc. (gen)", "f");
+        if (genNum == 3 || genNum == 1) leEntry = legend->AddEntry(gen, "Syst. + stat. unc. (gen)", "f");
         else leEntry = legend->AddEntry(gen, "Stat. unc. (gen)", "f");
         leEntry->SetFillColor(ZJetsFillColor[genNum-1]);
         leEntry->SetFillStyle(ZJetsFillStyle);
@@ -593,7 +594,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool i
 
     TGraphAsymmErrors *grGen1ToCentral = createGenToCentral(hGen1, grCentralStat);
     TGraphAsymmErrors *grGen1PDFSyst = createPDFSystGraph(hPDFUp, hPDFDown, grGen1ToCentral); 
-    TGraphAsymmErrors *grGen1TotSyst = createTotSystGraphAMCNLO(lepSel, variable, grGen1ToCentral);
+    TGraphAsymmErrors *grGen1TotSyst = createTotSystGraphAMCNLO(lepSel, variable, grGen1ToCentral, isRatio);
 
     TGraphAsymmErrors *grGen2ToCentral = NULL;
     TGraphAsymmErrors *grGen2PDFSyst = NULL;
@@ -841,16 +842,6 @@ TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool i
     ytitle->DrawLatex(0.008,0.91,strYtitle.c_str());
     // --- End Of first Pad ---
 
-
-
-
-
-
-
-
-
-
-
     // ------------------------------------------------------------------------------------------
 
     // --- Second Pad ---
@@ -861,13 +852,11 @@ TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool i
     // --- TLegend and aesthetics ---
     TLegend *legend2 = new TLegend(0.16, 0.05, 0.42, 0.20);
     customizeLegend(legend2, 1, numbOfGenerator);
-    // TString generator1 = hGen1->GetZaxis()->GetTitle();
-    // generator1 = generator1(0, generator1.Index(" "));
-    customizeGenGraph(hSyst, grGen1ToCentral, grGen1PDFSyst, 1, "MG_aMC FxFx/Data", numbOfGenerator, legend2, isClosureTest);
+    customizeGenGraph(hSyst, grGen1ToCentral, grGen1PDFSyst, 1, "MG_aMC FxFx/Data", numbOfGenerator, legend2, isClosureTest, isRatio);
     configXaxis(hSyst, hGen1, variable);
 
-    grGen1PDFSyst->SetFillStyle(1001);
-    grGen1PDFSyst->SetFillColor(kBlue-6);
+    // grGen1PDFSyst->SetFillStyle(1001);
+    // grGen1PDFSyst->SetFillColor(kBlue-6);
     grGen1TotSyst->SetFillStyle(1001);
     grGen1TotSyst->SetFillColor(kBlue-10);
 
@@ -887,22 +876,6 @@ TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool i
 
     // ------------------------------------------------------------------------------------------
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     if (hGen2){
 
         // --- Third Pad ---
@@ -916,7 +889,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool i
         TString generator2 = hGen2->GetZaxis()->GetTitle();
         generator2 = generator2(0, generator2.Index(" "));
 
-        customizeGenGraph(hSyst, grGen2ToCentral, grGen2PDFSyst, 2, "MG_aMC/Data", numbOfGenerator, legend3, isClosureTest);
+        customizeGenGraph(hSyst, grGen2ToCentral, grGen2PDFSyst, 2, "MG_aMC/Data", numbOfGenerator, legend3, isClosureTest, isRatio);
 
         configXaxis(hSyst, hGen2, variable);
         grGen2PDFSyst->SetFillStyle(ZJetsFillStyle);
@@ -951,7 +924,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, int year, TString variable, bool i
         TString generator3 = hGen3->GetZaxis()->GetTitle();
         generator3 = generator3(0, generator3.Index(" "));
 
-        customizeGenGraph(hSyst, grGen3ToCentral, grGen3PDFSyst, 3,"NNLO/Data", numbOfGenerator, legend4, isClosureTest);        
+        customizeGenGraph(hSyst, grGen3ToCentral, grGen3PDFSyst, 3, "NNLO/Data", numbOfGenerator, legend4, isClosureTest, isRatio);        
 
         configXaxis(hSyst, hGen3, variable);
         grGen3PDFSyst->SetFillStyle(ZJetsFillStyle);
@@ -1612,9 +1585,9 @@ TGraphAsymmErrors* createScaleSystGraphNNLO1j(TString lepSel, TString variable, 
     //    return genNNLOgrSyst;
 }
 
-TGraphAsymmErrors* createTotSystGraphAMCNLO(TString lepSel, TString variable, const TGraphAsymmErrors *grGenToCentral)
+TGraphAsymmErrors* createTotSystGraphAMCNLO(TString lepSel, TString variable, const TGraphAsymmErrors *grGenToCentral, bool isRatio)
 {
-
+    // setup for final TGraphAsymmErrors object
 	int nPoints      = grGenToCentral->GetN();
 	double *xCoor    = new double[nPoints];
 	double *yCoor    = new double[nPoints];
@@ -1622,45 +1595,135 @@ TGraphAsymmErrors* createTotSystGraphAMCNLO(TString lepSel, TString variable, co
 	double *yErrUp   = new double[nPoints];
 	double *yErrDown = new double[nPoints];
 	
-	TString histoDir = cfg.getS("histoDir");
-    histoDir += "_2016";
-	   
-    // grab the file containing the theoretical uncertainties for the NLO FxFx prediction
-    TString inFileName = histoDir + "/" + "theoryUncertainties_nlofxfxinclusive_2016.root";
-	std::cout << "\n >>> createTotSystGraphAMCNLO from file: " << inFileName << std::endl;
+    // histograms used for theoretical systematic uncertainties
+    TH1D *hRelUncertTotal_Up;
+    TH1D *hRelUncertTotal_Down;
+
+    // ---------------------------------------------------------------------------------------------
+
+    // // USING SYSTEMATIC UNCERTAINTIES DERIVED USING NLO FXFX SAMPLES FROM A SINGLE YEAR ---
+
+    // // grab the file containing the theoretical systematic uncertainties for the NLO FxFx prediction
+    // // TString year = "2016";
+    // // TString year = "2017";
+    // TString year = "2018";
+	// TString histoDir = cfg.getS("histoDir");
+    // histoDir += "_"+year;
+
+    // TString inFileName = "";
+    // if (isRatio) inFileName = histoDir + "/" + "theoryUncert_NLOFxFx_pTbinned_"+year+"_Ratios.root";
+    // else         inFileName = histoDir + "/" + "theoryUncert_NLOFxFx_pTbinned_"+year+".root";
+
+	// std::cout << "\n >>> createTotSystGraphAMCNLO from file: " << inFileName << std::endl;
+    // std::cout << " >>> variable = " << variable << std::endl;
+    
+    // // grab the histograms with the relative total systematic uncertainties for this variable
+    // TFile *fSyst = new TFile(inFileName, "READ");
+    // if (isRatio){
+    //     hRelUncertTotal_Up   = (TH1D*) fSyst->Get(variable + "_ErrTotal_Up");
+    //     hRelUncertTotal_Down = (TH1D*) fSyst->Get(variable + "_ErrTotal_Down");
+    // }
+    // else{
+    //     hRelUncertTotal_Up   = (TH1D*) fSyst->Get("gen" + variable + "_ErrTotal_Up");
+    //     hRelUncertTotal_Down = (TH1D*) fSyst->Get("gen" + variable + "_ErrTotal_Down");
+    // }
+
+    // -----
+
+    // USING SYSTEMATIC UNCERTAINTIES CALCULATED AS A LUMI-WEIGHTED AVERAGE OF ALL THREE YEARS OF NLO FXFX SAMPLES ---
+
+    // grab the files containing the theoretical systematic uncertainties for the NLO FxFx prediction
+	TString histoDir = cfg.getS("histoDir");    
+    TString wordTemp = "";
+    if (isRatio) wordTemp = "_Ratios";
+    TString inFileName_2016 = histoDir + "_2016" + "/" + "theoryUncert_NLOFxFx_pTbinned_2016" + wordTemp + ".root";
+    TString inFileName_2017 = histoDir + "_2017" + "/" + "theoryUncert_NLOFxFx_pTbinned_2017" + wordTemp + ".root";
+    TString inFileName_2018 = histoDir + "_2018" + "/" + "theoryUncert_NLOFxFx_pTbinned_2018" + wordTemp + ".root";
+    
+	std::cout << "\n >>> createTotSystGraphAMCNLO from files: " << std::endl;
+    std::cout << inFileName_2016 << "\n" << inFileName_2017 << "\n" << inFileName_2018 << std::endl;
     std::cout << " >>> variable = " << variable << std::endl;
     
-    // grab the histogram with relative uncertainties
-    TH1D *hRelUncertTotal;
-    TFile *fSyst = new TFile(inFileName, "READ");
-    hRelUncertTotal = (TH1D*) fSyst->Get("gen" + variable + "_ErrTotal");
+    // open the files
+    TFile *fSyst_2016 = new TFile(inFileName_2016, "READ");
+    TFile *fSyst_2017 = new TFile(inFileName_2017, "READ");
+    TFile *fSyst_2018 = new TFile(inFileName_2018, "READ");
+
+    // grab the histograms with the relative (total) systematic uncertainties
+    TString wordTemp2 = "";
+    if (!isRatio) wordTemp2 = "gen";
+    TH1D *hSyst_2016_Up   = (TH1D*) fSyst_2016->Get(wordTemp2 + variable + "_ErrTotal_Up");
+    TH1D *hSyst_2017_Up   = (TH1D*) fSyst_2017->Get(wordTemp2 + variable + "_ErrTotal_Up");
+    TH1D *hSyst_2018_Up   = (TH1D*) fSyst_2018->Get(wordTemp2 + variable + "_ErrTotal_Up");
+    TH1D *hSyst_2016_Down = (TH1D*) fSyst_2016->Get(wordTemp2 + variable + "_ErrTotal_Down");
+    TH1D *hSyst_2017_Down = (TH1D*) fSyst_2017->Get(wordTemp2 + variable + "_ErrTotal_Down");
+    TH1D *hSyst_2018_Down = (TH1D*) fSyst_2018->Get(wordTemp2 + variable + "_ErrTotal_Down");
     
+    // Integrated luminosity values, by year
+    double integratedLumi_2016 = 35916.982;
+    double integratedLumi_2017 = 41524.945;
+    double integratedLumi_2018 = 59717.255;
+    double integratedLumi_Run2 = integratedLumi_2016 + integratedLumi_2017 + integratedLumi_2018;
+
+    // Calculate systematic uncertainties from all three years of files as a lumi-weighted average
+    // -- up variation
+    hRelUncertTotal_Up = (TH1D*) hSyst_2016_Up->Clone("hRelUncertTotal_Up");
+    hRelUncertTotal_Up->Scale(integratedLumi_2016);
+    hRelUncertTotal_Up->Add(hSyst_2017_Up, integratedLumi_2017);
+    hRelUncertTotal_Up->Add(hSyst_2018_Up, integratedLumi_2018);
+    hRelUncertTotal_Up->Scale(1./integratedLumi_Run2);
+    // -- down
+    hRelUncertTotal_Down = (TH1D*) hSyst_2016_Down->Clone("hRelUncertTotal_Down");
+    hRelUncertTotal_Down->Scale(integratedLumi_2016);
+    hRelUncertTotal_Down->Add(hSyst_2017_Down, integratedLumi_2017);
+    hRelUncertTotal_Down->Add(hSyst_2018_Down, integratedLumi_2018);
+    hRelUncertTotal_Down->Scale(1./integratedLumi_Run2);
+
+    // ---------------------------------------------------------------------------------------------
+
 	for (int i(0); i < nPoints; i++){
 
+        // get x- & y-values, and x-errors (bin widths)
 		grGenToCentral->GetPoint(i, xCoor[i], yCoor[i]);
 		xErr[i] = grGenToCentral->GetErrorXlow(i);
 		
         // calculate y-errors for the theory/data distribution based on relative uncertainty values
-		double fracErrUp(0.), fracErrDown(0.); 
-        if (yCoor[i] > 0){
-            fracErrUp   = hRelUncertTotal->GetBinContent(i+1);
-            fracErrDown = hRelUncertTotal->GetBinContent(i+1);
-        }
-        else{              
-            fracErrUp   = 0.;
-            fracErrDown = 0.;
-        }
-        yErrUp[i]   = fracErrUp * yCoor[i];
-		yErrDown[i] = fracErrDown * yCoor[i];
+
+        // -- statistical uncertainty
+        double fracErrUpStat   = grGenToCentral->GetErrorYhigh(i)/yCoor[i];
+        double fracErrDownStat = grGenToCentral->GetErrorYlow(i)/yCoor[i];
+
+        // -- systematic uncertainty (alpha-s + PDF + scales)
+		double fracErrUpSyst(0.), fracErrDownSyst(0.); 
+        if (yCoor[i] > 0.){
+            fracErrUpSyst   = hRelUncertTotal_Up->GetBinContent(i+1);
+            fracErrDownSyst = hRelUncertTotal_Down->GetBinContent(i+1);
+        }   
+
+        // -- add in quadrature to get stat.+syst.    
+        double fracErrUpTotal   = sqrt( (fracErrUpStat*fracErrUpStat) + (fracErrUpSyst*fracErrUpSyst) );
+        double fracErrDownTotal = sqrt( (fracErrDownStat*fracErrDownStat) + (fracErrDownSyst*fracErrDownSyst) );
+        
+        // -- assign to TGraph
+        yErrUp[i]   = fracErrUpTotal * yCoor[i];
+		yErrDown[i] = fracErrDownTotal * yCoor[i];
 		
-		std::cout << "bin #" << i+1 << ": X coor: " << xCoor[i] << " Y coor: " << yCoor[i]
-		<< "  total uncertainty up: "   << yErrUp[i]
-		<< "  total uncertainty down: " << yErrDown[i] << std::endl;
+		std::cout << "bin #" << (i+1) << ": x-coord.: " << xCoor[i] << ", y-coord.: " << yCoor[i] << std::endl;
+        std::cout << "         frac. stat uncert up: " << fracErrUpStat << ", frac. syst uncert up: " << fracErrUpSyst << ", frac. total uncert up: " << fracErrUpTotal << ", total uncert up: " << yErrUp[i] << std::endl;
+        std::cout << "         frac. stat uncert dn: " << fracErrDownStat << ", frac. syst uncert dn: " << fracErrDownSyst << ", frac. total uncert dn: " << fracErrDownTotal << ", total uncert dn: " << yErrDown[i] << std::endl;
+
 	}
 	
 	TGraphAsymmErrors *grTotSyst = new TGraphAsymmErrors(nPoints, xCoor, yCoor, xErr, xErr, yErrDown, yErrUp);
 	delete [] xCoor; delete [] yCoor; delete [] xErr; delete [] yErrDown; delete [] yErrUp;
-	fSyst->Close();
+
+    // for theoretical syst. uncertainties derived using...
+    // one year of samples
+	// fSyst->Close();
+    // multiple years of samples
+    fSyst_2016->Close();
+    fSyst_2017->Close();
+    fSyst_2018->Close();
 	
 	return grTotSyst;
 }
