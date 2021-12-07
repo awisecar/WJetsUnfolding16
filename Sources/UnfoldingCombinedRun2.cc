@@ -509,7 +509,7 @@ void UnfoldingCombinedRun2(TString lepSel, int year, TString algo, TString histo
         // if (hUnfData[11]) hCov[7] = makeCovFromUpAndDown(hUnfData[0], hUnfData[11], hUnfData[12], "CovBtagSF"); // not currently using
         if (hUnfData[13]) hCov[8]  = makeCovFromUpAndDown(hUnfData[0], hUnfData[13], hUnfData[14], "CovL1Prefire");
         if (hUnfData[15]) hCov[9]  = makeCovFromUpAndDown(hUnfData[0], hUnfData[15], hUnfData[16], "CovLumi");
-        if (hUnfData[17]) hCov[10] = makeCovFromUpAndDown(hUnfData[0], hUnfData[17], hUnfData[0], "CovUnfolding");
+        if (hUnfData[17]) hCov[10] = makeCovFromUpAndDown(hUnfData[0], hUnfData[17], hUnfData[0], "CovUnfolding"); // ALW: think the argument needs to be: hUnfData[0], hUnfData[17], hUnfData[17]
         // -- Covariance matrix for all systematics summed
         // if (hCov[1]) hCov[11] = (TH2D*) hCov[1]->Clone("CovTotSyst");
         if (hCov[2]) hCov[11] = (TH2D*) hCov[2]->Clone("CovTotSyst");

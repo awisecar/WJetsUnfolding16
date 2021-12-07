@@ -246,7 +246,7 @@ void TakeRatiosOfUnfoldedXSecs(TString lepSel, int year, TString algo, TString h
     // if (hUnfDataRATIO[11]) hCovRATIO[7] = makeCovFromUpAndDown(hUnfDataRATIO[0], hUnfDataRATIO[11], hUnfDataRATIO[12], "CovBtagSF"); // not currently using
     if (hUnfDataRATIO[13]) hCovRATIO[8]  = makeCovFromUpAndDown(hUnfDataRATIO[0], hUnfDataRATIO[13], hUnfDataRATIO[14], "CovL1Prefire");
     if (hUnfDataRATIO[15]) hCovRATIO[9]  = makeCovFromUpAndDown(hUnfDataRATIO[0], hUnfDataRATIO[15], hUnfDataRATIO[16], "CovLumi");
-    if (hUnfDataRATIO[17]) hCovRATIO[10] = makeCovFromUpAndDown(hUnfDataRATIO[0], hUnfDataRATIO[17], hUnfDataRATIO[0], "CovUnfolding");
+    if (hUnfDataRATIO[17]) hCovRATIO[10] = makeCovFromUpAndDown(hUnfDataRATIO[0], hUnfDataRATIO[17], hUnfDataRATIO[0], "CovUnfolding"); // ALW: think the argument needs to be: hUnfDataRATIO[0], hUnfDataRATIO[17], hUnfDataRATIO[17]
     // -- Covariance matrix for all systematics summed
     // if (hCovRATIO[1]) hCovRATIO[11] = (TH2D*) hCovRATIO[1]->Clone("CovTotSyst");
     if (hCovRATIO[2]) hCovRATIO[11] = (TH2D*) hCovRATIO[2]->Clone("CovTotSyst");
